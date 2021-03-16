@@ -58,7 +58,7 @@ goto*Startup
 
 	//DXƒ‰ƒCƒuƒ‰ƒŠ‰Šú‰»
 	SetOutApplicationLogValidFlag 0
-	ChangeWindowMode TRUE
+	ChangeWindowMode FALSE
 	SetGraphMode DispWidth,DispHeight,32
 	SetAlwaysRunFlag TRUE
 	SetMainWindowText"XODA v"+BuildVersion(0)+"."+BuildVersion(1)+"."+BuildVersion(2)
