@@ -1,0 +1,502 @@
+
+*Scene_Play
+
+	//カウンタ開始
+	if SceneCount==0 :PlayStartMS=GetNowCount()
+
+	//キー判定
+		dim JudgeFlag,3
+		dim KeyFlag,4
+		if CheckHitKey(KEY_INPUT_D)==TRUE :KeyFlag(0)=TRUE
+		if CheckHitKey(KEY_INPUT_F)==TRUE :KeyFlag(1)=TRUE
+		if CheckHitKey(KEY_INPUT_J)==TRUE :KeyFlag(2)=TRUE
+		if CheckHitKey(KEY_INPUT_K)==TRUE :KeyFlag(3)=TRUE
+
+	//判定開始フラグ
+		repeat 4
+			if bfKeyFlag(cnt)==FALSE&KeyFlag(cnt)==TRUE {
+				if cnt==0 :JudgeFlag(0)=TRUE
+				if cnt==1 :JudgeFlag(1)=TRUE
+				if cnt==2 :JudgeFlag(1)=TRUE
+				if cnt==3 :JudgeFlag(2)=TRUE
+			}
+
+			if KeyFlag(cnt)==TRUE {
+				if cnt==0 :LaneEffCount(0)=0
+				if cnt==1 :LaneEffCount(1)=0
+				if cnt==2 :LaneEffCount(1)=0
+				if cnt==3 :LaneEffCount(2)=0
+			}
+			bfKeyFlag(cnt)=KeyFlag(cnt)
+		loop
+
+	//判定処理
+		dim ProgLaneID
+		repeat 3
+			ProgLaneID=cnt
+			if JudgeFlag(cnt)==TRUE {
+				//判定処理
+				dim NearNoteDif:dim NearNoteID:dim curNoteDif
+				NearNoteDif=JUDGE_WIDTH_MISS
+				NearNoteID=-1
+				repeat hitobjMax
+					if hitJudgeFlag(cnt)==TRUE :continue
+					if hitobjLaneID(cnt)!ProgLaneID :continue
+					curNoteDif=PlayCountMS-hitobjTiming(cnt)
+					if abs(curNoteDif)<abs(NearNoteDif) {
+						NearNoteDif=curNoteDif
+						NearNoteID=cnt
+					}
+				loop
+
+				dim JudgeRes
+				JudgeRes=JUDGE_RES_EMPTY
+				if NearNoteID!-1 {
+					hitJudgeFlag(NearNoteID)=TRUE
+					JudgeResCount=0
+
+					//判定別
+					if abs(NearNoteDif)<JUDGE_WIDTH_MISS :JudgeRes=JUDGE_RES_MISS
+					if abs(NearNoteDif)<JUDGE_WIDTH_BAD :JudgeRes=JUDGE_RES_BAD
+					if abs(NearNoteDif)<JUDGE_WIDTH_NICE :JudgeRes=JUDGE_RES_NICE
+					if abs(NearNoteDif)<JUDGE_WIDTH_GREAT :JudgeRes=JUDGE_RES_GREAT
+					if abs(NearNoteDif)<JUDGE_WIDTH_EXCELLENT :JudgeRes=JUDGE_RES_EXCELLENT
+
+					switch JudgeRes
+						case JUDGE_RES_EXCELLENT:numExcellent++:swbreak
+						case JUDGE_RES_GREAT:numGreat++:swbreak
+						case JUDGE_RES_NICE:numNice++:swbreak
+						case JUDGE_RES_BAD:numBad++:swbreak
+						case JUDGE_RES_MISS:numMiss++:swbreak
+					swend
+
+					//ゲージ加算
+					curGaugeVal+gaugeAmount(JudgeRes)
+					if curGaugeVal>100.0 :curGaugeVal=100.0
+					if curGaugeVal<0.0 :curGaugeVal=0.0
+
+					//コンボ加算
+					if JudgeRes==JUDGE_RES_EXCELLENT|JudgeRes==JUDGE_RES_GREAT|JudgeRes==JUDGE_RES_NICE {
+						curCombo++
+						gosub*SetComboBurst
+					} else {
+						curCombo=0
+					}
+
+					//爆発エフェクト
+					BombFlag(hitobjLaneID(NearNoteID))=TRUE
+					BombCount(hitobjLaneID(NearNoteID))=0
+				}
+				//SE
+				if JudgeRes==JUDGE_RES_EMPTY {
+					BASS_ChannelSetPosition hbasssnd(sndHitempty),0,0,0
+					BASS_ChannelPlay hbasssnd(sndHitempty)
+				} else {
+					BASS_ChannelSetPosition hbasssnd(sndHitobj),0,0,0
+					BASS_ChannelPlay hbasssnd(sndHitobj)
+				}
+			}
+		loop
+
+	//背景
+		setease 0,256,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-50,100)
+		;DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
+		DrawGraph -bgScrollX,0,hdximg(iPlay_bg_Default),FALSE
+		DrawGraph DispWidth*2-bgScrollX,0,hdximg(iPlay_bg_Default),FALSE
+
+		bgScrollX+10
+		if bgScrollX>=1280*2 :bgScrollX=0
+
+	//グリッド
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,10
+		DrawGraph 0,0,hdximg(iPlay_bg_Grid),TRUE
+
+	//パーティクル
+		DrawParticle 150,hdximg(iParticle_bg_0),256,32,30,80,35
+		DrawParticle 50,hdximg(iParticle_bg_1),128,20,50,200,20
+		DrawParticle 75,hdximg(iParticle_bg_2),225,40,40,140,18
+
+	//ムービー処理
+		if bgMovieFlag==TRUE {
+			//ムービー再生開始
+			if MoviePlayFlag==FALSE&PlayCountMS>chartMOVIEoffset {
+				PlayMovieToGraph hdximg(iPlay_bg_Movie)
+				MoviePlayFlag=TRUE
+			}
+			//ムービー描画
+			if MoviePlayFlag==TRUE {
+				if chartMOVIEposX==0&chartMOVIEposY=0&chartMOVIEwidth=0&chartMOVIEheight=0&chartMOVIEalpha==0 {
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,256/2
+					DrawModiGraph 200,0,DispWidth-200,0,DispWidth-400,256,400,256,hdximg(iPlay_bg_Movie),TRUE
+				} else {
+					SetDrawBlendMode DX_BLENDMODE_ADD,chartMOVIEalpha
+					DrawExtendGraph chartMOVIEposX,chartMOVIEposY,chartMOVIEposX+chartMOVIEwidth,chartMOVIEposY+chartMOVIEheight,hdximg(iPlay_bg_Movie),TRUE
+				}
+			}
+		}
+
+	//ビジュアライザー
+		SetDrawScreen hdximg(iPlay_Visualizer)
+			ClearDrawScreen
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			dim bgmFFTbuf,4096:dim bgmFFTline
+			BASS_ChannelGetData hplaybgm,varptr(bgmFFTbuf),BASS_DATA_FFT8192
+			setease 0,191,ease_linear+ease_loop
+			hsvcolor getease(SceneCount,200),75,255
+			repeat 32
+				bgmFFTline=int(todouble(bgmFFTbuf(128/32*cnt))*2500)
+				if bgmFFTline<100 :bgmFFTline*4
+				DrawBox cnt*(1024/32),512-bgmFFTline,(cnt+1)*(1024/32)-2,512,GetColor(ginfo_r,ginfo_g,ginfo_b),TRUE
+			loop
+		SetDrawScreen DX_SCREEN_BACK
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,50
+		DrawModiGraph 256,400,DispWidth-256,400,DispWidth,DispHeight,0,DispHeight,hdximg(iPlay_Visualizer),TRUE
+
+	//パーティクル処理
+		repeat partline_Max
+			if partline_Flag(cnt)==FALSE :continue
+			//描画
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,150
+			DrawGraph partline_PosX(cnt),partline_PosY(cnt),hdximg(iParticle_Line_256_White),TRUE
+			partline_PosX(cnt)-partline_Speed(cnt)
+			if partline_PosX(cnt)<-256 :partline_Flag(cnt)=FALSE
+		loop
+		repeat partfade_Max
+			if partfade_Flag(cnt)==FALSE :continue
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,25
+			DrawGraph partfade_PosX(cnt),0,hdximg(iParticle_Fade_White),TRUE
+			partfade_PosX(cnt)-10
+			if partfade_PosX<-256 :partfade_Flag=FALSE
+		loop
+
+	//BPM
+		ddim curBPM,1
+		repeat bpmpointMax
+			if PlayCountMS>bpmpointTiming(cnt) :curBPM=bpmpointValue(cnt)
+		loop
+		if curBPM==0.0 :curBPM=chartDefBPM
+
+	//iUI_bg_SongInfo
+		setease -360,0,ease_cubic_out
+		EasePosX=getease(SceneCount,30)
+		setease -150,0,ease_cubic_out
+		EasePosY=getease(SceneCount,30)
+		setease 0,256,ease_cubic_out
+		EaseAlpha=getease(SceneCount,30)
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+		DrawGraph EasePosX,EasePosY,hdximg(iUI_bg_SongInfo),TRUE
+
+		if SceneCount>20 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-20,20)
+			setease -64,0,ease_cubic_out
+			DrawGraph getease(SceneCount-20,20),0,hdximg(iUI_tx_SongInfo),TRUE
+		}
+
+	//iUI_bg_Profile
+		setease -300,0,ease_cubic_out
+		EasePosX=getease(SceneCount,35)
+		setease 720,600,ease_cubic_out
+		EasePosY=getease(SceneCount,35)
+		setease 0,256,ease_cubic_out
+		EaseAlpha=getease(SceneCount,35)
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+		DrawGraph EasePosX,EasePosY,hdximg(iUI_bg_Profile),TRUE
+
+		if SceneCount>20 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-20,15)
+			setease -32,0,ease_cubic_out
+			DrawGraph getease(SceneCount-20,15),600,hdximg(iUI_tx_Profile),TRUE
+		}
+
+	//iUI_bg_Score
+		setease DispWidth,960,ease_cubic_out
+		EasePosX=getease(SceneCount,40)
+		setease -220,0,ease_cubic_out
+		EasePosY=getease(SceneCount,40)
+		setease 0,256,ease_cubic_out
+		EaseAlpha=getease(SceneCount,40)
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+		DrawGraph EasePosX,EasePosY,hdximg(iUI_bg_Score),TRUE
+
+		if SceneCount>20 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-20,20)
+
+			setease -16,0,ease_cubic_out
+			DrawStringToHandle 1100,16+getease(SceneCount-20,20),strf("%08d",curScore),GetColor(240,240,240),hdxfont(fCurScore)
+		}
+		if SceneCount>100 {
+			setease 1116+32,1116,ease_cubic_out
+			EasePosX=getease(SceneCount-100,20)
+			setease 0,256,ease_cubic_out
+			EaseAlpha=getease(SceneCount-100,20)
+
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,EaseAlpha
+			//Excellent
+			DrawStringToHandle EasePosX,83,strf("%04d",numExcellent),GetColor(20,20,20),hdxfont(fPlayDetail)
+			//Great
+			DrawStringToHandle EasePosX,106,strf("%04d",numGreat),GetColor(20,20,20),hdxfont(fPlayDetail)
+			//Nice
+			DrawStringToHandle EasePosX,129,strf("%04d",numNice),GetColor(20,20,20),hdxfont(fPlayDetail)
+			//Bad
+			DrawStringToHandle EasePosX,152,strf("%04d",numBad),GetColor(20,20,20),hdxfont(fPlayDetail)
+			//Miss
+			DrawStringToHandle EasePosX,175,strf("%04d",numMiss),GetColor(20,20,20),hdxfont(fPlayDetail)
+		}
+
+	//iUI_bg_Gauge
+		setease DispWidth,580,ease_cubic_out
+		EasePosX=getease(SceneCount,25)
+		setease DispHeight,640,ease_cubic_out
+		EasePosY=getease(SceneCount,25)
+		setease 0,256,ease_cubic_out
+		EaseAlpha=getease(SceneCount,25)
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+		DrawGraph EasePosX,EasePosY,hdximg(iUI_bg_Gauge),TRUE
+
+		if SceneCount>22 {
+			//ゲージ数値
+			sdim GaugeValStr
+			GaugeValStr=str(int(curGaugeVal))	//小数点以下切り捨て＋文字列に変換
+			dim TxDrawPosX		//描画位置
+			TxDrawPosX=1255-(20*strlen(GaugeValStr))
+			setease 32,0,ease_cubic_out
+			EasePosX=TxDrawPosX+getease(SceneCount-22,15)
+
+			DrawStringToHandle EasePosX,655,GaugeValStr,GetColor(15,15,15),hdxfont(fGaugeVal)
+
+			setease 16,0,ease_cubic_out
+			EasePosX=getease(SceneCount-22,20)
+			//最大コンボ
+			DrawStringToHandle 740+EasePosX,655,str(curMaxCombo),GetColor(25,25,25),hdxfont(fChartDetail)
+
+			//BPM値
+			DrawStringToHandle 880+EasePosX,655,str(int(curBPM)),GetColor(25,25,25),hdxfont(fChartDetail)
+		}
+
+	//レーンエフェクト
+		repeat 3
+			setease 150,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(LaneEffCount(cnt),15)
+			setease 1,0.5,ease_cubic_out
+			EaseHeight=int(48.0*geteasef(LaneEffCount(cnt),15))
+			DrawExtendGraph 224,288+cnt*48+48/2-EaseHeight/2,224+512,288+cnt*48+48/2+EaseHeight/2,hdximg(iLaneEffect),TRUE
+		loop
+
+	//ノーツ処理
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,100
+		DrawGraph 200,DispHeight/2-48/2-48,hdximg(iHitCircle),TRUE
+		repeat hitobjMax
+			if hitJudgeFlag(cnt)==TRUE :continue
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			hitobjPosition(cnt)+(1000.0/60.0*curBPM/1000.0)
+			hitobjDrawPos(cnt)=200-(hitobjPosition(cnt)*AddSpeed)
+			dim DrawobjPosX:dim DrawobjPosY
+			DrawobjPosX=hitobjDrawPos(cnt)
+			DrawobjPosY=DispHeight/2-48/2-48+48*hitobjLaneID(cnt)
+
+			switch hitobjType(cnt)
+				//通常
+					case HITOBJ_NORMAL
+						DrawGraph DrawobjPosX,DrawobjPosY,hdxarr_Char_Slime((SceneCount/4)\9+hitobjLaneID(cnt)*9),TRUE
+					swbreak
+				//ホールド開始
+					case HITOBJ_HOLDSTART
+						DrawGraph DrawobjPosX,DrawobjPosY,hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3),TRUE
+					swbreak
+				//ホールド終了
+					case HITOBJ_HOLDEND
+						DrawGraph DrawobjPosX,DrawobjPosY,hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3+2),TRUE
+						DrawExtendGraph hitobjDrawPos(cnt-1)+48,DrawobjPosY,DrawobjPosX,DrawobjPosY+48,hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3+1),TRUE
+					swbreak
+			swend
+				//オートプレイ
+				if AutoPlayFlag==TRUE {
+					if PlayCountMS-hitobjTiming(cnt)>0 {
+						curCombo++
+						curGaugeVal+gaugeAmount(JUDGE_RES_EXCELLENT)
+						if curGaugeVal>100.0 :curGaugeVal=100.0
+						gosub*SetComboBurst
+						hitJudgeFlag(cnt)=TRUE
+						JudgeRes=JUDGE_RES_EXCELLENT
+						JudgeResCount=0
+						LaneEffCount(hitobjLaneID(cnt))=0
+						BombFlag(hitobjLaneID(cnt))=TRUE
+						BombCount(hitobjLaneID(cnt))=0
+						BASS_ChannelSetPosition hbasssnd(sndHitobj),0,0,0
+						BASS_ChannelPlay hbasssnd(sndHitobj)
+						numExcellent++
+					}
+				}
+			//見逃し判定
+				if PlayCountMS-hitobjTiming(cnt)>JUDGE_WIDTH_MISS {
+					JudgeRes=JUDGE_RES_MISS
+					hitJudgeFlag(cnt)=TRUE
+					curCombo=0
+					curGaugeVal+gaugeAmount(JUDGE_RES_MISS)
+					if curGaugeVal<0.0 :curGaugeVal=0.0
+					numMiss++
+				}
+		loop
+
+	//自機
+		if SceneCount>25 {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			setease -64,100,ease_cubic_out
+			EasePosX=getease(SceneCount-25,60)
+			DrawGraph EasePosX,DispHeight/2-64/2,hdximg(iChar_Player),TRUE
+		}
+
+	//判定文字
+		dim hJudgeimg
+		if JudgeRes==JUDGE_RES_EXCELLENT {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		} else {
+			//点滅
+			if (SceneCount/2)\2==0 {
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,0
+			} else {
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			}
+		}
+		switch JudgeRes
+			case JUDGE_RES_EXCELLENT:hJudgeimg=hdxarr_Judge((SceneCount/3)\3):swbreak
+			case JUDGE_RES_GREAT:hJudgeimg=hdxarr_Judge(3):swbreak
+			case JUDGE_RES_NICE:hJudgeimg=hdxarr_Judge(4):swbreak
+			case JUDGE_RES_BAD:hJudgeimg=hdxarr_Judge(5):swbreak
+			case JUDGE_RES_MISS:hJudgeimg=hdxarr_Judge(6+rnd(4)):swbreak
+		swend
+		if hJudgeimg!0 {
+			setease 1.25,1,ease_cubic_out
+			EaseWidth=int(150.0*geteasef(JudgeResCount,10))
+			EaseHeight=int(32.0*geteasef(JudgeResCount,10))
+			DrawExtendGraph 50,268,50+EaseWidth,268+EaseHeight,hJudgeimg,TRUE
+		}
+
+	//コンボ
+		if curCombo>=10 {
+			setease -32,0,ease_cubic_out
+			EasePosX=getease(JudgeResCount,15)
+			setease 150,256,ease_cubic_out
+			EaseAlpha=getease(JudgeResCount,15)
+
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(JudgeResCount,15)
+			DrawStringToHandle 50+EasePosX,220,str(curCombo),GetColor(255,255,255),hdxfont(fCombo)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(JudgeResCount,15)
+			DrawGraph 50+EasePosX+strlen(str(curCombo))*48,235,hdximg(iUI_tx_Combo),TRUE
+		}
+
+	//バースト
+		if hcbDraw!-1 {
+			if comboBurstCount==0 {
+				BASS_ChannelSetPosition hbasssnd(sndBurst),0,0,0
+				BASS_ChannelPlay hbasssnd(sndBurst)
+			}
+			EasePosX=0
+			EaseAlpha=256
+			if comboBurstCount<15 {
+				setease -32,0,ease_cubic_out
+				EasePosX=getease(comboBurstCount,15)
+				setease 0,256,ease_cubic_out
+				EaseAlpha=getease(comboBurstCount,15)
+			}
+			if comboBurstCount>70 {
+				setease 0,32,ease_cubic_in
+				EasePosX=getease(comboBurstCount-70,15)
+				setease 256,0,ease_cubic_in
+				EaseAlpha=getease(comboBurstCount-70,15)
+			}
+			if comboBurstCount>=0&comboBurstCount<=85 {
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+				DrawGraph 200+strlen(str(curCombo))*48+EasePosX,230,hcbDraw,TRUE
+			}
+		}
+
+	//爆発エフェクト
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		repeat 3
+			if BombFlag(cnt)==TRUE {
+				if BombCount(cnt)>9 {
+					BombFlag(cnt)=FALSE
+				} else {
+					DrawGraph 200+48/2-192/2,DispHeight/2-48/2-48+48/2-192/2+48*cnt,hdxarr_HitBomb(BombCount(cnt)),TRUE
+					BombCount(cnt)++
+				}
+			}
+		loop
+
+	//歌詞
+		sdim curLyrics
+		repeat lyricsMax
+			if PlayCountMS>lyricsTiming(cnt)-25 {
+				curLyrics=lyricsString(cnt)
+			}
+		loop
+		if bframeLyrics!curLyrics {
+			updateLyricsCount=0
+		} else {
+			updateLyricsCount++
+		}
+		bframeLyrics=curLyrics
+		setease 150,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(updateLyricsCount,25)
+		setease 16,0,ease_cubic_out
+		DrawStringXCenterToHandle 0,DispHeight-180+getease(updateLyricsCount,25),curLyrics,DispWidth,GetColor(255,255,255),hdxfont(fLyrics)
+
+	//暗転
+		setease 256,200,ease_linear
+		EaseAlpha=getease(SceneCount,25)
+		if SceneCount>60*2 {
+			setease 200,0,ease_linear
+			EaseAlpha=getease(SceneCount-60*2,25)
+		}
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,EaseAlpha
+		DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
+
+	//開始時のムービー
+		if SceneCount==20 {
+			PlayMovieToGraph hdximg(iMovie_Start)
+			BASS_ChannelPlay hbasssnd(sndStart)
+		}
+		if SceneCount>20 {
+			SetDrawBlendMode DX_BLENDMODE_ADD,256
+			DrawGraph 0,0,hdximg(iMovie_Start),TRUE
+		}
+
+	//パーティクル生成
+		if SceneCount\10==0 {
+			partline_PosX(partline_Max)=DispWidth
+			partline_PosY(partline_Max)=rnd(DispHeight)
+			partline_Speed(partline_Max)=20+rnd(20)
+			partline_Flag(partline_Max)=TRUE
+			partline_Max++
+		}
+		if SceneCount\120==0 {
+			partfade_PosX(partfade_Max)=DispWidth
+			partfade_Flag(partfade_Max)=TRUE
+			partfade_Max++
+		}
+
+	//BGM再生開始
+		if BGMPlayFlag==FALSE&PlayCountMS>chartBGMoffset {
+			BASS_ChannelPlay hplaybgm
+			BGMPlayFlag=TRUE
+		}
+
+	//カウンタ(ms)
+		PlayCountMS=GetNowCount()-PlayStartMS-1000*5
+		;PlayCountMS=int(double(SceneCount)*1000.0/60.0)-1000*5
+		JudgeResCount++
+		comboBurstCount++
+		repeat 3
+			LaneEffCount(cnt)++
+		loop
+
+	return

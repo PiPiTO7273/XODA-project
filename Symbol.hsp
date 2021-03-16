@@ -1,0 +1,80 @@
+
+//フォントハンドル
+#enum fSysLayer	=	0
+#enum fCurScore
+#enum fGaugeVal
+#enum fChartDetail
+#enum fLyrics
+#enum fCombo
+#enum fPlayDetail
+
+//シーンID
+#enum ID_Boot		=	0
+#enum ID_Play
+
+//DxLibグラフィック
+#enum iTmp			=	0
+#enum iUI_bg_SongInfo
+#enum iUI_bg_Profile
+#enum iUI_bg_Score
+#enum iUI_bg_Gauge
+#enum iChar_Player
+#enum iUI_tx_SongInfo
+#enum iUI_tx_Profile
+#enum iUI_tx_Score
+#enum iUI_tx_Combo
+#enum iMovie_Start
+#enum iHitCircle
+#enum iParticle_Line_256_White
+#enum iParticle_Fade_White
+#enum iParticle_bg_0
+#enum iParticle_bg_1
+#enum iParticle_bg_2
+#enum iPlay_bg_Default
+#enum iPlay_bg_Movie
+#enum iPlay_bg_Grid
+#enum iPlay_Visualizer
+#enum iLaneEffect
+#enum iBurst_Combo_x50
+#enum iBurst_Combo_x100
+#enum iBurst_Combo_x200
+#enum iBurst_Combo_x300
+#enum iBurst_Combo_x400
+#enum iBurst_Combo_x500
+#enum iBurst_Combo_x600
+#enum iBurst_Combo_x700
+#enum iBurst_Combo_x800
+#enum iBurst_Combo_x900
+#enum iBurst_Combo_x1000
+
+#enum iMax
+
+//Artlet2Dイメージ
+#enum i2D_SongInfo		=	0
+#enum i2D_Profile
+
+//BASSサウンドID
+#enum sndStart			=	0
+#enum sndAssistTick
+#enum sndHitobj
+#enum sndHitempty
+#enum sndBurst
+
+//オブジェクトID
+#define HITOBJ_NORMAL		0
+#define HITOBJ_HOLDSTART		1
+#define HITOBJ_HOLDEND		2
+
+//判定幅
+#define JUDGE_WIDTH_MISS			400
+#define JUDGE_WIDTH_BAD			200
+#define JUDGE_WIDTH_NICE			100
+#define JUDGE_WIDTH_GREAT		60
+#define JUDGE_WIDTH_EXCELLENT		30
+
+#enum JUDGE_RES_EMPTY		=	0
+#enum JUDGE_RES_MISS
+#enum JUDGE_RES_BAD
+#enum JUDGE_RES_NICE
+#enum JUDGE_RES_GREAT
+#enum JUDGE_RES_EXCELLENT

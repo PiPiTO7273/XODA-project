@@ -1,0 +1,46 @@
+
+#module
+	#uselib "kernel32.dll"
+	#func VirtualProtect "VirtualProtect" int, int, int, int
+#deffunc getdouble
+	if code == 0 {
+		code=$0424448b,$04c218dd,$00000000
+		VirtualProtect varptr(code),length(code)*4,$40,varptr(res)
+		fret=0.0
+	}
+	prm=varptr(fret)
+	res=callfunc(prm,varptr(code),1)
+	return fret
+#global
+
+*InitScene
+
+	//シーン別カウンタ
+	dim SceneCount
+
+	//イージング関数用
+	dim EasePosX
+	dim EasePosY
+	dim EaseWidth
+	dim EaseHeight
+	dim EaseAlpha
+
+	randomize
+
+	return
+
+*Create_AQProfileBuf
+
+	alCreateImage i2D_Profile,300,120
+		alColor 230,230,230,255
+		alFont"Pier Sans",20	//名前
+		alDrawText aqName,120,14,300-120,120-14,0,0
+		alFont"Pier Sans",16	//レート
+		alDrawText "RATE:"+aqRate,120,47,300-120,120-47,0,0
+		alFont"Noto Sans CJK JP Regular",14	//称号
+		alDrawText aqBadge,120,70,300-120,120-70,0,0
+
+	if hdximg(iUI_tx_Profile)!0 :DeleteGraph hdximg(iUI_tx_Profile)
+	hdximg(iUI_tx_Profile)=MakeScreen(300,120,TRUE)
+	alCopyImageToDXBuf i2D_Profile,hdximg(iUI_tx_Profile)
+	return

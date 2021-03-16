@@ -1,0 +1,436 @@
+// 
+// [ Infomation ]
+//  Name      : Artlet2D Plus
+//  Version   : 1.01
+//  copyright : GENKI
+// 
+// [ Update history ]
+// yyyy/mm/dd : ver  : comment
+// 2014/01/11 : 1.00 : 完成
+// 
+// [ Comment ]
+// Artlet2Dへの機能追加を行います。
+//
+// 次の機能が追加されます。
+// ・キャップスタイルの変更
+// ・角丸図形の描画
+// ・連続線の結合方法の変更
+//
+
+
+#include "a2d.hsp"
+
+// ------------------------------------------------------------ //
+//
+// モジュール変数：～をするモジュール
+//
+// ローカル変数  ：
+//           int hogehoge : hogehoge
+//
+// 機能説明：hogehoge
+//           hogehoge
+//
+// ------------------------------------------------------------ //
+
+#ifndef __ARTLET2D_PLUS__
+#define global __ARTLET2D_PLUS__
+#module
+
+////////////////////////////////////////////////////////////////
+// 
+//   外部DLL呼び出し命令登録
+// 
+////////////////////////////////////////////////////////////////
+
+// #const global 
+// #enum  global 
+
+#uselib "Data/Plugins/xoda_2D.bin"
+#func GdipCreatePath       "GdipCreatePath" int, int
+#func GdipDeletePath       "GdipDeletePath" int
+#func GdipClosePathFigures "GdipClosePathFigures" int
+#func GdipSetPathFillMode  "GdipSetPathFillMode"  int, int
+#func GdipFillPath         "GdipFillPath" int, int, int
+#func GdipDrawPath         "GdipDrawPath" int, int, int
+#func GdipAddPathLine      "GdipAddPathLine" int, float, float, float, float
+#func GdipAddPathArc       "GdipAddPathArc"  int, float, float, float, float, float, float
+#func GdipGetPenWidth      "GdipGetPenWidth" int, int
+#func GdipCreatePen1       "GdipCreatePen1"  int, float, int, int
+#func GdipSetPenLineJoin   "GdipSetPenLineJoin" int, int
+
+
+// キャップスタイルの変更
+#uselib "Data/Plugins/xoda_2D.bin"
+#func GdipSetPenStartCap "GdipSetPenStartCap" int, int
+#func GdipSetPenEndCap   "GdipSetPenEndCap"   int, int
+
+// String Format Object
+#uselib "Data/Plugins/xoda_2D.bin"
+#func GdipCreateStringFormat	"GdipCreateStringFormat"	int, int, int
+#func GdipDeleteStringFormat	"GdipDeleteStringFormat"	int
+#func GdipSetStringFormatAlign	"GdipSetStringFormatAlign"	int, int
+#func GdipSetStringFormatLineAlign "GdipSetStringFormatLineAlign"	int, int
+
+// 文字列の描画とサイズ取得
+#uselib "Data/Plugins/xoda_2D.bin"
+#func GdipDrawString		"GdipDrawString"	int, wstr, int, int, int, int, int
+#func GdipMeasureString     "GdipMeasureString" int, wstr, int, int, int, int, int, int, int
+
+// ------------------------------------------------------------ //
+// tools
+
+// 指定された文字列の長さを取得
+#uselib "kernel32"
+#cfunc alWstrlen "lstrlenW" wptr
+
+
+// ------------------------------------------------------------ //
+// float -> double 変換
+// 参考資料：http://sprocket.babyblue.jp/html/hsp_koneta3.htm
+// ------------------------------------------------------------ //
+#defcfunc todouble int p1
+	temp = 0.0
+	lpoke temp, 4, (p1 & 0x80000000) | (((p1 & 0x7fffffff) >> 3) + ((p1 & 0x7fffffff) ! 0) * 0x38000000)
+	lpoke temp, 0, p1 << 29
+	return temp
+
+
+
+// ------------------------------------------------------------ //
+//
+// 命  令  ：alGdipSetPenCap
+//
+// 引  数  ：int p_s : 開始点のキャップスタイル
+//           int p_e : 終了点のキャップスタイル
+//
+// 機能説明：線の末端スタイルを変更
+//
+//           線の末端スタイルを変更し、矢印にしたり丸くしたりすることが出来ます。
+//           開始点、終了点のキャップスタイルを一度に設定できます。
+//           結果はalDrawLine命令やalDrawLines命令を使用する際に反映されます。
+//           
+//           引数を省略または-1を設定すると設定を変更しません。
+//
+//
+//  0 (0x00) : Flat          平坦なライン キャップ
+//  1 (0x01) : Square        四角形のライン キャップ
+//  2 (0x02) : Round         丸いライン キャップ
+//  3 (0x03) : Triangle      三角形のライン キャップ
+// 16 (0x10) : NoAnchor      アンカー キャップなし
+// 17 (0x11) : SquareAnchor  四角形のアンカー キャップ
+// 18 (0x12) : RoundAnchor   丸いアンカー キャップ
+// 19 (0x13) : DiamondAnchor 菱形のアンカー キャップ
+// 20 (0x14) : ArrowAnchor   矢印形のアンカー キャップ
+//
+// ------------------------------------------------------------ //
+#deffunc alGdipSetPenCap_ int p_s, int p_e
+	if imgValid@a2d {
+		if p_s >= 0 : GdipSetPenStartCap imgPen@a2d, p_s
+		if p_e >= 0 : GdipSetPenEndCap   imgPen@a2d, p_e
+	}
+	return
+#define global alGdipSetPenCap(%1=-1, %2=-1)	alGdipSetPenCap_ %1, %2
+
+
+
+
+// ------------------------------------------------------------ //
+//
+// 命  令  ：alGdipSetPenLineJoin
+//
+// 引  数  ：LineJoin	: 結合方法
+//
+// 返り値  ：なし
+//
+// 機能説明：連続した線を結合する方法を指定
+//
+//           設定結果はalDrawPoly命令などに反映されます。
+//           Artlet2Dでは初期値は 0（Miter）です。
+//           
+//           
+//           LineJoin = 0（初期値）
+//           Miter：
+//           鋭角接合を指定します。
+//           マイタ長がマイタ制限値を超えない場合、鋭角的な角で結合されます。
+//           マイタ長がマイタ制限値を超える場合、角の先端がカットされます。
+//           
+//           LineJoin = 1
+//           Bevel：
+//           面取り接合を指定します。
+//           角は斜めにカットされます。カットされる位置は中心線の頂点位置です。
+//           
+//           LineJoin = 2
+//           Round：
+//           角丸接合を指定します。
+//           角は丸く円弧で結合されます。
+//           
+//           LineJoin = 3
+//           MiterClipped：
+//           鋭角接合を指定します。
+//           マイタ長がマイタ制限値を超えない場合、鋭角的な角で結合されます。
+//           マイタ長がマイタ制限値を超える場合、Bevelで結合されます。
+//           
+//
+// ------------------------------------------------------------ //
+#deffunc alGdipSetPenLineJoin int p_j
+	if imgValid@a2d {
+		GdipSetPenLineJoin imgPen@a2d, p_j
+	}
+	return
+
+
+
+
+
+
+// ------------------------------------------------------------ //
+//
+// 命  令  ：alDrawRoundRect
+//
+// 引  数  ：x, y	: 矩形の左上座標
+//           w, h	: 矩形のサイズ
+//           r      : 角丸半径
+//
+// 返り値  ：なし
+//
+// 機能説明：角丸矩形の描画（塗りつぶしなし）
+//           引数で指定した位置・サイズの角丸矩形を描画します。
+//
+//           この矩形は、塗りつぶしではなく線で枠を描画した図形です。
+//           alPenWidth で太さを設定できます。
+//
+// ------------------------------------------------------------ //
+// Rounded Rectangle
+#deffunc alDrawRoundRect int p_x, int p_y, int p_w, int p_h, int p_r
+	if imgValid@a2d {
+
+		;パス作成
+		GdipCreatePath 0,varptr(path)
+
+		// 角半径の閾値
+		r = p_r
+		if r < 0 {
+			r = 0
+		} else {
+			if r > p_w/2 : r = p_w/2
+			if r > p_h/2 : r = p_h/2
+		}
+
+		// パスを作成
+		if r = 0 {
+			GdipAddPathLine path, p_x    , p_y    , p_x+p_w, p_y
+			GdipAddPathLine path, p_x+p_w, p_y+p_h, p_x    , p_y+p_h
+		} else {
+			GdipAddPathArc path, p_x + p_w - r*2, p_y + p_h - r*2, r*2, r*2,   0-5, 90+10	// 右下
+			GdipAddPathArc path, p_x            , p_y + p_h - r*2, r*2, r*2,  90-5, 90+10	// 左下
+			GdipAddPathArc path, p_x            , p_y            , r*2, r*2, 180-5, 90+10	// 左上
+			GdipAddPathArc path, p_x + p_w - r*2, p_y            , r*2, r*2, 270-5, 90+10	// 右上
+		}
+	
+		;完成
+		GdipClosePathFigures path
+		;塗りつぶしなし
+		GdipDrawPath imgGraphics@a2d, imgPen@a2d, path
+		GdipDeletePath path
+
+		return 0
+	}
+	return -1
+
+
+
+
+// ------------------------------------------------------------ //
+//
+// 命  令  ：alFillRoundRect
+//
+// 引  数  ：x, y	: 矩形の左上座標
+//           w, h	: 矩形のサイズ
+//           r      : 角丸半径
+//
+// 返り値  ：なし
+//
+// 機能説明：塗りつぶし角丸矩形の描画
+//           引数で指定した位置・サイズの角丸矩形を描画します。
+//
+// ------------------------------------------------------------ //
+// Rounded Rectangle
+#deffunc alFillRoundRect int p_x, int p_y, int p_w, int p_h, int p_r
+	if imgValid@a2d {
+
+		;パス作成
+		GdipCreatePath 0,varptr(path)
+	
+		// 角半径の閾値
+		r = p_r
+		if r < 0 {
+			r = 0
+		} else {
+			if r > p_w/2 : r = p_w/2
+			if r > p_h/2 : r = p_h/2
+		}
+
+		// パスを作成
+		if r = 0 {
+			GdipAddPathLine path, p_x    , p_y    , p_x+p_w, p_y
+			GdipAddPathLine path, p_x+p_w, p_y+p_h, p_x    , p_y+p_h
+		} else {
+			GdipAddPathArc path, p_x + p_w - r*2, p_y + p_h - r*2, r*2, r*2,   0-5, 90+10	// 右下
+			GdipAddPathArc path, p_x            , p_y + p_h - r*2, r*2, r*2,  90-5, 90+10	// 左下
+			GdipAddPathArc path, p_x            , p_y            , r*2, r*2, 180-5, 90+10	// 左上
+			GdipAddPathArc path, p_x + p_w - r*2, p_y            , r*2, r*2, 270-5, 90+10	// 右上
+		}
+	
+		;完成
+		GdipClosePathFigures path
+		;塗りつぶし
+		GdipFillPath imgGraphics@a2d, imgBrush@a2d, path
+		GdipDeletePath path
+
+		return 0
+	}	
+	return -1
+
+
+
+
+// ------------------------------------------------------------ //
+//
+// 命  令  ：alFillRoundRectLine
+//
+// 引  数  ：x, y	: 矩形の左上座標
+//           w, h	: 矩形のサイズ
+//           r      : 角丸半径
+//           argb1	:内側の色（0xAARRGGBB）
+//           argb2	:線の色（0xAARRGGBB）
+//
+// 返り値  ：なし
+//
+// 機能説明：角丸矩形の描画（枠＋塗りつぶし）
+//           引数で指定した位置・サイズの角丸矩形を描画します。
+//           この角丸矩形は、線で枠を描画し内側を塗りつぶします。
+//
+//           色はArtlet2Dの内蔵のマクロ ARGB(A, R, G, B) もしくは RGBA(R, G, B, A) を使用すると、値を簡単に記述できます。
+//
+// ------------------------------------------------------------ //
+// Rounded Rectangle
+#deffunc alFillRoundRectLine int p_x, int p_y, int p_w, int p_h, int p_r, int p_argb1, int p_argb2
+
+	if imgValid@a2d {
+		// -----------------------
+		//   ペン太さを取得
+		// -----------------------
+		b = 0
+		GdipGetPenWidth imgPen@a2d, varptr(b)	; 旧ペンの Width を保存
+		border = todouble(b)
+
+
+		// -----------------------
+		//   内側
+		// -----------------------
+		i = int(border/2)
+		x = p_x - i
+		y = p_y - i
+		w = p_w + i*2
+		h = p_h + i*2
+		rr = p_r + i
+		
+		a = (p_argb1 & 0xFF000000) >>24
+		r = (p_argb1 & 0x00FF0000) >>16
+		g = (p_argb1 & 0x0000FF00) >> 8
+		b = (p_argb1 & 0x000000FF)
+		alColor r,g,b,a
+		alFillRoundRect x, y, w, h, rr
+		
+		
+		// -----------------------
+		//   外側
+		// -----------------------
+		x = p_x
+		y = p_y
+		w = p_w
+		h = p_h
+		
+		// border=0 以下は描画しない
+		a = (p_argb2 & 0xFF000000) >>24
+		r = (p_argb2 & 0x00FF0000) >>16
+		g = (p_argb2 & 0x0000FF00) >> 8
+		b = (p_argb2 & 0x000000FF)
+		alColor r,g,b,a
+		alDrawRoundRect x, y, w, h, p_r
+	}
+
+	return
+
+
+
+// ------------------------------------------------------------ //
+//
+// 命  令  ：alDrawTextP
+//
+// 引  数  ：bRect  : 描画位置とサイズを受け取る配列変数
+//           fdraw  : 描画ON/OFFフラグ(1)
+//           "str"  : 描画する文字列
+//           px, py : 描画する位置 (0, 0)
+//           w, h   : 描画領域の幅と高さ (9999, 9999)
+//           ax, ay : アラインメント モード (0, 0)
+//
+// 返り値  ：なし
+//
+// 機能説明：仮想イメージに文字列を描画し、その位置とサイズを取得
+//
+//           仮想イメージに文字列を描画し、その位置とサイズを取得します。
+//           
+//           bRect
+//           描画される文字列の位置とサイズがdouble型の値で返されます。内容は次の通り。
+//           bRect(0) = 描画する位置 X座標
+//           bRect(1) = 描画する位置 Y座標
+//           bRect(2) = 描画領域の幅
+//           bRect(3) = 描画領域の高さ
+//           使用する前に
+//           ddim bRect,4
+//           として配列変数を初期化しておいてください。
+//           
+//           
+//           fdraw = 0
+//           文字列の描画を行いません。
+//           
+//           fdraw = 1（省略時）
+//           文字列の描画を行います。
+//           結果はalDrawText命令と同じ動作に成ります。
+//           
+//           "str"以降はalDrawText命令と同じ内容を指定してください。
+//
+// ------------------------------------------------------------ //
+#deffunc alDrawTextP_ array bRect, int fdraw, str p1, int px, int py, int pw, int ph, int pah, int pav
+	if imgFont@a2d {
+		GdipCreateStringFormat 0, 0, varptr(tmpFormat) ; アラインメント用 Format オブジェクト
+		GdipSetStringFormatAlign tmpFormat, pah
+		GdipSetStringFormatLineAlign tmpFormat, pav
+
+		rectf = alFloat(px), alFloat(py), alFloat(pw), alFloat(ph)
+		// 描画
+		if fdraw ! 0 {
+			GdipDrawString imgGraphics@a2d, p1, alWstrlen(p1), imgFont@a2d, varptr(rectf), tmpFormat, imgBrush@a2d
+		}
+	
+		// 位置とサイズを取得
+		dim br, 4
+		a = 0 : b = 0
+		GdipMeasureString imgGraphics@a2d, p1, alWstrlen(p1), imgFont@a2d, varptr(rectf), tmpFormat, varptr(br), varptr(a), varptr(b)
+		repeat 4
+			bRect(cnt) = todouble(br(cnt))
+		loop
+		
+		GdipDeleteStringFormat tmpFormat ; Format オブジェクト 削除
+		tmpFormat = 0
+	}
+	return
+#define global alDrawTextP(%1, %2=1, %3="", %4=0, %5=0, %6=9999, %7=9999, %8=0, %9=0)	alDrawTextP_ %1, %2, %3, %4, %5, %6, %7, %8, %9
+
+
+
+
+#global
+#endif	;__ARTLET2D_PLUS__
+

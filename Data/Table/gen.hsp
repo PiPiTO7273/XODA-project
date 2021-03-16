@@ -1,0 +1,11 @@
+
+randomize
+
+sdim enctable,(512-4-1)*(256*256)
+
+repeat varsize(enctable)
+	poke enctable,cnt,rnd(256)
+loop
+bsave"enctable.bin",enctable
+
+end

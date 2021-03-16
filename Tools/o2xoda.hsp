@@ -1,0 +1,110 @@
+
+//Osu! beatmap to XODA chart format Converter
+// by piyapipito
+
+#include"hsp3utf.as"
+#packopt hide 1
+
+#ifdef _debug
+	gsel 0,-1
+#endif
+
+	sdim defdir
+	defdir=dir_cur
+	sdim beatmapFileName
+	dialog"osu",16,""
+	beatmapFileName=refstr
+	chdir defdir
+
+	exist beatmapFileName
+	if strsize==-1 {
+		dialog"指定された譜面ファイルが見つかりませんでした。",1,"エラー"
+		end
+	}
+
+	//解析開始
+	sdim beatmapBuf,strsize
+	notesel beatmapBuf
+	noteload beatmapFileName
+
+	dim beatmapNotemax
+	beatmapNotemax=notemax
+	sdim curSection
+
+	//書き出し用バッファ
+	sdim exportBuf
+	exportBuf="#FORMAT:chart.xoda\n"
+	exportBuf+"#VERSION:0.1.0\n\n"
+
+	repeat beatmapNotemax
+		sdim beatmapLine
+		noteget beatmapLine,cnt
+		if beatmapLine=="" :continue
+		if strmid(beatmapLine,0,1)=="[" {
+			//セクション名検出
+			curSection=beatmapLine
+			exportBuf+"\n"
+		} else {
+			if curSection=="[General]" {
+				sdim dataPrm:sdim dataValue
+				split beatmapLine,":",dataPrm,dataValue
+				//一般
+				switch dataPrm
+					case"AudioLeadIn"
+						exportBuf+"#BGMOFFSET:"+int(dataValue)+"\n"
+					swbreak
+				swend
+			}
+			if curSection=="[Metadata]" {
+				sdim dataPrm:sdim dataValue
+				split beatmapLine,":",dataPrm,dataValue
+				//メタデータ
+				switch dataPrm
+					case"Title"
+						exportBuf+"#TITLE:"+dataValue+"\n"
+					swbreak
+					case"Artist"
+						exportBuf+"#ARTIST:"+dataValue+"\n"
+					swbreak
+				swend
+			}
+			if curSection=="[TimingPoints]" {
+				//タイミング
+				sdim dataDiv
+				split beatmapLine,",",dataDiv
+				if double(dataDiv(1))>0.0 {
+					//BPM定義
+					if instr(exportBuf,0,"#SETBPM")==-1 {
+						exportBuf+"#DEFBPM:"+(60000.0/double(dataDiv(1)))+"\n"
+					}
+					exportBuf+"#SETBPM:"+dataDiv(0)+","+(60000.0/double(dataDiv(1)))+"\n"
+				}
+			}
+			if curSection=="[HitObjects]" {
+				//ヒットオブジェクト
+				//x,y,time,type,hitSound,objectParams,hitSample
+				//x,y,time,type,hitSound,endTime:hitSample
+				sdim dataDiv
+				split beatmapLine,",",dataDiv
+				sdim tmpdiv:sdim tmpstr:tmpdiv=dataDiv(5):split tmpdiv,":",tmpstr
+				dim ColumnID
+					if int(dataDiv(0))==85 :ColumnID=0
+					if int(dataDiv(0))==256 :ColumnID=1
+					if int(dataDiv(0))==426 :ColumnID=2
+				if length(tmpstr)==5 {
+					//通常
+					exportBuf+"#OBJ:"+dataDiv(2)+","+ColumnID+",-1,0\n"
+				} else {
+					//長いやつ
+					exportBuf+"#HOLD.START:"+dataDiv(2)+","+ColumnID+",-1,0,"+str(int(tmpstr(0))-int(dataDiv(2)))+"\n"
+					exportBuf+"#HOLD.END:"+int(tmpstr(0))+","+ColumnID+",-1,0\n"
+				}
+			}
+		}
+	loop
+
+	dialog"dat",17,"XODA Chart Format"
+	notesel exportBuf
+	notesave refstr
+
+	end

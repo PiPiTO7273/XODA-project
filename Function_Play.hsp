@@ -1,0 +1,370 @@
+
+#deffunc DrawParticle int _alpha,int _hwnd,int _width,int _height,int _margin,int _posy,int _speed
+	dim partPosX:dim partMoveSpeed:partMoveSpeed=_speed
+	repeat
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,_alpha
+		DrawGraph partPosX-SceneCount*partMoveSpeed,_posy,_hwnd,TRUE
+		DrawGraph partPosX-SceneCount*partMoveSpeed,DispHeight-_posy-_height,_hwnd,TRUE
+		partPosX+_width+_margin
+		if partPosX-SceneCount*partMoveSpeed>DispWidth :break
+	loop
+
+	return
+
+#deffunc SetHitObjDefaultPreset int _id
+	hitSoundFlag(_id)=FALSE
+	hitJudgeFlag(_id)=FALSE
+	hitobjBPM(_id)=0.0
+	return
+
+
+	return
+
+*LoadChart
+
+	//譜面ファイルの読み込み
+	sdim chartPath
+	chartPath="Data/"+chartFileName+".dat"
+	exist chartPath
+	if strsize==-1 {
+		//ファイルの読み込みエラー
+		return -1
+	}
+	sdim chartBuf,strsize
+	notesel chartBuf
+	noteload chartPath
+
+	dim chartNoteMax	//最大行数
+	chartNoteMax=notemax
+	sdim chartNoteLine	//解析する行の文字列データ
+	sdim chartCmdName	//コマンド名
+	sdim chartCmdPrm	//コマンドパラメータ
+	sdim chartDivPrm	//コマンドパラメータ（配列）
+	sdim chartProgErr	//エラー発生フラグ
+	chartProgErr=FALSE
+
+	dim chartDefVersion,3	//譜面ファイルの定義バージョン
+
+	sdim chartTitle		//タイトル
+	sdim chartSubTitle		//サブタイトル
+	sdim chartArtist		//アーティスト
+	sdim chartSource		//提供元
+	sdim chartLicense		//ライセンス表記
+	ddim chartDefBPM,1		//既定のBPM値
+	dim chartBGMoffset		//BGMの再生オフセット
+	dim chartMOVIEoffset	//ムービーのオフセット
+	dim chartMOVIEposX		//ムービーの表示位置X
+	dim chartMOVIEposy		//ムービーの表示位置Y
+	dim chartMOVIEwidth		//ムービーの横幅
+	dim chartMOVIEheight	//ムービーの高さ
+	dim chartMOVIEalpha		//ムービーの不透明度
+	sdim chartResIndex		//リソースの識別子
+	sdim chartDifficulty	//難易度（区分）
+	dim chartLevel			//難易度（数値）
+	dim chartobjOffset		//オブジェクトのオフセット
+
+	dim hitobjTiming	//タイミング
+	dim hitobjLength	//長さ
+	dim hitobjLaneID	//レーンID
+	dim hitobjSoundID	//サウンドID
+	dim hitobjSoundVol	//サウンドの音量
+	dim hitobjType		//種類(0=通常,1=ホールド)
+	ddim hitobjBPM,1		//BPM値
+	dim hitobjMax		//オブジェクト最大数
+	dim hitSoundFlag	//サウンドを鳴らしたフラグ
+	dim hitJudgeFlag	//判定済みフラグ
+
+	dim bpmpointTiming	//BPM定義地点の位置
+	ddim bpmpointValue,1//BPM定義地点の値
+	dim bpmpointMax	//BPM定義地点の最大数
+
+	dim lyricsTiming	//歌詞の位置
+	dim lyricsString	//歌詞の文字列
+	dim lyricsMax		//歌詞の最大数
+
+	repeat chartNoteMax
+		noteget chartNoteLine,cnt
+		if strmid(chartNoteLine,0,1)=="#" {	//接頭語からコマンド行を判別
+			split chartNoteLine,":",chartCmdName,chartCmdPrm
+			split chartCmdPrm,",",chartDivPrm
+
+			//コマンド別処理
+			switch chartCmdName
+				case"#FORMAT"		//シグネチャ
+					if chartCmdPrm!"chart.xoda" {
+						chartProgErr=TRUE
+					}
+				swbreak
+				case"#VERSION"		//定義バージョン
+					split chartCmdPrm,".",chartDefVersion
+				swbreak
+
+				case"#TITLE"		//タイトル
+					chartTitle=chartCmdPrm
+				swbreak
+				case"#SUBTITLE"	//サブタイトル
+					chartSubTitle=chartCmdPrm
+				swbreak
+				case"#ARTIST"		//アーティスト
+					chartArtist=chartCmdPrm
+				swbreak
+				case"#SOURCE"		//提供元
+					chartSource=chartCmdPrm
+				swbreak
+				case"#LICENSE"		//ライセンス表記
+					chartLicense=chartCmdPrm
+				swbreak
+				case"#DEFBPM"		//既定のBPM値
+					chartDefBPM=double(chartCmdPrm)
+				swbreak
+				case"#BGMOFFSET"	//BGMのオフセット値
+					chartBGMoffset=int(chartCmdPrm)
+				swbreak
+				case"#MOVIEOFFSET"	//ムービーのオフセット値
+					chartMOVIEoffset=int(chartCmdPrm)
+				swbreak
+				case"#MOVIEADV"	//ムービーの追加設定
+					//追加設定で位置やサイズを指定された場合はそれに従い、
+					//未指定の場合は、上部に短形変形した状態で表示
+					chartMOVIEposX=int(chartDivPrm(0))
+					chartMOVIEposY=int(chartDivPrm(1))
+					chartMOVIEwidth=int(chartDivPrm(2))
+					chartMOVIEheight=int(chartDivPrm(3))
+					chartMOVIEalpha=int(chartDivPrm(4))
+				swbreak
+				case"#INDEX"		//リソースの識別子
+					chartResIndex=chartCmdPrm
+				swbreak
+				case"#OBJOFFSET"	//オブジェクトのオフセット値
+					chartobjOffset=int(chartCmdPrm)
+				swbreak
+
+				case"#DIFFICULTY"	//難易度（区分）
+					chartDifficulty=chartCmdPrm
+				swbreak
+				case"#LEVEL"		//難易度（数値）
+					chartLevel=int(chartCmdPrm)
+				swbreak
+
+				case"#SETBPM"	//BPM定義
+					bpmpointTiming(bpmpointMax)=int(chartDivPrm(0))
+					bpmpointValue(bpmpointMax)=double(chartDivPrm(1))
+					bpmpointMax++
+				swbreak
+
+				case"#OBJ"		//オブジェクト
+					hitobjTiming(hitobjMax)=int(chartDivPrm(0))+chartobjOffset
+					hitobjLaneID(hitobjMax)=int(chartDivPrm(1))
+					hitobjSoundID(hitobjMax)=int(chartDivPrm(2))
+					hitobjSoundVol(hitobjMax)=int(chartDivPrm(3))
+					hitobjLength(hitobjMax)=0
+					hitobjType(hitobjMax)=HITOBJ_NORMAL
+					SetHitObjDefaultPreset hitobjMax
+					hitobjMax++
+				swbreak
+				case"#HOLD.START"		//ホールドオブジェクト（始点）
+					hitobjTiming(hitobjMax)=int(chartDivPrm(0))+chartobjOffset
+					hitobjLaneID(hitobjMax)=int(chartDivPrm(1))
+					hitobjSoundID(hitobjMax)=int(chartDivPrm(2))
+					hitobjSoundVol(hitobjMax)=int(chartDivPrm(3))
+					hitobjLength(hitobjMax)=int(chartDivPrm(4))
+					hitobjType(hitobjMax)=HITOBJ_HOLDSTART
+					SetHitObjDefaultPreset hitobjMax
+					hitobjMax++
+				swbreak
+				case"#HOLD.END"		//ホールドオブジェクト（終点）
+					hitobjTiming(hitobjMax)=int(chartDivPrm(0))+chartobjOffset
+					hitobjLaneID(hitobjMax)=int(chartDivPrm(1))
+					hitobjSoundID(hitobjMax)=int(chartDivPrm(2))
+					hitobjSoundVol(hitobjMax)=int(chartDivPrm(3))
+					hitobjLength(hitobjMax)=0
+					hitobjType(hitobjMax)=HITOBJ_HOLDEND
+					SetHitObjDefaultPreset hitobjMax
+					hitobjMax++
+				swbreak
+
+				case"#LYRICS"			//歌詞
+					lyricsTiming(lyricsMax)=int(chartDivPrm(0))
+					strrep chartDivPrm(1),"*com",","	//置換
+					lyricsString(lyricsMax)=chartDivPrm(1)
+					lyricsMax++
+				swbreak
+			swend
+		}
+
+		if chartProgErr==TRUE :break
+	loop
+
+	//譜面ファイルのバージョンを照合
+	if chartDefVersion(0)!BuildVersion(0) {		//メジャーバージョン
+		return -3
+	}
+	if chartDefVersion(1)!BuildVersion(1) {		//マイナーバージョン
+		return -3
+	}
+	if chartDefVersion(2)!BuildVersion(2) {		//パッチバージョン
+		return -3
+	}
+
+	if chartProgErr==TRUE {
+		//解析中のエラー
+		return -2
+	}
+
+	//楽曲情報のバッファを生成
+	alCreateImage i2D_SongInfo,360,150
+		alColor 15,15,15:alFont"Noto Sans CJK JP Medium",16
+		alDrawText chartTitle,30,24,360-45,150-20,0,0
+		alColor 30,30,30:alFont"Noto Sans CJK JP Regular",14
+		alDrawText chartArtist,40,62,360-45,150-60,0,0
+		alColor 50,50,50:alFont"Pier Sans",14
+		alDrawText chartDifficulty+" Lv."+chartLevel,45,104,360-45,150-104,0,0
+
+	if hdximg(iUI_tx_SongInfo)!0 :DeleteGraph hdximg(iUI_tx_Profile)
+	hdximg(iUI_tx_SongInfo)=MakeScreen(360,150,TRUE)
+	alCopyImageToDXBuf i2D_SongInfo,hdximg(iUI_tx_SongInfo)
+
+	//音源読み込み
+	dim hplaybgm
+	hplaybgm=BASS_StreamCreateFile(FALSE,"Data/Package/"+chartResIndex+"/Audio.mp3",0,0,0,0,BASS_STREAM_AUTOFREE)
+	BASS_ChannelSetAttribute hplaybgm,BASS_ATTRIB_VOL,tofloat(0.5)
+
+	//ムービー読み込み
+	if hdximg(iPlay_bg_Movie)!0 :DeleteGraph hdximg(iPlay_bg_Movie)
+	hdximg(iPlay_bg_Movie)=LoadGraph("Data/Package/"+chartResIndex+"/Background.ogv")
+
+	//ゲージ関係
+	ddim tmpGaugeTotal,1:ddim gaugeAmount,6
+	tmpGaugeTotal=7.605*double(hitobjMax)/(0.01*double(hitobjMax)+6.5)
+	gaugeAmount(JUDGE_RES_EMPTY)=0.0
+	gaugeAmount(JUDGE_RES_EXCELLENT)=tmpGaugeTotal/double(hitobjMax)
+	gaugeAmount(JUDGE_RES_GREAT)=gaugeAmount(JUDGE_RES_EXCELLENT)*0.5
+	gaugeAmount(JUDGE_RES_NICE)=0.0
+	gaugeAmount(JUDGE_RES_BAD)=-1.0
+	gaugeAmount(JUDGE_RES_MISS)=-2.0
+
+	//BPM情報解析
+	dim ProgObjID
+	repeat hitobjMax
+		ProgObjID=cnt
+		if chartDefBPM!0.0 {
+			//既定のBPM値を設定
+			hitobjBPM(ProgObjID)=chartDefBPM
+		}
+		repeat bpmpointMax
+			if hitobjTiming(ProgObjID)>=bpmpointTiming(cnt) {
+				hitobjBPM(ProgObjID)=bpmpointValue(cnt)
+			}
+		loop
+	loop
+
+	//ヒット位置設定
+	ddim hitobjPosition,hitobjMax
+	ddim tmpobjPosition,hitobjMax
+	dim hitobjDrawPos,hitobjMax
+	repeat hitobjMax
+		if cnt==0 {
+			hitobjPosition(cnt)=tmpobjPosition-(double(hitobjTiming(cnt)+1000*5)*hitobjBPM(cnt)/1000.0)
+		} else {
+			hitobjPosition(cnt)=tmpobjPosition-(double(hitobjTiming(cnt)-hitobjTiming(cnt-1))*hitobjBPM(cnt)/1000.0)
+		}
+		tmpobjPosition=hitobjPosition(cnt)
+	loop
+
+	return 0
+
+*Scene_Init_Play
+
+	//ゲージの種類
+	dim GaugeType
+	//現在のゲージ数値
+	ddim curGaugeVal,1
+	curGaugeVal=0.0
+	//現在のBPM値
+	ddim curBPM,1
+	//最大コンボ
+	dim curMaxCombo
+	//白線パーティクル
+	dim partline_PosX
+	dim partline_PosY
+	dim partline_Speed
+	dim partline_Max
+	dim partline_Flag
+	//フェードパーティクル
+	dim partfade_PosX
+	dim partfade_Max
+	dim partfade_Flag
+
+	//背景スクロール位置X
+	dim bgScrollX
+
+	//ムービー使用フラグ
+	dim bgMovieFlag
+	bgMovieFlag=TRUE
+
+	//ムービー再生済みフラグ
+	dim MoviePlayFlag
+	//音源再生済みフラグ
+	dim BGMPlayFlag
+
+	//経過時間
+	dim PlayStartMS
+	dim PlayCountMS
+	PlayCountMS=-1000*5
+
+	//ビジュアライザー用スクリーン
+	if hdximg(iPlay_Visualizer)!0 :DeleteGraph hdximg(iPlay_Visualizer)
+	hdximg(iPlay_Visualizer)=MakeScreen(1024,512,TRUE)
+
+	//歌詞表示フラグ
+	sdim bframeLyrics
+	dim updateLyricsCount
+
+	//ユーザー指定スピード値
+	ddim AddSpeed,1
+	AddSpeed=8.0
+
+	//判定するフラグ
+	dim JudgeFlag,3
+	dim KeyFlag,4
+	dim bfKeyFlag,4
+	dim LaneEffCount,3
+
+	//コンボ
+	dim curCombo
+
+	//判定
+	dim numMiss
+	dim numBad
+	dim numNice
+	dim numGreat
+	dim numExcellent
+	dim JudgeRes
+	dim JudgeResCount
+	dim BombCount,3
+	dim BombFlag,3
+
+	//デバッグ
+	dim AutoPlayFlag
+	AutoPlayFlag=true
+
+	//コンボバースト
+	dim hcbDraw
+	dim comboBurstCount
+	hcbDraw=-1
+	return
+
+*SetComboBurst
+	if curCombo==50 :hcbDraw=hdximg(iBurst_Combo_x50):comboBurstCount=0
+	if curCombo==100 :hcbDraw=hdximg(iBurst_Combo_x100):comboBurstCount=0
+	if curCombo==200 :hcbDraw=hdximg(iBurst_Combo_x200):comboBurstCount=0
+	if curCombo==300 :hcbDraw=hdximg(iBurst_Combo_x300):comboBurstCount=0
+	if curCombo==400 :hcbDraw=hdximg(iBurst_Combo_x400):comboBurstCount=0
+	if curCombo==500 :hcbDraw=hdximg(iBurst_Combo_x500):comboBurstCount=0
+	if curCombo==600 :hcbDraw=hdximg(iBurst_Combo_x600):comboBurstCount=0
+	if curCombo==700 :hcbDraw=hdximg(iBurst_Combo_x700):comboBurstCount=0
+	if curCombo==800 :hcbDraw=hdximg(iBurst_Combo_x800):comboBurstCount=0
+	if curCombo==900 :hcbDraw=hdximg(iBurst_Combo_x900):comboBurstCount=0
+	if curCombo==1000 :hcbDraw=hdximg(iBurst_Combo_x1000):comboBurstCount=0
+
+	return
