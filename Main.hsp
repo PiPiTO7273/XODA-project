@@ -4,6 +4,7 @@
 #include"bass.as"
 #include"a2dp.hsp"
 #include"mod_dxlibplus.hsp"
+#include"gm_crlf.hsp"
 
 #packopt hide 1
 

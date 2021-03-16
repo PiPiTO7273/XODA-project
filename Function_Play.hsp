@@ -34,6 +34,11 @@
 	notesel chartBuf
 	noteload chartPath
 
+	//改行コードを判別
+	if id_crlf(chartBuf)!0 {
+		conv_crlf chartBuf,0
+	}
+
 	dim chartNoteMax	//最大行数
 	chartNoteMax=notemax
 	sdim chartNoteLine	//解析する行の文字列データ
