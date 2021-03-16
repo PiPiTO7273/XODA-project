@@ -1,4 +1,6 @@
 
+//XODA-Project
+
 #include"hsp3utf.as"
 #include"DxLib.as"
 #include"bass.as"
