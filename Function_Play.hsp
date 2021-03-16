@@ -346,7 +346,7 @@
 
 	//デバッグ
 	dim AutoPlayFlag
-	AutoPlayFlag=true
+	AutoPlayFlag=false
 
 	//コンボバースト
 	dim hcbDraw
