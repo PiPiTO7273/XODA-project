@@ -27,17 +27,17 @@ sdim indexbuf,512
 
 	//サーバーアドレス
 	sdim serveraddress,64
-	serveraddress="ftp.homepage.shinobi.jp"
+	serveraddress="****サーバーのアドレス****"
 	memcpy indexbuf,serveraddress,64,64,0
 
 	//サーバーログイン名
 	sdim serverusername,64
-	serverusername="exp0s3rsvv.goemonburo.com"
+	serverusername="****サーバーのログインユーザー名****"
 	memcpy indexbuf,serverusername,64,128,0
 
 	//サーバーログインパスワードのデータ長
 	sdim serverpassword,64
-	serverpassword="408e6b334a43ab3304a3e5df3bf7bbd7"
+	serverpassword="****サーバーのログインパスワード****"
 	memcpy indexbuf,serverpassword,64,192
 
 	//開発コードネーム
