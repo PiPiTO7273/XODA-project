@@ -72,6 +72,7 @@
 #define JUDGE_WIDTH_GREAT		60
 #define JUDGE_WIDTH_EXCELLENT		30
 
+//判定結果
 #enum JUDGE_RES_EMPTY		=	0
 #enum JUDGE_RES_MISS
 #enum JUDGE_RES_BAD
@@ -79,4 +80,11 @@
 #enum JUDGE_RES_GREAT
 #enum JUDGE_RES_EXCELLENT
 
+//デバッグキーアサイン
 #enum DEBUG_AUTOPLAY		=	0
+
+//ゲージの種類
+#enum GAUGE_ASSIST			=	0
+#enum GAUGE_NORMAL
+#enum GAUGE_HARD
+#enum GAUGE_MADNESS

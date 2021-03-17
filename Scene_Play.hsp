@@ -12,6 +12,7 @@
 		if CheckHitKey(KEY_INPUT_J)==TRUE :KeyFlag(2)=TRUE
 		if CheckHitKey(KEY_INPUT_K)==TRUE :KeyFlag(3)=TRUE
 
+	//デバッグキー判定
 		dim DebugKeyFlag,12
 		repeat 12
 			DebugKeyFlag(cnt)=CheckHitKey(KEY_INPUT_F1+cnt)
@@ -292,6 +293,19 @@
 
 			//BPM値
 			DrawStringToHandle 880+EasePosX,655,str(int(curBPM)),GetColor(25,25,25),hdxfont(fChartDetail)
+
+			//ゲージ描画
+			dim hGaugeImg
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			repeat int(curGaugeVal)
+				switch GaugeType
+					case GAUGE_ASSIST:hGaugeImg=hdxarr_Gauge_Assist(cnt):swbreak
+					case GAUGE_NORMAL:hGaugeImg=hdxarr_Gauge_Normal(cnt):swbreak
+					case GAUGE_HARD:hGaugeImg=hdxarr_Gauge_Hard(cnt):swbreak
+					case GAUGE_MADNESS:hGaugeImg=hdxarr_Gauge_Madness(cnt):swbreak
+				swend
+				DrawGraph 580+7*cnt,688,hGaugeImg,TRUE
+			loop
 		}
 
 	//レーンエフェクト

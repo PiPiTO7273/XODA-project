@@ -149,6 +149,15 @@ goto*Startup
 	dim hdxarr_HitBomb,10
 	LoadDivGraph"Data/Object/Hit/Bomb.png",10,5,2,192,192,varptr(hdxarr_HitBomb)
 
+	dim hdxarr_Gauge_Assist,100
+	dim hdxarr_Gauge_Normal,100
+	dim hdxarr_Gauge_Hard,100
+	dim hdxarr_Gauge_Madness,100
+	LoadDivGraph"Data/Image/Gauge_Assist.png",100,100,1,7,32,varptr(hdxarr_Gauge_Assist)
+	LoadDivGraph"Data/Image/Gauge_Normal.png",100,100,1,7,32,varptr(hdxarr_Gauge_Normal)
+	LoadDivGraph"Data/Image/Gauge_Hard.png",100,100,1,7,32,varptr(hdxarr_Gauge_Hard)
+	LoadDivGraph"Data/Image/Gauge_Madness.png",100,100,1,7,32,varptr(hdxarr_Gauge_Madness)
+
 	//ÉVÅ[ÉìID
 	dim curSceneID
 	curSceneID=ID_Play
