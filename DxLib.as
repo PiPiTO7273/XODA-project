@@ -267,7 +267,7 @@
 #func global SetShadowMapAdjustDepth "dx_SetShadowMapAdjustDepth" int,float
 #func global TestDrawShadowMap "dx_TestDrawShadowMap" int,int,int,int,int
 #func global LoadBmpToGraph "dx_LoadBmpToGraph" str,int,int,int
-#func global LoadGraph "dx_LoadGraph" str,int
+#func global LoadGraph_org "dx_LoadGraph" str,int
 #func global LoadReverseGraph "dx_LoadReverseGraph" str,int
 #func global LoadDivGraph "dx_LoadDivGraph" str,int,int,int,int,int,sptr,int
 #func global LoadDivBmpToGraph "dx_LoadDivBmpToGraph" str,int,int,int,int,int,sptr,int,int
