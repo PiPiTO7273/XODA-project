@@ -14,6 +14,7 @@
 #deffunc SetHitObjDefaultPreset int _id
 	hitSoundFlag(_id)=FALSE
 	hitJudgeFlag(_id)=FALSE
+	hitCountFlag(_id)=FALSE
 	hitobjBPM(_id)=0.0
 	return
 
@@ -81,6 +82,7 @@
 	dim hitobjMax		//オブジェクト最大数
 	dim hitSoundFlag	//サウンドを鳴らしたフラグ
 	dim hitJudgeFlag	//判定済みフラグ
+	dim hitCountFlag	//判定ラインに触れたフラグ
 
 	dim bpmpointTiming	//BPM定義地点の位置
 	ddim bpmpointValue,1//BPM定義地点の値
@@ -365,6 +367,7 @@
 	dim LaneEffCount,3
 	dim HoldFlag,3
 	dim HoldNoteID,3
+	dim HoldCount,3
 
 	//コンボ
 	dim curCombo
@@ -391,6 +394,7 @@
 
 	//現在のスコア
 	dim curScore
+	dim mxmScore
 	dim hitCount
 	dim ScoreEaseA
 	dim ScoreEaseB

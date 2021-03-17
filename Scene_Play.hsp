@@ -86,6 +86,7 @@
 							} else {
 								HoldFlag(hitobjLaneID(NearNoteID))=TRUE
 								HoldNoteID(hitobjLaneID(NearNoteID))=NearNoteID
+								HoldCount(hitobjLaneID(NearNoteID))=0
 							}
 						}
 						if hitobjType(NearNoteID)==HITOBJ_HOLDEND :HoldFlag(hitobjLaneID(NearNoteID))=FALSE
@@ -236,34 +237,52 @@
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
 		DrawGraph EasePosX,EasePosY,hdximg(iUI_bg_Score),TRUE
 
-		if SceneCount>20 {
-			setease 0,256,ease_cubic_out
-			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-20,20)
+		//スコア数値
+			if SceneCount>20 {
+				setease 0,256,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-20,20)
 
-			setease ScoreEaseA,ScoreEaseB,ease_linear
-			ScoreEaseVal=getease(JudgeResCount,30)
+				setease ScoreEaseA,ScoreEaseB,ease_linear
+				ScoreEaseVal=getease(JudgeResCount,30)
 
-			setease -16,0,ease_cubic_out
-			DrawStringToHandle 1100,16+getease(SceneCount-20,20),strf("%08d",ScoreEaseVal),GetColor(240,240,240),hdxfont(fCurScore)
-		}
-		if SceneCount>100 {
-			setease 1116+32,1116,ease_cubic_out
-			EasePosX=getease(SceneCount-100,20)
-			setease 0,256,ease_cubic_out
-			EaseAlpha=getease(SceneCount-100,20)
+				setease -16,0,ease_cubic_out
+				DrawStringToHandle 1100,16+getease(SceneCount-20,20),strf("%08d",ScoreEaseVal),GetColor(240,240,240),hdxfont(fCurScore)
+			}
+		//判定された数・暫定ランク
+			if SceneCount>50 {
+				setease 1116+32,1116,ease_cubic_out
+				EasePosX=getease(SceneCount-100,20)
+				setease 0,256,ease_cubic_out
+				EaseAlpha=getease(SceneCount-100,20)
 
-			SetDrawBlendMode DX_BLENDMODE_ALPHA,EaseAlpha
-			//Excellent
-			DrawStringToHandle EasePosX,83,strf("%04d",numExcellent),GetColor(20,20,20),hdxfont(fPlayDetail)
-			//Great
-			DrawStringToHandle EasePosX,106,strf("%04d",numGreat),GetColor(20,20,20),hdxfont(fPlayDetail)
-			//Nice
-			DrawStringToHandle EasePosX,129,strf("%04d",numNice),GetColor(20,20,20),hdxfont(fPlayDetail)
-			//Bad
-			DrawStringToHandle EasePosX,152,strf("%04d",numBad),GetColor(20,20,20),hdxfont(fPlayDetail)
-			//Miss
-			DrawStringToHandle EasePosX,175,strf("%04d",numMiss),GetColor(20,20,20),hdxfont(fPlayDetail)
-		}
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,EaseAlpha
+				//Excellent
+				DrawStringToHandle EasePosX,83,strf("%04d",numExcellent),GetColor(20,20,20),hdxfont(fPlayDetail)
+				//Great
+				DrawStringToHandle EasePosX,106,strf("%04d",numGreat),GetColor(20,20,20),hdxfont(fPlayDetail)
+				//Nice
+				DrawStringToHandle EasePosX,129,strf("%04d",numNice),GetColor(20,20,20),hdxfont(fPlayDetail)
+				//Bad
+				DrawStringToHandle EasePosX,152,strf("%04d",numBad),GetColor(20,20,20),hdxfont(fPlayDetail)
+				//Miss
+				DrawStringToHandle EasePosX,175,strf("%04d",numMiss),GetColor(20,20,20),hdxfont(fPlayDetail)
+
+				//暫定ランク
+				sdim curRank
+				curRank="E"
+				if double(curScore)>double(mxmScore)*(double(RANK_SCORE_D)/10000000.0) :curRank="D"
+				if double(curScore)>double(mxmScore)*(double(RANK_SCORE_C)/10000000.0) :curRank="C"
+				if double(curScore)>double(mxmScore)*(double(RANK_SCORE_B)/10000000.0) :curRank="B"
+				if double(curScore)>double(mxmScore)*(double(RANK_SCORE_A)/10000000.0) :curRank="A"
+				if double(curScore)>double(mxmScore)*(double(RANK_SCORE_AA)/10000000.0) :curRank="AA"
+				if double(curScore)>double(mxmScore)*(double(RANK_SCORE_AAA)/10000000.0) :curRank="AAA"
+				if double(curScore)>double(mxmScore)*(double(RANK_SCORE_S)/10000000.0) :curRank="S"
+				if double(curScore)>double(mxmScore)*(double(RANK_SCORE_SS)/10000000.0) :curRank="SS"
+				if double(curScore)>double(mxmScore)*(double(RANK_SCORE_SSS)/10000000.0) :curRank="SSS"
+				if curScore==mxmScore :curRank="MAX"
+
+				DrawStringXCenterToHandle 1180,128,curRank,78,GetColor(25,25,25),hdxfont(fChartDetail)
+			}
 
 	//iUI_bg_Gauge
 		setease DispWidth,580,ease_cubic_out
@@ -345,9 +364,11 @@
 						DrawExtendGraph hitobjDrawPos(cnt-1)+48,DrawobjPosY,DrawobjPosX,DrawobjPosY+48,hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3+1),TRUE
 					swbreak
 			swend
-				//オートプレイ
-				if AutoPlayFlag==TRUE {
-					if PlayCountMS-hitobjTiming(cnt)>0 {
+
+			//オブジェクトが判定ラインに触れたタイミングの処理
+				if PlayCountMS-hitobjTiming(cnt)>0 {
+					//オートプレイ
+					if AutoPlayFlag==TRUE {
 						UpdateJudgeValue JUDGE_RES_EXCELLENT
 						hitJudgeFlag(cnt)=TRUE
 						LaneEffCount(hitobjLaneID(cnt))=0
@@ -355,6 +376,13 @@
 						BombCount(hitobjLaneID(cnt))=0
 						BASS_ChannelSetPosition hbasssnd(sndHitobj),0,0,0
 						BASS_ChannelPlay hbasssnd(sndHitobj)
+						if hitobjType(cnt)==HITOBJ_HOLDSTART {
+							HoldFlag(hitobjLaneID(cnt))=TRUE
+							HoldCount(hitobjLaneID(cnt))=0
+						}
+						if hitobjType(cnt)==HITOBJ_HOLDEND {
+							HoldFlag(hitobjLaneID(cnt))=FALSE
+						}
 					}
 				}
 			//見逃し判定
@@ -366,6 +394,16 @@
 						UpdateJudgeValue JUDGE_RES_MISS
 					}
 				}
+		loop
+
+	//理論値スコアの計算
+		repeat hitobjMax
+			if hitCountFlag(cnt)==TRUE :continue
+			if PlayCountMS-hitobjTiming(cnt)>0 {
+				mxmScore+hitScore(JUDGE_RES_EXCELLENT)
+				if cnt==0 :mxmScore+bonusScore
+				hitCountFlag(cnt)=TRUE
+			}
 		loop
 
 	//自機
@@ -440,6 +478,14 @@
 				DrawGraph 200+strlen(str(curCombo))*48+EasePosX,230,hcbDraw,TRUE
 			}
 		}
+
+	//ホールドエフェクト
+		SetDrawBlendMode DX_BLENDMODE_ADD,200
+		repeat 3
+			if HoldFlag(cnt)==TRUE {
+				DrawGraph 200+48/2-128/2,DispHeight/2-48/2-48+48/2-128/2+48*cnt,hdxarr_HoldCharge(HoldCount(cnt)\80),TRUE
+			}
+		loop
 
 	//爆発エフェクト
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
@@ -520,6 +566,7 @@
 		comboBurstCount++
 		repeat 3
 			LaneEffCount(cnt)++
+			HoldCount(cnt)++
 		loop
 
 	return

@@ -88,10 +88,23 @@
 #enum GAUGE_HARD
 #enum GAUGE_MADNESS
 
+//コンソール出力の文字スタイル
 #enum STYLE_NORMAL			=	0
 #enum STYLE_WARNING
 #enum STYLE_ERROR
 #enum STYLE_STATUS
 
+//サウンド登録の種類
 #enum TYPE_BGM				=	0
 #enum TYPE_SE
+
+//各ランクの基準
+#define RANK_SCORE_SSS	9900000
+#define RANK_SCORE_SS	9750000
+#define RANK_SCORE_S	9500000
+#define RANK_SCORE_AAA	9000000
+#define RANK_SCORE_AA	8500000
+#define RANK_SCORE_A	8000000
+#define RANK_SCORE_B	5000000
+#define RANK_SCORE_C	2500000
+#define RANK_SCORE_D	1000000

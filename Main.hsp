@@ -179,6 +179,9 @@ goto*Startup
 	dim hdxarr_HitBomb,10
 	LoadDivGraph"Data/Object/Hit/Bomb.png",10,5,2,192,192,varptr(hdxarr_HitBomb)
 
+	dim hdxarr_HoldCharge,80
+	LoadDivGraph"Data/Object/Hit/Charge.png",80,9,9,128,128,varptr(hdxarr_HoldCharge)
+
 	dim hdxarr_Gauge_Assist,100
 	dim hdxarr_Gauge_Normal,100
 	dim hdxarr_Gauge_Hard,100
