@@ -55,7 +55,6 @@
 
 //BASSƒTƒEƒ“ƒhID
 #enum sndStart			=	0
-#enum sndAssistTick
 #enum sndHitobj
 #enum sndHitempty
 #enum sndBurst
@@ -80,3 +79,11 @@
 #enum JUDGE_RES_EXCELLENT
 
 #enum DEBUG_AUTOPLAY		=	0
+
+#enum STYLE_NORMAL			=	0
+#enum STYLE_WARNING
+#enum STYLE_ERROR
+#enum STYLE_STATUS
+
+#enum TYPE_BGM				=	0
+#enum TYPE_SE

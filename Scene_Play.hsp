@@ -177,7 +177,7 @@
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,25
 			DrawGraph partfade_PosX(cnt),0,hdximg(iParticle_Fade_White),TRUE
 			partfade_PosX(cnt)-10
-			if partfade_PosX<-256 :partfade_Flag=FALSE
+			if partfade_PosX(cnt)<-256 :partfade_Flag(cnt)=FALSE
 		loop
 
 	//BPM
@@ -493,6 +493,7 @@
 
 	//BGM再生開始
 		if BGMPlayFlag==FALSE&PlayCountMS>chartBGMoffset {
+			AddDebugConsole STYLE_NORMAL,"BGMの再生を開始"
 			BASS_ChannelPlay hplaybgm
 			BGMPlayFlag=TRUE
 		}

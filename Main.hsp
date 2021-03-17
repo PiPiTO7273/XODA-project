@@ -7,6 +7,8 @@
 #include"a2dp.hsp"
 #include"mod_dxlibplus.hsp"
 #include"gm_crlf.hsp"
+#include"llmod3/llmod3.hsp"
+#include"llmod3/console.hsp"
 
 #epack"enctable.bin"
 
@@ -14,6 +16,7 @@
 
 #ifdef _debug
 	gsel 0,-1
+	console
 #endif
 
 goto*Startup
@@ -25,17 +28,26 @@ goto*Startup
 
 *Startup
 
+	sdim ConsoleLogBuf
+	AddDebugConsole STYLE_NORMAL,"Startup..."
+
 	//起動設定読み込み
 	exist"Data/Index.dat"
 	if strsize==-1 {
-		end
+		AddDebugConsole STYLE_ERROR,"起動設定ファイルが見つかりません。"
+		goto*StopError
 	} else {
 		sdim bootIndex,strsize
 		bload"Data/Index.dat",bootIndex
 		//シグネチャ
-		if peek(bootIndex,0)!'x' :end
-		if peek(bootIndex,1)!'0' :end
-		if peek(bootIndex,3)!'A' :end
+		dim SigErrFlag:SigErrFlag=FALSE
+		if peek(bootIndex,0)!'x' :SigErrFlag=TRUE
+		if peek(bootIndex,1)!'0' :SigErrFlag=TRUE
+		if peek(bootIndex,3)!'A' :SigErrFlag=TRUE
+		if SigErrFlag==TRUE {
+			AddDebugConsole STYLE_ERROR,"起動設定ファイルの暗号化キーに無効な値が指定されています。"
+			goto*StopError
+		}
 
 		//暗号化キー
 		dim EncKey
@@ -59,9 +71,18 @@ goto*Startup
 		BuildVersion(0)=peek(bootIndex,16)		//Major
 		BuildVersion(1)=peek(bootIndex,17)		//Minor
 		BuildVersion(2)=peek(bootIndex,18)		//Patch
+
+		//ログ出力
+		AddDebugConsole STYLE_STATUS,"DISPLAY.WIDTH = "+DispWidth
+		AddDebugConsole STYLE_STATUS,"DISPLAY.HEIGHT = "+DispHeight
+		AddDebugConsole STYLE_STATUS,"BUILD.VERSION = "+BuildVersion(0)+"."+BuildVersion(1)+"."+BuildVersion(2)
+		AddDebugConsole STYLE_STATUS,"SERVER.HOST = ****"
+		AddDebugConsole STYLE_STATUS,"SERVER.USERNAME = ****"
+		AddDebugConsole STYLE_STATUS,"SERVER.PASSWORD = ****"
 	}
 
 	//DXライブラリ初期化
+	AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化開始"
 	SetOutApplicationLogValidFlag 0
 	ChangeWindowMode TRUE
 	SetGraphMode DispWidth,DispHeight,32
@@ -70,28 +91,37 @@ goto*Startup
 	SetWaitVSyncFlag TRUE
 	dxlib_Init
 	if stat==-1 {
-		end
+		AddDebugConsole STYLE_ERROR,"DXライブラリの初期化に失敗しました。"
+		goto*StopError
+	} else {
+		AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化完了"
 	}
 
 	//BASS初期化
 	BASS_Init -1,44100,0,hwnd,0
+	if stat==0 {
+		AddDebugConsole STYLE_ERROR,"BASS Audio Libraryの初期化に失敗しました。"
+	} else {
+		AddDebugConsole STYLE_NORMAL,"BASS Audio Libraryの初期化完了"
+	}
 	dim hbasssnd:dim hsmpsnd
 	//開始音
 	hsmpsnd(sndStart)=BASS_SampleLoad(FALSE,"Data/Sound/Start.wav",0,0,0,16,0)
 	hbasssnd(sndStart)=BASS_SampleGetChannel(hsmpsnd(sndStart),FALSE)
-	//アシスト
-	hsmpsnd(sndAssistTick)=BASS_SampleLoad(FALSE,"Data/Sound/AssistTick.wav",0,0,0,16,0)
-	hbasssnd(sndAssistTick)=BASS_SampleGetChannel(hsmpsnd(sndAssistTick),FALSE)
+	RegAudioLib TYPE_SE,"Data/Sound/Start.wav"
 	//ヒット
 	hsmpsnd(sndHitobj)=BASS_SampleLoad(FALSE,"Data/Sound/Hit.wav",0,0,0,16,0)
 	hbasssnd(sndHitobj)=BASS_SampleGetChannel(hsmpsnd(sndHitobj),FALSE)
+	RegAudioLib TYPE_SE,"Data/Sound/Hit.wav"
 	//空打ち
 	hsmpsnd(sndHitempty)=BASS_SampleLoad(FALSE,"Data/Sound/Empty.wav",0,0,0,16,0)
 	hbasssnd(sndHitempty)=BASS_SampleGetChannel(hsmpsnd(sndHitempty),FALSE)
+	RegAudioLib TYPE_SE,"Data/Sound/Empty.wav"
 	//バースト
 	hsmpsnd(sndBurst)=BASS_SampleLoad(FALSE,"Data/Sound/Burst.wav",0,0,0,16,0)
 	hbasssnd(sndBurst)=BASS_SampleGetChannel(hsmpsnd(sndBurst),FALSE)
 	BASS_ChannelSetAttribute hbasssnd(sndBurst),BASS_ATTRIB_VOL,tofloat(0.8)
+	RegAudioLib TYPE_SE,"Data/Sound/Burst.wav"
 
 	//フォントデータ初期化
 	dim hdxfont
@@ -208,7 +238,20 @@ goto*Startup
 
 	goto*MainLoop
 
+*StopError
+	AddDebugConsole STYLE_ERROR,"処理を全て停止しました。"
+	AddDebugConsole STYLE_STATUS,"終了待機中"
+	dxlib_End
+	BASS_Free
+	dialog"エラーが発生したため、実行中の全ての処理を停止しました。",1,"XODA"
+	stop
+
 *Exit
 	dxlib_End
 	BASS_Free
+	AddDebugConsole STYLE_NORMAL,"全ての処理を正常に終了しました。"
+	AddDebugConsole STYLE_STATUS,"終了待機中"
+	#ifndef _debug
+	gosub*ExportLog
+	#endif
 	end

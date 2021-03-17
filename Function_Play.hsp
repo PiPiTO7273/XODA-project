@@ -22,6 +22,8 @@
 
 *LoadChart
 
+	AddDebugConsole STYLE_NORMAL,"譜面ファイルの読み込みを開始"
+
 	//譜面ファイルの読み込み
 	sdim chartPath
 	chartPath="Data/"+chartFileName+".dat"
@@ -36,6 +38,7 @@
 
 	//改行コードを判別
 	if id_crlf(chartBuf)!0 {
+		AddDebugConsole STYLE_WARNING,"非対応の改行コードを変換しました"
 		conv_crlf chartBuf,0
 	}
 
@@ -201,19 +204,25 @@
 	loop
 
 	//譜面ファイルのバージョンを照合
+	dim VerErrFlag:VerErrFlag=FALSE
 	if chartDefVersion(0)!BuildVersion(0) {		//メジャーバージョン
-		return -3
+		VerErrFlag=TRUE
 	}
 	if chartDefVersion(1)!BuildVersion(1) {		//マイナーバージョン
-		return -3
+		VerErrFlag=TRUE
 	}
 	if chartDefVersion(2)!BuildVersion(2) {		//パッチバージョン
-		return -3
+		VerErrFlag=TRUE
+	}
+	if VerErrFlag==TRUE {
+		AddDebugConsole STYLE_ERROR,"非対応のバージョンの譜面ファイルです。"
+		goto*StopError
 	}
 
 	if chartProgErr==TRUE {
 		//解析中のエラー
-		return -2
+		AddDebugConsole STYLE_ERROR,"譜面ファイルの解析に失敗しました。"
+		goto*StopError
 	}
 
 	//楽曲情報のバッファを生成
@@ -233,6 +242,7 @@
 	dim hplaybgm
 	hplaybgm=BASS_StreamCreateFile(FALSE,"Data/Package/"+chartResIndex+"/Audio.mp3",0,0,0,0,BASS_STREAM_AUTOFREE)
 	BASS_ChannelSetAttribute hplaybgm,BASS_ATTRIB_VOL,tofloat(0.5)
+	RegAudioLib TYPE_BGM,"Data/Package/"+chartResIndex+"/Audio.mp3"
 
 	//ムービー読み込み
 	if hdximg(iPlay_bg_Movie)!0 :DeleteGraph hdximg(iPlay_bg_Movie)
@@ -287,9 +297,17 @@
 	hitScore(JUDGE_RES_MISS)=0
 	bonusScore=10000000\hitobjMax
 
+	AddDebugConsole STYLE_NORMAL,"譜面ファイルの読み込み完了"
+	AddDebugConsole STYLE_STATUS,"TITLE = "+chartTitle
+	AddDebugConsole STYLE_STATUS,"ARTIST = "+chartArtist
+	AddDebugConsole STYLE_STATUS,"DEFAULT.BPM = "+chartDefBPM
+	AddDebugConsole STYLE_STATUS,"OBJECT = "+hitobjMax
+
 	return 0
 
 *Scene_Init_Play
+
+	AddDebugConsole STYLE_NORMAL,"プレイ画面の初期化開始"
 
 	//ゲージの種類
 	dim GaugeType
@@ -381,6 +399,8 @@
 	//デバッグキー
 	dim DebugKeyFlag,12
 	dim DebugbfKeyFlag,12
+
+	AddDebugConsole STYLE_NORMAL,"プレイ画面の初期化完了"
 	return
 
 *SetComboBurst

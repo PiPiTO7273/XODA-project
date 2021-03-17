@@ -11,6 +11,11 @@
 	prm=varptr(fret)
 	res=callfunc(prm,varptr(code),1)
 	return fret
+
+	#defcfunc ConvUTF8toANSI str _p
+		sdim tmpstr
+		cnvstoa tmpstr,_p
+		return tmpstr
 #global
 
 #defcfunc ConvKeyIDtoLaneID int _id
@@ -63,6 +68,80 @@
 
 	JudgeRes=_id
 	JudgeResCount=0
+
+	return
+
+#defcfunc GetJudgeName int _id
+	switch _id
+		case JUDGE_RES_MISS:return"MISS":swbreak
+		case JUDGE_RES_BAD:return"BAD":swbreak
+		case JUDGE_RES_NICE:return"NICE":swbreak
+		case JUDGE_RES_GREAT:return"GREAT":swbreak
+		case JUDGE_RES_EXCELLENT:return"EXCELLENT":swbreak
+	swend
+	return"EMPTY"
+
+#defcfunc GetNumJudge int _id
+	switch _id
+		case JUDGE_RES_MISS:return numMiss:swbreak
+		case JUDGE_RES_BAD:return numBad:swbreak
+		case JUDGE_RES_NICE:return numNice:swbreak
+		case JUDGE_RES_GREAT:return numGreat:swbreak
+		case JUDGE_RES_EXCELLENT:return numExcellent:swbreak
+	swend
+	return
+
+#deffunc AddDebugConsole int _style,str _msg
+	sdim tmpstr
+	if _style!STYLE_STATUS {
+		tmpstr+strf("[%04d-%02d-%02d %02d:%02d:%02d.%03d], ",gettime(0),gettime(1),gettime(3),gettime(4),gettime(5),gettime(6),gettime(7))
+	}
+	switch _style
+		case STYLE_NORMAL
+			console_color 1+2+4
+			tmpstr+"[INFO],    - "
+		swbreak
+		case STYLE_WARNING
+			console_color 2+4
+			tmpstr+"[WARNING], - "
+		swbreak
+		case STYLE_ERROR
+			console_color 4
+			tmpstr+"[ERROR],   - "
+		swbreak
+		case STYLE_STATUS
+			console_color 8
+			tmpstr+" - "
+		swbreak
+	swend
+	tmpstr+ConvUTF8toANSI(_msg)+"\n"
+
+	//デバッグモード時のみコンソールの出力を行う
+	#ifdef _debug
+	puts tmpstr
+	#endif
+	ConsoleLogBuf+tmpstr
+	return
+
+#defcfunc RepHiddenWords str _p,str _hiddenstr
+	sdim tmpstr
+	repeat strlen(_p)
+		tmpstr+_hiddenstr
+	loop
+	return tmpstr
+
+#deffunc RegAudioLib int _type,str _filename
+	if _type==TYPE_BGM :AddDebugConsole TYPE_NORMAL,"[BGM] \""+_filename+"\" の読み込み完了"
+	if _type==TYPE_SE :AddDebugConsole TYPE_NORMAL,"[SE] \""+_filename+"\" の読み込み完了"
+	return
+
+#defcfunc LoadGraph str _filename
+	AddDebugConsole TYPE_NORMAL,"[IMG] \""+_filename+"\" の読み込み完了"
+	return LoadGraph_org(_filename)
+
+*ExportLog
+	notesel ConsoleLogBuf
+	notesave"Log.txt"
 	return
 
 *InitScene
@@ -78,6 +157,8 @@
 	dim EaseAlpha
 
 	randomize
+
+	AddDebugConsole STYLE_NORMAL,"シーンの初期化完了"
 
 	return
 
@@ -95,4 +176,9 @@
 	if hdximg(iUI_tx_Profile)!0 :DeleteGraph hdximg(iUI_tx_Profile)
 	hdximg(iUI_tx_Profile)=MakeScreen(300,120,TRUE)
 	alCopyImageToDXBuf i2D_Profile,hdximg(iUI_tx_Profile)
+
+	AddDebugConsole STYLE_NORMAL,"アカウント情報が更新されました。"
+	AddDebugConsole STYLE_STATUS,"NAME = "+aqName
+	AddDebugConsole STYLE_STATUS,"RATE = "+aqRate
+	AddDebugConsole STYLE_STATUS,"BADGE = "+aqBadge
 	return
