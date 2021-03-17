@@ -139,6 +139,9 @@
 	AddDebugConsole TYPE_NORMAL,"[IMG] \""+_filename+"\" ÇÃì«Ç›çûÇ›äÆóπ"
 	return LoadGraph_org(_filename)
 
+#defcfunc ConvBooltoStr int _val
+	if _val==TRUE :return"TRUE":else:return"FALSE"
+
 *ExportLog
 	notesel ConsoleLogBuf
 	notesave"Log.txt"

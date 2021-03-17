@@ -20,6 +20,7 @@
 				switch cnt
 					case DEBUG_AUTOPLAY
 						AutoPlayFlag^1
+						AddDebugConsole STYLE_NORMAL,"AUTOPLAYÇ["+ConvBooltoStr(AutoPlayFlag)+"]Ç…ïœçX"
 					swbreak
 				swend
 			}

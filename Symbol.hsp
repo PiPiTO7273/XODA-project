@@ -87,7 +87,6 @@
 #enum GAUGE_NORMAL
 #enum GAUGE_HARD
 #enum GAUGE_MADNESS
-#enum DEBUG_AUTOPLAY		=	0
 
 #enum STYLE_NORMAL			=	0
 #enum STYLE_WARNING
