@@ -96,21 +96,22 @@
 	if _style!STYLE_STATUS {
 		tmpstr+strf("[%04d-%02d-%02d %02d:%02d:%02d.%03d], ",gettime(0),gettime(1),gettime(3),gettime(4),gettime(5),gettime(6),gettime(7))
 	}
+	dim tmpcolorcode
 	switch _style
 		case STYLE_NORMAL
-			console_color 1+2+4
+			tmpcolorcode=1+2+4
 			tmpstr+"[INFO],    - "
 		swbreak
 		case STYLE_WARNING
-			console_color 2+4
+			tmpcolorcode=2+4
 			tmpstr+"[WARNING], - "
 		swbreak
 		case STYLE_ERROR
-			console_color 4
+			tmpcolorcode=4
 			tmpstr+"[ERROR],   - "
 		swbreak
 		case STYLE_STATUS
-			console_color 8
+			tmpcolorcode=8
 			tmpstr+" - "
 		swbreak
 	swend
@@ -118,6 +119,7 @@
 
 	//デバッグモード時のみコンソールの出力を行う
 	#ifdef _debug
+	console_color tmpcolorcode
 	puts tmpstr
 	#endif
 	ConsoleLogBuf+tmpstr
