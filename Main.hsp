@@ -6,6 +6,8 @@
 #include"mod_dxlibplus.hsp"
 #include"gm_crlf.hsp"
 
+#epack"enctable.bin"
+
 #packopt hide 1
 
 #ifdef _debug
@@ -59,7 +61,7 @@ goto*Startup
 
 	//DXƒ‰ƒCƒuƒ‰ƒŠ‰Šú‰»
 	SetOutApplicationLogValidFlag 0
-	ChangeWindowMode FALSE
+	ChangeWindowMode TRUE
 	SetGraphMode DispWidth,DispHeight,32
 	SetAlwaysRunFlag TRUE
 	SetMainWindowText"XODA v"+BuildVersion(0)+"."+BuildVersion(1)+"."+BuildVersion(2)
@@ -172,6 +174,7 @@ goto*Startup
 	gosub*InitScene
 	gosub*Scene_Init_Play
 	gosub*LoadChart
+
 
 *MainLoop
 

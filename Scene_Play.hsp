@@ -12,20 +12,28 @@
 		if CheckHitKey(KEY_INPUT_J)==TRUE :KeyFlag(2)=TRUE
 		if CheckHitKey(KEY_INPUT_K)==TRUE :KeyFlag(3)=TRUE
 
+		dim DebugKeyFlag,12
+		repeat 12
+			DebugKeyFlag(cnt)=CheckHitKey(KEY_INPUT_F1+cnt)
+			if DebugbfKeyFlag(cnt)==FALSE&DebugKeyFlag(cnt)==TRUE {
+				switch cnt
+					case DEBUG_AUTOPLAY
+						AutoPlayFlag^1
+					swbreak
+				swend
+			}
+			DebugbfKeyFlag(cnt)=DebugKeyFlag(cnt)
+		loop
+
 	//判定開始フラグ
 		repeat 4
-			if bfKeyFlag(cnt)==FALSE&KeyFlag(cnt)==TRUE {
-				if cnt==0 :JudgeFlag(0)=TRUE
-				if cnt==1 :JudgeFlag(1)=TRUE
-				if cnt==2 :JudgeFlag(1)=TRUE
-				if cnt==3 :JudgeFlag(2)=TRUE
-			}
+			//押し始め
+			if bfKeyFlag(cnt)==FALSE&KeyFlag(cnt)==TRUE :JudgeFlag(ConvKeyIDtoLaneID(cnt))=TRUE
+			//離した
+			if HoldFlag(ConvKeyIDtoLaneID(cnt))==TRUE&bfKeyFlag(cnt)==TRUE&KeyFlag(cnt)==FALSE :JudgeFlag(ConvKeyIDtoLaneID(cnt))=TRUE
 
 			if KeyFlag(cnt)==TRUE {
-				if cnt==0 :LaneEffCount(0)=0
-				if cnt==1 :LaneEffCount(1)=0
-				if cnt==2 :LaneEffCount(1)=0
-				if cnt==3 :LaneEffCount(2)=0
+				LaneEffCount(ConvKeyIDtoLaneID(cnt))=0
 			}
 			bfKeyFlag(cnt)=KeyFlag(cnt)
 		loop
@@ -39,62 +47,64 @@
 				dim NearNoteDif:dim NearNoteID:dim curNoteDif
 				NearNoteDif=JUDGE_WIDTH_MISS
 				NearNoteID=-1
-				repeat hitobjMax
-					if hitJudgeFlag(cnt)==TRUE :continue
-					if hitobjLaneID(cnt)!ProgLaneID :continue
-					curNoteDif=PlayCountMS-hitobjTiming(cnt)
-					if abs(curNoteDif)<abs(NearNoteDif) {
-						NearNoteDif=curNoteDif
-						NearNoteID=cnt
-					}
-				loop
+				if HoldFlag(ProgLaneID)==FALSE {
+					repeat hitobjMax
+						if hitJudgeFlag(cnt)==TRUE :continue
+						if hitobjLaneID(cnt)!ProgLaneID :continue
+						curNoteDif=PlayCountMS-hitobjTiming(cnt)
+						if abs(curNoteDif)<abs(NearNoteDif) {
+							NearNoteDif=curNoteDif
+							NearNoteID=cnt
+						}
+					loop
+				} else {
+					NearNoteID=HoldNoteID(ProgLaneID)+1
+					NearNoteDif=PlayCountMS-hitobjTiming(HoldNoteID(ProgLaneID)+1)
+				}
 
 				dim JudgeRes
 				JudgeRes=JUDGE_RES_EMPTY
-				if NearNoteID!-1 {
-					hitJudgeFlag(NearNoteID)=TRUE
-					JudgeResCount=0
 
+				if HoldFlag(ProgLaneID)==TRUE|NearNoteID!-1 {
 					//判定別
-					if abs(NearNoteDif)<JUDGE_WIDTH_MISS :JudgeRes=JUDGE_RES_MISS
-					if abs(NearNoteDif)<JUDGE_WIDTH_BAD :JudgeRes=JUDGE_RES_BAD
-					if abs(NearNoteDif)<JUDGE_WIDTH_NICE :JudgeRes=JUDGE_RES_NICE
-					if abs(NearNoteDif)<JUDGE_WIDTH_GREAT :JudgeRes=JUDGE_RES_GREAT
-					if abs(NearNoteDif)<JUDGE_WIDTH_EXCELLENT :JudgeRes=JUDGE_RES_EXCELLENT
+						if abs(NearNoteDif)<JUDGE_WIDTH_MISS :JudgeRes=JUDGE_RES_MISS
+						if abs(NearNoteDif)<JUDGE_WIDTH_BAD :JudgeRes=JUDGE_RES_BAD
+						if abs(NearNoteDif)<JUDGE_WIDTH_NICE :JudgeRes=JUDGE_RES_NICE
+						if abs(NearNoteDif)<JUDGE_WIDTH_GREAT :JudgeRes=JUDGE_RES_GREAT
+						if abs(NearNoteDif)<JUDGE_WIDTH_EXCELLENT :JudgeRes=JUDGE_RES_EXCELLENT
 
-					switch JudgeRes
-						case JUDGE_RES_EXCELLENT:numExcellent++:swbreak
-						case JUDGE_RES_GREAT:numGreat++:swbreak
-						case JUDGE_RES_NICE:numNice++:swbreak
-						case JUDGE_RES_BAD:numBad++:swbreak
-						case JUDGE_RES_MISS:numMiss++:swbreak
-					swend
+						UpdateJudgeValue JudgeRes
 
-					//ゲージ加算
-					curGaugeVal+gaugeAmount(JudgeRes)
-					if curGaugeVal>100.0 :curGaugeVal=100.0
-					if curGaugeVal<0.0 :curGaugeVal=0.0
-
-					//コンボ加算
-					if JudgeRes==JUDGE_RES_EXCELLENT|JudgeRes==JUDGE_RES_GREAT|JudgeRes==JUDGE_RES_NICE {
-						curCombo++
-						gosub*SetComboBurst
-					} else {
-						curCombo=0
-					}
+					//ホールド判定
+						if hitobjType(NearNoteID)==HITOBJ_HOLDSTART {
+							if JudgeRes==JUDGE_RES_MISS {
+								hitJudgeFlag(NearNoteID+1)=TRUE
+								curGaugeVal+gaugeAmount(JudgeRes)
+								numMiss++
+							} else {
+								HoldFlag(hitobjLaneID(NearNoteID))=TRUE
+								HoldNoteID(hitobjLaneID(NearNoteID))=NearNoteID
+							}
+						}
+						if hitobjType(NearNoteID)==HITOBJ_HOLDEND :HoldFlag(hitobjLaneID(NearNoteID))=FALSE
 
 					//爆発エフェクト
-					BombFlag(hitobjLaneID(NearNoteID))=TRUE
-					BombCount(hitobjLaneID(NearNoteID))=0
+						BombFlag(hitobjLaneID(NearNoteID))=TRUE
+						BombCount(hitobjLaneID(NearNoteID))=0
+
+					//フラグ処理
+						hitJudgeFlag(NearNoteID)=TRUE
+						JudgeResCount=0
 				}
+
 				//SE
-				if JudgeRes==JUDGE_RES_EMPTY {
-					BASS_ChannelSetPosition hbasssnd(sndHitempty),0,0,0
-					BASS_ChannelPlay hbasssnd(sndHitempty)
-				} else {
-					BASS_ChannelSetPosition hbasssnd(sndHitobj),0,0,0
-					BASS_ChannelPlay hbasssnd(sndHitobj)
-				}
+					if JudgeRes==JUDGE_RES_EMPTY {
+						BASS_ChannelSetPosition hbasssnd(sndHitempty),0,0,0
+						BASS_ChannelPlay hbasssnd(sndHitempty)
+					} else {
+						BASS_ChannelSetPosition hbasssnd(sndHitobj),0,0,0
+						BASS_ChannelPlay hbasssnd(sndHitobj)
+					}
 			}
 		loop
 
@@ -228,8 +238,11 @@
 			setease 0,256,ease_cubic_out
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-20,20)
 
+			setease ScoreEaseA,ScoreEaseB,ease_linear
+			ScoreEaseVal=getease(JudgeResCount,30)
+
 			setease -16,0,ease_cubic_out
-			DrawStringToHandle 1100,16+getease(SceneCount-20,20),strf("%08d",curScore),GetColor(240,240,240),hdxfont(fCurScore)
+			DrawStringToHandle 1100,16+getease(SceneCount-20,20),strf("%08d",ScoreEaseVal),GetColor(240,240,240),hdxfont(fCurScore)
 		}
 		if SceneCount>100 {
 			setease 1116+32,1116,ease_cubic_out
@@ -320,29 +333,23 @@
 				//オートプレイ
 				if AutoPlayFlag==TRUE {
 					if PlayCountMS-hitobjTiming(cnt)>0 {
-						curCombo++
-						curGaugeVal+gaugeAmount(JUDGE_RES_EXCELLENT)
-						if curGaugeVal>100.0 :curGaugeVal=100.0
-						gosub*SetComboBurst
+						UpdateJudgeValue JUDGE_RES_EXCELLENT
 						hitJudgeFlag(cnt)=TRUE
-						JudgeRes=JUDGE_RES_EXCELLENT
-						JudgeResCount=0
 						LaneEffCount(hitobjLaneID(cnt))=0
 						BombFlag(hitobjLaneID(cnt))=TRUE
 						BombCount(hitobjLaneID(cnt))=0
 						BASS_ChannelSetPosition hbasssnd(sndHitobj),0,0,0
 						BASS_ChannelPlay hbasssnd(sndHitobj)
-						numExcellent++
 					}
 				}
 			//見逃し判定
 				if PlayCountMS-hitobjTiming(cnt)>JUDGE_WIDTH_MISS {
-					JudgeRes=JUDGE_RES_MISS
+					UpdateJudgeValue JUDGE_RES_MISS
 					hitJudgeFlag(cnt)=TRUE
-					curCombo=0
-					curGaugeVal+gaugeAmount(JUDGE_RES_MISS)
-					if curGaugeVal<0.0 :curGaugeVal=0.0
-					numMiss++
+					if hitobjType(cnt)==HITOBJ_HOLDSTART {
+						hitJudgeFlag(cnt+1)=TRUE
+						UpdateJudgeValue JUDGE_RES_MISS
+					}
 				}
 		loop
 

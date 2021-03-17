@@ -276,6 +276,17 @@
 		tmpobjPosition=hitobjPosition(cnt)
 	loop
 
+	//スコア関連の初期化
+	dim hitScore,6
+	dim bonusScore
+	hitScore(JUDGE_RES_EMPTY)=0
+	hitScore(JUDGE_RES_EXCELLENT)=10000000/hitobjMax
+	hitScore(JUDGE_RES_GREAT)=hitScore(JUDGE_RES_EXCELLENT)/2
+	hitScore(JUDGE_RES_NICE)=hitScore(JUDGE_RES_EXCELLENT)/4
+	hitScore(JUDGE_RES_BAD)=hitScore(JUDGE_RES_EXCELLENT)/8
+	hitScore(JUDGE_RES_MISS)=0
+	bonusScore=10000000\hitobjMax
+
 	return 0
 
 *Scene_Init_Play
@@ -334,6 +345,8 @@
 	dim KeyFlag,4
 	dim bfKeyFlag,4
 	dim LaneEffCount,3
+	dim HoldFlag,3
+	dim HoldNoteID,3
 
 	//コンボ
 	dim curCombo
@@ -351,12 +364,23 @@
 
 	//デバッグ
 	dim AutoPlayFlag
-	AutoPlayFlag=false
+	AutoPlayFlag=true
 
 	//コンボバースト
 	dim hcbDraw
 	dim comboBurstCount
 	hcbDraw=-1
+
+	//現在のスコア
+	dim curScore
+	dim hitCount
+	dim ScoreEaseA
+	dim ScoreEaseB
+	dim ScoreEaseVal
+
+	//デバッグキー
+	dim DebugKeyFlag,12
+	dim DebugbfKeyFlag,12
 	return
 
 *SetComboBurst
