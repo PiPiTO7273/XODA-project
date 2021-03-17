@@ -30,6 +30,9 @@
 #enum iParticle_bg_0
 #enum iParticle_bg_1
 #enum iParticle_bg_2
+#enum iParticle_bg_3
+#enum iParticle_bg_4
+#enum iParticle_bg_5
 #enum iPlay_bg_Default
 #enum iPlay_bg_Movie
 #enum iPlay_bg_Grid

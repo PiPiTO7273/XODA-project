@@ -18,6 +18,79 @@
 	hitobjBPM(_id)=0.0
 	return
 
+#defcfunc ConvKeyIDtoLaneID int _id
+	if _id==0 :return 0
+	if _id==1 :return 1
+	if _id==2 :return 1
+	if _id==3 :return 2
+	return
+
+#deffunc UpdateJudgeValue int _id
+	switch _id
+		case JUDGE_RES_EMPTY:return:swbreak
+		case JUDGE_RES_MISS
+			numMiss++
+			curCombo=0
+		swbreak
+		case JUDGE_RES_BAD
+			numBad++
+			curCombo=0
+		swbreak
+		case JUDGE_RES_NICE
+			numNice++
+			curCombo++
+		swbreak
+		case JUDGE_RES_GREAT
+			numGreat++
+			curCombo++
+		swbreak
+		case JUDGE_RES_EXCELLENT
+			numExcellent++
+			curCombo++
+		swbreak
+	swend
+
+	gosub*SetComboBurst
+
+	if curMaxCombo<curCombo :curMaxCombo=curCombo
+
+	//ゲージ加算
+		curGaugeVal+gaugeAmount(_id)
+		if curGaugeVal>100.0 :curGaugeVal=100.0
+		if curGaugeVal<0.0 :curGaugeVal=0.0
+
+	//スコア加算
+		ScoreEaseA=curScore
+		curScore+hitScore(_id)
+		if hitCount==0 :curScore+bonusScore
+		hitCount++
+		ScoreEaseB=curScore
+
+	JudgeRes=_id
+	JudgeResCount=0
+
+	return
+
+#defcfunc GetJudgeName int _id
+	switch _id
+		case JUDGE_RES_MISS:return"MISS":swbreak
+		case JUDGE_RES_BAD:return"BAD":swbreak
+		case JUDGE_RES_NICE:return"NICE":swbreak
+		case JUDGE_RES_GREAT:return"GREAT":swbreak
+		case JUDGE_RES_EXCELLENT:return"EXCELLENT":swbreak
+	swend
+	return"EMPTY"
+
+#defcfunc GetNumJudge int _id
+	switch _id
+		case JUDGE_RES_MISS:return numMiss:swbreak
+		case JUDGE_RES_BAD:return numBad:swbreak
+		case JUDGE_RES_NICE:return numNice:swbreak
+		case JUDGE_RES_GREAT:return numGreat:swbreak
+		case JUDGE_RES_EXCELLENT:return numExcellent:swbreak
+	swend
+	return
+
 
 	return
 
@@ -67,6 +140,7 @@
 	dim chartMOVIEwidth		//ムービーの横幅
 	dim chartMOVIEheight	//ムービーの高さ
 	dim chartMOVIEalpha		//ムービーの不透明度
+	sdim chartBackground	//背景
 	sdim chartResIndex		//リソースの識別子
 	sdim chartDifficulty	//難易度（区分）
 	dim chartLevel			//難易度（数値）
@@ -141,6 +215,9 @@
 					chartMOVIEwidth=int(chartDivPrm(2))
 					chartMOVIEheight=int(chartDivPrm(3))
 					chartMOVIEalpha=int(chartDivPrm(4))
+				swbreak
+				case"#BACKGROUND"	//背景の種類
+					chartBackground=chartCmdPrm
 				swbreak
 				case"#INDEX"		//リソースの識別子
 					chartResIndex=chartCmdPrm

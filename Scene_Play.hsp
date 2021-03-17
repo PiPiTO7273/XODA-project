@@ -81,8 +81,7 @@
 						if hitobjType(NearNoteID)==HITOBJ_HOLDSTART {
 							if JudgeRes==JUDGE_RES_MISS {
 								hitJudgeFlag(NearNoteID+1)=TRUE
-								curGaugeVal+gaugeAmount(JudgeRes)
-								numMiss++
+								UpdateJudgeValue JUDGE_RES_MISS
 							} else {
 								HoldFlag(hitobjLaneID(NearNoteID))=TRUE
 								HoldNoteID(hitobjLaneID(NearNoteID))=NearNoteID
@@ -126,9 +125,19 @@
 		DrawGraph 0,0,hdximg(iPlay_bg_Grid),TRUE
 
 	//パーティクル
-		DrawParticle 150,hdximg(iParticle_bg_0),256,32,30,80,35
-		DrawParticle 50,hdximg(iParticle_bg_1),128,20,50,200,20
-		DrawParticle 75,hdximg(iParticle_bg_2),225,40,40,140,18
+	switch getpath(chartBackground,16)
+		case"town"
+			DrawParticle 150,hdximg(iParticle_bg_0),256,32,30,80,35
+			DrawParticle 50,hdximg(iParticle_bg_1),128,20,50,200,20
+			DrawParticle 75,hdximg(iParticle_bg_2),225,40,40,140,18
+		swbreak
+		case"cyber"
+			DrawParticle 200,hdximg(iParticle_bg_5),50,20,128,70,25
+			DrawParticle 100,hdximg(iParticle_bg_5),50,20,64,210,15
+			DrawParticle 256,hdximg(iParticle_bg_4),64,100,64,100,20
+			DrawParticle 256,hdximg(iParticle_bg_3),64,100,64*4,100,18
+		swbreak
+	swend
 
 	//ムービー処理
 		if bgMovieFlag==TRUE {

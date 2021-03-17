@@ -150,6 +150,9 @@ goto*Startup
 	hdximg(iParticle_bg_0)=LoadGraph("Data/Object/Background/0.png")
 	hdximg(iParticle_bg_1)=LoadGraph("Data/Object/Background/1.png")
 	hdximg(iParticle_bg_2)=LoadGraph("Data/Object/Background/2.png")
+	hdximg(iParticle_bg_3)=LoadGraph("Data/Object/Background/3.png")
+	hdximg(iParticle_bg_4)=LoadGraph("Data/Object/Background/4.png")
+	hdximg(iParticle_bg_5)=LoadGraph("Data/Object/Background/5.png")
 
 	hdximg(iPlay_bg_Default)=LoadGraph("Data/Image/bg_Default.png")
 	hdximg(iPlay_bg_Grid)=LoadGraph("Data/Object/Background/Grid.png")
