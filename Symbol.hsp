@@ -89,6 +89,7 @@
 #enum STYLE_WARNING
 #enum STYLE_ERROR
 #enum STYLE_STATUS
+#enum STYLE_COMMENT
 
 //ƒTƒEƒ“ƒh“o˜^‚ÌŽí—Þ
 #enum TYPE_BGM				=	0

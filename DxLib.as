@@ -28,7 +28,7 @@
 #define __DXLIB__
 // 定義ファイルのバージョン（=作成時のDxLibのバージョン+連番4桁数字）
 #define DEFINE_DXLIB_VERSION "3.14f0000"
-#uselib "Data/Plugins/xoda_Draw.bin"
+#uselib "Data/Plugins/core_Draw.bin"
 #func global SetActiveStateChangeCallBackFunction "dx_SetActiveStateChangeCallBackFunction" sptr,sptr
 #func global SetUseASyncChangeWindowModeFunction "dx_SetUseASyncChangeWindowModeFunction" int,sptr,
 #func global SetMenuItemSelectCallBackFunction "dx_SetMenuItemSelectCallBackFunction" sptr

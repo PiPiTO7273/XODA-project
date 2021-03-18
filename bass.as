@@ -1,7 +1,7 @@
 
 #ifndef __BASS__
 #define __BASS__
-#uselib "Data/Plugins/xoda_Audio.bin"
+#uselib "Data/Plugins/core_Audio.bin"
 
 	#cfunc BASS_GetVersion "BASS_GetVersion"
 	#func  BASS_Init "BASS_Init" int, int, int ,int, int

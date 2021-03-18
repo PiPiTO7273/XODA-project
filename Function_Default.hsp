@@ -13,14 +13,14 @@
 	return fret
 
 	#defcfunc ConvUTF8toANSI str _p
-		sdim tmpstr
+		sdim tmpstr,512
 		cnvstoa tmpstr,_p
 		return tmpstr
 #global
 
 #deffunc AddDebugConsole int _style,str _msg
 	sdim tmpstr
-	if _style!STYLE_STATUS {
+	if _style!STYLE_STATUS&_style!STYLE_COMMENT {
 		tmpstr+strf("[%04d-%02d-%02d %02d:%02d:%02d.%03d], ",gettime(0),gettime(1),gettime(3),gettime(4),gettime(5),gettime(6),gettime(7))
 	}
 	dim tmpcolorcode
@@ -40,6 +40,9 @@
 		case STYLE_STATUS
 			tmpcolorcode=8
 			tmpstr+" - "
+		swbreak
+		case STYLE_COMMENT
+			tmpcolorcode=1+2
 		swbreak
 	swend
 	tmpstr+ConvUTF8toANSI(_msg)+"\n"
@@ -75,6 +78,133 @@
 
 #defcfunc ConvBooltoStr int _val
 	if _val==TRUE :return"TRUE":else:return"FALSE"
+
+//初期化処理
+#deffunc ExScript_Init str _path,str _symbol
+
+	AddDebugConsole STYLE_NORMAL,"[EXD] \""+_path+"\" 読み込みを開始"
+
+	dim exdBGhwnd		//背景のハンドル
+	dim exdImgHwnd		//イメージのハンドル格納
+	dim exdImgMax		//イメージの最大数
+	dim exdFuncHWND		//画像ハンドル
+	dim exdFuncAlpha		//不透明度
+	dim exdFuncWidth		//横幅
+	dim exdFuncHeight		//高さ
+	dim exdFuncMargin		//間隔
+	dim exdFuncPosY		//位置(y)
+	dim exdFuncSpeed		//速度
+	dim exdFuncMax		//描画する回数
+	dim exdVisColor,3	//ビジュアライザーの色
+
+	//ファイル読み込み
+	exist _path
+	if strsize==-1 {
+		AddDebugConsole STYLE_ERROR,"外部のスクリプトファイルが見つかりませんでした。"
+		goto*StopError
+	}
+	dim exdBufSize
+	exdBufSize=strsize
+	sdim exdBuf,exdBufSize
+	bload _path,exdBuf
+
+	AddDebugConsole STYLE_NORMAL,"RC4エンコード開始"
+	sdim RC4keydata,256
+	RC4keydata=EncKey_BackgroundObj
+	rc4encode exdBuf,RC4keydata,exdBufSize
+	AddDebugConsole STYLE_NORMAL,"RC4エンコード完了"
+	AddDebugConsole STYLE_STATUS,"KEY.LENGTH = "+int(strlen(RC4keydata)*8)+"bit"
+
+	notesel exdBuf
+
+	strrep exdBuf,"\t",""	//タブ除去
+
+	sdim NoteLine
+	sdim FuncName:sdim FuncPrm:sdim FuncDivPrm
+	sdim CurSymbol
+	repeat notemax
+		noteget NoteLine,cnt
+
+		//セクション開始
+		if strmid(NoteLine,-1,1)=="{" {
+			strrep NoteLine,"{",""
+			strrep NoteLine," ",""
+			CurSymbol=NoteLine
+			continue
+		}
+		//セクション終了
+		if NoteLine=="}" {
+			CurSymbol=""
+			continue
+		}
+
+		//コマンド行
+		if getpath(CurSymbol,16)==getpath(_symbol,16) {
+			split NoteLine," ",FuncName,FuncPrm
+			split FuncPrm,",",FuncDivPrm
+
+			switch FuncName
+				//背景を登録
+				case"RegBackground"
+					exdBGhwnd=LoadGraph("Data/Object/Background/"+FuncPrm)
+				swbreak
+				//画像ファイルを新規登録
+				case"RegImage"
+					if exdImgMax!int(FuncDivPrm(0)) {
+						AddDebugConsole STYLE_WARNING,"[EXD] 画像ファイルの登録順が変更されました。"
+						AddDebugConsole STYLE_STATUS,"ID["+int(FuncDivPrm(0))+"] > ID["+exdImgMax+"]"
+					}
+					exdImgHwnd(exdImgMax)=LoadGraph("Data/Object/Background/"+FuncDivPrm(1))
+					if exdImgHwnd(exdImgMax)==0 {
+						AddDebugConsole STYLE_WARNING,"[EXD] 読み込みエラー \"Data/Object/Background/"+FuncDivPrm(1)+"\""
+					}
+					exdImgMax++
+				swbreak
+				//オブジェクトを描画
+				case"DrawObject"
+					exdFuncHWND(exdFuncMax)=exdImgHwnd(int(FuncDivPrm(0)))
+					exdFuncAlpha(exdFuncMax)=int(FuncDivPrm(1))
+					exdFuncWidth(exdFuncMax)=int(FuncDivPrm(2))
+					exdFuncHeight(exdFuncMax)=int(FuncDivPrm(3))
+					exdFuncMargin(exdFuncMax)=int(FuncDivPrm(4))
+					exdFuncPosY(exdFuncMax)=int(FuncDivPrm(5))
+					exdFuncSpeed(exdFuncMax)=int(FuncDivPrm(6))
+					exdFuncMax++
+				swbreak
+				//ビジュアライザーの色を指定
+				case"SetVisualizerColor"
+					if getpath(FuncPrm,16)=="all" {
+						//虹色
+						exdVisColor=-1,-1,-1
+					} else {
+						//単色
+						exdVisColor=int(FuncDivPrm(0)),int(FuncDivPrm(1)),int(FuncDivPrm(2))
+					}
+				swbreak
+
+				//例外
+				default
+					AddDebugConsole STYLE_WARNING,"[EXD] 無効なパラメータが指定されました。 \""+FuncName+"\""
+				swbreak
+			swend
+		}
+	loop
+
+	AddDebugConsole STYLE_NORMAL,"[EXD] \""+_path+"\" 読み込みを完了"
+
+	return
+
+//終了処理
+//（！）メモリリークが起きる可能性があるので、処理が完了した後に必ず呼び出すこと
+#deffunc ExScript_Free
+
+	AddDebugConsole STYLE_NORMAL,"[EXD] バッファの解放完了"
+	DeleteGraph exdBGhwnd
+	repeat exdImgMax
+		DeleteGraph exdImgHwnd(cnt)
+	loop
+
+	return
 
 *ExportLog
 	notesel ConsoleLogBuf

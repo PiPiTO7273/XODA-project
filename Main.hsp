@@ -1,10 +1,18 @@
 
-//XODA-Project
+//  __   __  _______  ______   _______             _______  ______   _______      ___  _______  _______  _______
+// |  |_|  ||       ||      | |   _   |           |       ||    _ | |       |    |   ||       ||       ||       |
+// |       ||   _   ||  _    ||  |_|  |   ____    |    _  ||   | || |   _   |    |   ||    ___||       ||_     _|
+// |       ||  | |  || | |   ||       |  |____|   |   |_| ||   |_|| |  | |  |    |   ||   |___ |       |  |   |
+//  |     | |  |_|  || |_|   ||       |           |    ___||    __ ||  |_|  |    |   ||    ___||      _|  |   |
+// |   _   ||       ||       ||   _   |           |   |    |   |  |||       |   |    ||   |___ |     |_   |   |
+// |__| |__||_______||______| |__| |__|           |___|    |___|  |||_______|   |____||_______||_______|  |___|
+
 
 #include"hsp3utf.as"
 #include"DxLib.as"
 #include"bass.as"
 #include"a2dp.hsp"
+#include"hspinet.as"
 #include"mod_dxlibplus.hsp"
 #include"gm_crlf.hsp"
 #include"llmod3/llmod3.hsp"
@@ -26,64 +34,115 @@
 goto*Startup
 
 #include"Symbol.hsp"
+#include"RC4key.hsp"
 #include"Function_Default.hsp"
-#include"Function_ExScript.hsp"
 #include"Function_Play.hsp"
 #include"Scene_Play.hsp"
 
 *Startup
 
 	sdim ConsoleLogBuf
+
+	//起動時のアスキーアート
+	AddDebugConsole STYLE_COMMENT,"  __   __  _______  ______   _______ "
+	AddDebugConsole STYLE_COMMENT," |  |_|  ||       ||      | |   _   |"
+	AddDebugConsole STYLE_COMMENT," |       ||   _   ||  _    ||  |_|  |"
+	AddDebugConsole STYLE_COMMENT," |       ||  | |  || | |   ||       |    XODA-Project"
+	AddDebugConsole STYLE_COMMENT,"  |     | |  |_|  || |_|   ||       |    (c) 2019-"+gettime(0)+" PiPiTO Software."
+	AddDebugConsole STYLE_COMMENT," |   _   ||       ||       ||   _   |"
+	AddDebugConsole STYLE_COMMENT," |__| |__||_______||______| |__| |__|"
+	AddDebugConsole STYLE_COMMENT,""
+	AddDebugConsole STYLE_COMMENT,"::::::::::::::::::::::::::::::::::::: :::: ::: :: :  :   :    :\n\n"
+
 	AddDebugConsole STYLE_NORMAL,"Startup..."
 
 	//起動設定読み込み
-	exist"Data/Index.dat"
+	dim bootIndexSize
+	exist"Data/Core.dat"
 	if strsize==-1 {
 		AddDebugConsole STYLE_ERROR,"起動設定ファイルが見つかりません。"
 		goto*StopError
 	} else {
-		sdim bootIndex,strsize
-		bload"Data/Index.dat",bootIndex
-		//シグネチャ
-		dim SigErrFlag:SigErrFlag=FALSE
-		if peek(bootIndex,0)!'x' :SigErrFlag=TRUE
-		if peek(bootIndex,1)!'0' :SigErrFlag=TRUE
-		if peek(bootIndex,3)!'A' :SigErrFlag=TRUE
-		if SigErrFlag==TRUE {
-			AddDebugConsole STYLE_ERROR,"起動設定ファイルの暗号化キーに無効な値が指定されています。"
-			goto*StopError
-		}
+		bootIndexSize=strsize
+		AddDebugConsole STYLE_NORMAL,"起動設定の読み込み開始"
+		sdim bootIndex,bootIndexSize
+		bload"Data/Core.dat",bootIndex
 
-		//暗号化キー
-		dim EncKey
-		poke EncKey,0,peek(bootIndex,2)
-		poke EncKey,1,peek(bootIndex,511)
+		sdim RC4keydata,256
+		RC4keydata=EncKey_Core
+		AddDebugConsole STYLE_NORMAL,"RC4エンコード開始"
+		netinit
+		rc4encode bootIndex,RC4keydata,bootIndexSize
+		AddDebugConsole STYLE_NORMAL,"RC4エンコード完了"
+		AddDebugConsole STYLE_STATUS,"KEY.LENGTH = "+int(strlen(RC4keydata)*8)+"bit"
+		notesel bootIndex
 
-		//辞書読み込み
-		sdim encTable,(512-4-1)*256*256
-		bload"Enctable.bin",encTable
-		repeat 512-4-1
-			poke bootIndex,4+cnt,peek(bootIndex,4+cnt)-peek(enctable,(512-4-1)*EncKey+cnt)
+		//変数初期化
+		dim DispWidth
+		dim DispHeight
+		dim BuildVersion,3
+		sdim CodeName
+		sdim ServiceHost
+		sdim ServiceUserName
+		sdim ServicePassword
+
+		//解析
+		sdim NoteLine:sdim INIKey:sdim INIVal
+		repeat notemax
+			noteget NoteLine,cnt
+			if cnt==0 {
+				if NoteLine!"[Core]" {
+					AddDebugConsole STYLE_ERROR,"起動設定ファイルの読み込みに失敗しました。"
+					goto*StopError
+				}
+			}
+			split NoteLine,"=",INIKey,INIVal
+			switch INIKey
+				case"Display.Width"
+					DispWidth=int(INIVal)
+				swbreak
+				case"Display.Height"
+					DispHeight=int(INIVal)
+				swbreak
+				case"Build.Version"
+					sdim PrmDiv:split INIVal,".",PrmDiv
+					if length(PrmDiv)!3 {
+						AddDebugConsole STYLE_ERROR,"ビルドバージョンが無効な値です。"
+						AddDebugConsole STYLE_STATUS,"DATA = "+INIVal
+						AddDebugConsole STYLE_STATUS,"LENGTH = "+length(PrmDiv)
+						goto*StopError
+					}
+					repeat 3
+						BuildVersion(cnt)=int(PrmDiv(cnt))
+					loop
+				swbreak
+				case"CodeName":CodeName=INIVal:swbreak
+				case"Service.Host":ServiceHost=INIVal:swbreak
+				case"Service.UserName":ServiceUserName=INIVal:swbreak
+				case"Service.Password":ServicePassword=INIVal:swbreak
+			swend
 		loop
 
-		//画面解像度
-		dim DispWidth
-		DispWidth=lpeek(bootIndex,4)
-		dim DispHeight
-		DispHeight=lpeek(bootIndex,8)
-		//バージョン情報
-		dim BuildVersion
-		BuildVersion(0)=peek(bootIndex,16)		//Major
-		BuildVersion(1)=peek(bootIndex,17)		//Minor
-		BuildVersion(2)=peek(bootIndex,18)		//Patch
+		//チェック
+			if DispWidth<=0 {
+				AddDebugConsole STYLE_ERROR,"スクリーンの横幅が無効な値です。"
+				AddDebugConsole STYLE_STATUS,"DISPLAY.WIDTH = "+DispWidth
+				goto*StopError
+			}
+			if DispHeight<=0 {
+				AddDebugConsole STYLE_ERROR,"スクリーンの高さが無効な値です。"
+				AddDebugConsole STYLE_STATUS,"DISPLAY.HEIGHT = "+DispHeight
+				goto*StopError
+			}
 
 		//ログ出力
-		AddDebugConsole STYLE_STATUS,"DISPLAY.WIDTH = "+DispWidth
-		AddDebugConsole STYLE_STATUS,"DISPLAY.HEIGHT = "+DispHeight
-		AddDebugConsole STYLE_STATUS,"BUILD.VERSION = "+BuildVersion(0)+"."+BuildVersion(1)+"."+BuildVersion(2)
-		AddDebugConsole STYLE_STATUS,"SERVER.HOST = ****"
-		AddDebugConsole STYLE_STATUS,"SERVER.USERNAME = ****"
-		AddDebugConsole STYLE_STATUS,"SERVER.PASSWORD = ****"
+			AddDebugConsole STYLE_STATUS,"DISPLAY.WIDTH = "+DispWidth
+			AddDebugConsole STYLE_STATUS,"DISPLAY.HEIGHT = "+DispHeight
+			AddDebugConsole STYLE_STATUS,"BUILD.VERSION = "+BuildVersion(0)+"."+BuildVersion(1)+"."+BuildVersion(2)
+			AddDebugConsole STYLE_STATUS,"SERVICE.HOST = "+RepHiddenWords(ServiceHost,"*")
+			AddDebugConsole STYLE_STATUS,"SERVICE.USERNAME = "+RepHiddenWords(ServiceUserName,"*")
+			AddDebugConsole STYLE_STATUS,"SERVICE.PASSWORD = "+RepHiddenWords(ServicePassword,"*")
+			AddDebugConsole STYLE_NORMAL,"起動設定の読み込み完了"
 	}
 
 	//DXライブラリ初期化
