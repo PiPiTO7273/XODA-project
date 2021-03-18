@@ -112,18 +112,10 @@
 
 	//背景
 		setease 0,256,ease_linear
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-50,100)
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,100)
 		;DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
-		switch getpath(chartBackground,16)
-			case"laser"
-				DrawGraph -bgScrollX,0,hdximg(iPlay_bg_Laser),FALSE
-				DrawGraph DispWidth*2-bgScrollX,0,hdximg(iPlay_bg_Laser),FALSE
-			swbreak
-			case"trick"
-				DrawGraph -bgScrollX,0,hdximg(iPlay_bg_Trick),FALSE
-				DrawGraph DispWidth*2-bgScrollX,0,hdximg(iPlay_bg_Trick),FALSE
-			swbreak
-		swend
+		DrawGraph -bgScrollX,0,exdBGhwnd,FALSE
+		DrawGraph DispWidth*2-bgScrollX,0,exdBGhwnd,FALSE
 
 		bgScrollX+10
 		if bgScrollX>=1280*2 :bgScrollX=0
@@ -133,7 +125,7 @@
 		DrawGraph 0,0,hdximg(iPlay_bg_Grid),TRUE
 
 	//パーティクル
-	switch getpath(chartBackground,16)
+	/*switch getpath(chartBackground,16)
 		case"laser"
 			DrawParticle 150,hdximg(iParticle_Laser_0),256,32,30,80,35
 			DrawParticle 50,hdximg(iParticle_Laser_1),128,20,50,200,20
@@ -145,7 +137,10 @@
 			DrawParticle 256,hdximg(iParticle_Trick_1),64,100,64,100,15
 			DrawParticle 256,hdximg(iParticle_Trick_0),64,100,64*4,100,16
 		swbreak
-	swend
+	swend*/
+	repeat exdFuncMax
+		DrawParticle exdFuncAlpha(cnt),exdFuncHWND(cnt),exdFuncWidth(cnt),exdFuncHeight(cnt),exdFuncMargin(cnt),exdFuncPosY(cnt),exdFuncSpeed(cnt)
+	loop
 
 	//ムービー処理
 		if bgMovieFlag==TRUE {
@@ -172,8 +167,15 @@
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 			dim bgmFFTbuf,4096:dim bgmFFTline
 			BASS_ChannelGetData hplaybgm,varptr(bgmFFTbuf),BASS_DATA_FFT8192
-			setease 0,191,ease_linear+ease_loop
-			hsvcolor getease(SceneCount,200),75,255
+
+			//色指定
+				if exdVisColor(0)==-1&exdVisColor(1)==-1&exdVisColor(2)==-1 {
+					setease 0,191,ease_linear+ease_loop
+					hsvcolor getease(SceneCount,200),75,255
+				} else {
+					color exdVisColor(0),exdVisColor(1),exdVisColor(2)
+				}
+
 			repeat 32
 				bgmFFTline=int(todouble(bgmFFTbuf(128/32*cnt))*2500)
 				if bgmFFTline<100 :bgmFFTline*4

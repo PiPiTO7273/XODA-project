@@ -1,0 +1,22 @@
+laser {
+	RegBackground Laser_bg.png
+	RegImage 0,Laser_00.png
+	RegImage 1,Laser_01.png
+	RegImage 2,Laser_02.png
+	DrawObject 0,150,256,32,30,80,35
+	DrawObject 1,50,128,20,50,200,20
+	DrawObject 2,75,225,40,40,140,18
+	SetVisualizerColor ALL
+}
+
+trick {
+	RegBackground Trick_bg.png
+	RegImage 0,Trick_00.png
+	RegImage 1,Trick_01.png
+	RegImage 2,Trick_02.png
+	DrawObject 2,200,50,20,128,70,20
+	DrawObject 2,100,50,20,64,210,12
+	DrawObject 1,256,64,100,64,100,14
+	DrawObject 0,256,64,100,256,100,16
+	SetVisualizerColor 255,153,0
+}

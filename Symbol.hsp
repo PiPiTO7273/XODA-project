@@ -27,14 +27,6 @@
 #enum iHitCircle
 #enum iParticle_Line_256_White
 #enum iParticle_Fade_White
-#enum iParticle_Laser_0
-#enum iParticle_Laser_1
-#enum iParticle_Laser_2
-#enum iParticle_Trick_0
-#enum iParticle_Trick_1
-#enum iParticle_Trick_2
-#enum iPlay_bg_Laser
-#enum iPlay_bg_Trick
 #enum iPlay_bg_Movie
 #enum iPlay_bg_Grid
 #enum iPlay_Visualizer

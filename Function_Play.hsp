@@ -385,6 +385,9 @@
 	AddDebugConsole STYLE_STATUS,"DEFAULT.BPM = "+chartDefBPM
 	AddDebugConsole STYLE_STATUS,"OBJECT = "+hitobjMax
 
+	//外部スクリプト読み込み
+	ExScript_Init"Data/Background.dat",chartBackground
+
 	return 0
 
 *Scene_Init_Play
