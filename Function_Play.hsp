@@ -324,8 +324,11 @@
 	RegAudioLib TYPE_BGM,"Data/Package/"+chartResIndex+"/Audio.mp3"
 
 	//ムービー読み込み
-	if hdximg(iPlay_bg_Movie)!0 :DeleteGraph hdximg(iPlay_bg_Movie)
-	hdximg(iPlay_bg_Movie)=LoadGraph("Data/Package/"+chartResIndex+"/Background.ogv")
+	exist"Data/Package/"+chartResIndex+"/Background.ogv"
+	if strsize!-1 {
+		if hdximg(iPlay_bg_Movie)!0 :DeleteGraph hdximg(iPlay_bg_Movie)
+		hdximg(iPlay_bg_Movie)=LoadGraph("Data/Package/"+chartResIndex+"/Background.ogv")
+	}
 
 	//ゲージ関係
 	ddim tmpGaugeTotal,1:ddim gaugeAmount,6

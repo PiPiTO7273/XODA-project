@@ -147,14 +147,15 @@ goto*Startup
 
 	hdximg(iParticle_Line_256_White)=LoadGraph("Data/Object/Particle/White_256.png")
 	hdximg(iParticle_Fade_White)=LoadGraph("Data/Object/Particle/White_Fade.png")
-	hdximg(iParticle_bg_0)=LoadGraph("Data/Object/Background/0.png")
-	hdximg(iParticle_bg_1)=LoadGraph("Data/Object/Background/1.png")
-	hdximg(iParticle_bg_2)=LoadGraph("Data/Object/Background/2.png")
-	hdximg(iParticle_bg_3)=LoadGraph("Data/Object/Background/3.png")
-	hdximg(iParticle_bg_4)=LoadGraph("Data/Object/Background/4.png")
-	hdximg(iParticle_bg_5)=LoadGraph("Data/Object/Background/5.png")
+	hdximg(iParticle_Laser_0)=LoadGraph("Data/Object/Background/Laser_00.png")
+	hdximg(iParticle_Laser_1)=LoadGraph("Data/Object/Background/Laser_01.png")
+	hdximg(iParticle_Laser_2)=LoadGraph("Data/Object/Background/Laser_02.png")
+	hdximg(iParticle_Trick_0)=LoadGraph("Data/Object/Background/Trick_00.png")
+	hdximg(iParticle_Trick_1)=LoadGraph("Data/Object/Background/Trick_01.png")
+	hdximg(iParticle_Trick_2)=LoadGraph("Data/Object/Background/Trick_02.png")
 
-	hdximg(iPlay_bg_Default)=LoadGraph("Data/Image/bg_Default.png")
+	hdximg(iPlay_bg_Laser)=LoadGraph("Data/Object/Background/Laser_bg.png")
+	hdximg(iPlay_bg_Trick)=LoadGraph("Data/Object/Background/Trick_bg.png")
 	hdximg(iPlay_bg_Grid)=LoadGraph("Data/Object/Background/Grid.png")
 
 	hdximg(iLaneEffect)=LoadGraph("Data/Image/LaneEffect.png")
