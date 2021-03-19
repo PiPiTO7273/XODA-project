@@ -7,9 +7,9 @@
 
 ## クレジット（敬称略）
 ### フォント素材の提供
-Noto Sans CJK JP by Google
-Good Times by Typodermic Fonts
-Pier Sans by Hamilton
-Earth Orbiter by DanZadorozny
-M+ 2m by M+ FONTS PROJECT
-Gogo-Five by Maniackers Design
+- Noto Sans CJK JP by Google
+- Good Times by Typodermic Fonts
+- Pier Sans by Hamilton
+- Earth Orbiter by DanZadorozny
+- M+ 2m by M+ FONTS PROJECT
+- Gogo-Five by Maniackers Design
