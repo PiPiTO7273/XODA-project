@@ -107,14 +107,6 @@
 	exdBufSize=strsize
 	sdim exdBuf,exdBufSize
 	bload _path,exdBuf
-
-	AddDebugConsole STYLE_NORMAL,"RC4エンコード開始"
-	sdim RC4keydata,256
-	RC4keydata=EncKey_BackgroundObj
-	rc4encode exdBuf,RC4keydata,exdBufSize
-	AddDebugConsole STYLE_NORMAL,"RC4エンコード完了"
-	AddDebugConsole STYLE_STATUS,"KEY.LENGTH = "+int(strlen(RC4keydata)*8)+"bit"
-
 	notesel exdBuf
 
 	strrep exdBuf,"\t",""	//タブ除去

@@ -284,13 +284,10 @@
 
 	//譜面ファイルのバージョンを照合
 	dim VerErrFlag:VerErrFlag=FALSE
-	if chartDefVersion(0)!BuildVersion(0) {		//メジャーバージョン
+	if chartDefVersion(0)!BuildVersion_Major {		//メジャーバージョン
 		VerErrFlag=TRUE
 	}
-	if chartDefVersion(1)!BuildVersion(1) {		//マイナーバージョン
-		VerErrFlag=TRUE
-	}
-	if chartDefVersion(2)!BuildVersion(2) {		//パッチバージョン
+	if chartDefVersion(1)!BuildVersion_Minor {		//マイナーバージョン
 		VerErrFlag=TRUE
 	}
 	if VerErrFlag==TRUE {
