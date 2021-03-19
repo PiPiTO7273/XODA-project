@@ -34,7 +34,7 @@
 goto*Startup
 
 #include"Symbol.hsp"
-#include"RC4key.hsp"
+#addition"RC4key.hsp"
 #include"Function_Default.hsp"
 #include"Function_Play.hsp"
 #include"Scene_Play.hsp"
@@ -55,6 +55,8 @@ goto*Startup
 	AddDebugConsole STYLE_COMMENT,"::::::::::::::::::::::::::::::::::::: :::: ::: :: :  :   :    :\n\n"
 
 	AddDebugConsole STYLE_NORMAL,"Startup..."
+
+	wait 300
 
 	//ãNìÆê›íËì«Ç›çûÇ›
 	dim bootIndexSize
