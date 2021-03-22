@@ -14,6 +14,7 @@
 
 //DxLibグラフィック
 #enum iTmp			=	0
+#enum iBackground
 #enum iUI_bg_SongInfo
 #enum iUI_bg_Profile
 #enum iUI_bg_Score
@@ -54,6 +55,7 @@
 #enum sndHitobj
 #enum sndHitempty
 #enum sndBurst
+#enum bgmMain
 
 //オブジェクトID
 #define HITOBJ_NORMAL		0

@@ -198,6 +198,32 @@
 
 	return
 
+#deffunc CreateUpdateRequest int _id
+	netdlname updatepath(_id)
+	neturl getpath(updatelink(_id),32)
+	sdim infobuf
+	netfileinfo infobuf,getpath(updatelink(_id),8)
+	if stat!0|infobuf=="" {
+		AddDebugConsole STYLE_ERROR,"HTTPリクエストの作成に失敗しました。 [ID="+_id+"]"
+		goto*StopError
+	}
+	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを発行しました。 [ID="+_id+"]"
+	AddDebugConsole STYLE_STATUS,infobuf
+	notesel infobuf
+	repeat notemax
+		noteget NoteLine,cnt
+		if instr(NoteLine,0,"Content-Length:")!-1 {
+			strrep NoteLine,"Content-Length:",""
+			updatelength=int(NoteLine)
+			break
+		}
+	loop
+	netrequest getpath(updatelink(_id),8)
+
+	AddDebugConsole STYLE_NORMAL,"アップデートのリクエストを確認 [ID="+_id+",LENGTH="+updatelength+"]"
+
+	return
+
 *ExportLog
 	notesel ConsoleLogBuf
 	notesave"Log.txt"
@@ -219,6 +245,85 @@
 
 	AddDebugConsole STYLE_NORMAL,"シーンの初期化完了"
 
+	return
+
+*OnlineSignin
+
+	//オンライン認証
+	BASS_ChannelPlay hbasssnd(bgmMain)
+	PlayMovieToGraph hdximg(iBackground),DX_PLAYTYPE_LOOP
+	repeat
+		exist"Data/OnlineAuth.dat"
+		if strsize==-1 {
+			exec"Data/svcSignin.exe h:"+hwnd+":"+DispWidth+":"+DispHeight
+			repeat
+
+				SetDrawScreen DX_SCREEN_BACK
+				ClearDrawScreen
+
+				SetDrawBlendMode DX_BLENDMODE_NOBLEND
+				DrawGraph 0,0,hdximg(iBackground),FALSE
+
+				//一秒に一回のペースで実行
+				if cnt\60==0 {
+					sdim procList
+					get_process procList
+					if instr(procList,0,"svcSignin.exe")==-1 :break
+				}
+				ScreenFlip
+				await
+			loop
+		} else :break
+	loop
+	BASS_ChannelStop hbasssnd(bgmMain)
+	return
+
+*OnlineUpdate
+	dim htmpFont
+	htmpFont(0)=CreateFontToHandle("Noto Sans CJK JP Medium",20,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	htmpFont(1)=CreateFontToHandle("Noto Sans CJK JP Regular",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+
+	dim updateID:dim updateres:dim updatesize:dim updatelength
+
+	netinit
+	CreateUpdateRequest 0
+	repeat
+
+			exist updatepath(updateID)
+			updatesize=strsize
+
+			SetDrawScreen DX_SCREEN_BACK
+			ClearDrawScreen
+
+			//画面初期化
+			DrawBox 0,0,DispWidth,DispHeight,GetColor(255,255,255),TRUE
+			DrawBox 0,0,DispWidth,128,GetColor(245,245,245),TRUE
+			DrawLine 0,128,DispWidth,128,GetColor(200,200,200)
+
+			DrawStringToHandle 64,80,"オンラインアップデート",GetColor(25,25,25),htmpFont(0)
+			DrawStringToHandle 1130,85,"Ver "+BuildVersion_Major+"."+BuildVersion_Minor,GetColor(50,50,50),htmpFont(1)
+
+			DrawStringXCenterToHandle 0,240,"アップデートに必要なファイルをダウンロード中です。\nしばらくお待ち下さい...",DispWidth,GetColor(40,40,40),htmpFont(1)
+
+			DrawStringToHandle 265,360,updatepath(updateID),GetColor(50,50,50),htmpFont(1)
+			DrawStringXAlignRightToHandle 265,360,""+(updateID+1)+"/"+length(updatepath)+"件のダウンロード",750,GetColor(50,50,50),htmpFont(1)
+			DrawBox 265,400,265+750,400+20,GetColor(150,150,150),FALSE
+			DrawBox 265,400,265+int(750.0*(double(updatesize)/double(updatelength))),400+20,GetColor(184,255,41),TRUE
+			DrawBox 265,400,265+int(750.0*(double(updatesize)/double(updatelength))),400+20,GetColor(150,150,150),FALSE
+
+			ScreenFlip
+
+		netexec updateres
+		if updateres!0 {
+			updateID++
+			if updateID>=length(updatepath) :break
+			CreateUpdateRequest updateID
+		}
+		await
+	loop
+
+	DeleteFontToHandle htmpFont(0)
+	DeleteFontToHandle htmpFont(1)
 	return
 
 *Create_AQProfileBuf

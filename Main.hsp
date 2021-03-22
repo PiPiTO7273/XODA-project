@@ -17,6 +17,7 @@
 #include"gm_crlf.hsp"
 #include"llmod3/llmod3.hsp"
 #include"llmod3/console.hsp"
+#include"getProcess.hsp"
 
 #packopt hide 1
 
@@ -64,16 +65,18 @@ goto*Startup
 	AddDebugConsole STYLE_STATUS,"DISPLAY.WIDTH = "+DispWidth
 	AddDebugConsole STYLE_STATUS,"DISPLAY.HEIGHT = "+DispHeight
 	AddDebugConsole STYLE_STATUS,"BUILD.VERSION = "+BuildVersion_Major+"."+BuildVersion_Minor
-	AddDebugConsole STYLE_STATUS,"SERVICE.HOST = "+RepHiddenWords(ServiceHost,"*")
-	AddDebugConsole STYLE_STATUS,"SERVICE.USERNAME = "+RepHiddenWords(ServiceUserName,"*")
-	AddDebugConsole STYLE_STATUS,"SERVICE.PASSWORD = "+RepHiddenWords(ServicePassword,"*")
+	AddDebugConsole STYLE_STATUS,"SERVICE.HOST = "+RepHiddenWords(str(ServiceHost),"*")
+	AddDebugConsole STYLE_STATUS,"SERVICE.USERNAME = "+RepHiddenWords(str(ServiceUserName),"*")
+	AddDebugConsole STYLE_STATUS,"SERVICE.PASSWORD = "+RepHiddenWords(str(ServicePassword),"*")
 	AddDebugConsole STYLE_NORMAL,"起動設定の読み込み完了"
 
 	//DXライブラリ初期化
+	screen 0,DispWidth,DispHeight,0,ginfo(20)/2-DispWidth/2,ginfo(21)/2-DispHeight/2
 	AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化開始"
 	SetOutApplicationLogValidFlag 0
 	ChangeWindowMode TRUE
 	SetGraphMode DispWidth,DispHeight,32
+	SetUserWindow hwnd
 	SetAlwaysRunFlag TRUE
 	SetMainWindowText"XODA v"+BuildVersion_Major+"."+BuildVersion_Minor
 	SetWaitVSyncFlag TRUE
@@ -84,6 +87,7 @@ goto*Startup
 	} else {
 		AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化完了"
 	}
+	onexit*Exit
 
 	//BASS初期化
 	BASS_Init -1,44100,0,hwnd,0
@@ -92,6 +96,34 @@ goto*Startup
 	} else {
 		AddDebugConsole STYLE_NORMAL,"BASS Audio Libraryの初期化完了"
 	}
+
+	//オンラインアップデートの確認
+	exist"Data/OnlinePackage.dat"
+	if strsize!-1 {
+		sdim updatepkg,strsize
+		sdim NoteLine
+		notesel updatepkg
+		noteload"Data/OnlinePackage.dat"
+		sdim updatepath
+		sdim updatelink
+		sdim updateflag
+		sdim procjumpflag
+		repeat notemax
+			noteget NoteLine,cnt
+			split NoteLine,"=",updatepath(cnt),updatelink(cnt)
+
+			exist updatepath(cnt)
+			if strsize==-1 :updateflag(cnt)=TRUE:procjumpflag=TRUE
+		loop
+
+		if procjumpflag==TRUE {
+			//アップデート後、再起動
+			gosub*OnlineUpdate
+			gosub*ExitProg
+			goto*Startup
+		}
+	}
+
 	dim hbasssnd:dim hsmpsnd
 	//開始音
 	hsmpsnd(sndStart)=BASS_SampleLoad(FALSE,"Data/Sound/Start.wav",0,0,0,16,0)
@@ -111,6 +143,9 @@ goto*Startup
 	BASS_ChannelSetAttribute hbasssnd(sndBurst),BASS_ATTRIB_VOL,tofloat(0.8)
 	RegAudioLib TYPE_SE,"Data/Sound/Burst.wav"
 
+	//BGM
+	hbasssnd(bgmMain)=BASS_StreamCreateFile(FALSE,"Data/Sound/bgm_Main.ogg",0,0,0,0,BASS_SAMPLE_LOOP)
+
 	//フォントデータ初期化
 	dim hdxfont
 	hdxfont(fSysLayer)=CreateFontToHandle("SQNumber",20,-1,DX_FONTTYPE_NORMAL)
@@ -124,6 +159,7 @@ goto*Startup
 	//画像読み込み
 	dim hdximg,iMax
 	SetUsePremulAlphaConvertLoad TRUE
+	hdximg(iBackground)=LoadGraph("Data/Movie/background.ogv")
 	hdximg(iUI_bg_SongInfo)=LoadGraph("Data/Image/bg_SongInfo.png")
 	hdximg(iUI_bg_Profile)=LoadGraph("Data/Image/bg_Profile.png")
 	hdximg(iUI_bg_Score)=LoadGraph("Data/Image/bg_Score.png")
@@ -184,6 +220,9 @@ goto*Startup
 	//フレームカウンタ
 	dim FrameCount
 
+	//オンライン接続
+	gosub*OnlineSignin
+
 	//////debug
 	//AquaPass初期設定
 	sdim aqName
@@ -202,12 +241,7 @@ goto*Startup
 	gosub*Scene_Init_Play
 	gosub*LoadChart
 
-
 *MainLoop
-
-	//ウィンドウメッセージ処理
-	ProcessMessage
-	if stat==-1 :goto*Exit
 
 	SetDrawScreen DX_SCREEN_BACK
 	ClearDrawScreen
@@ -230,6 +264,7 @@ goto*Startup
 	FrameCount++
 
 	ScreenFlip
+	await
 
 	goto*MainLoop
 
@@ -241,7 +276,7 @@ goto*Startup
 	dialog"エラーが発生したため、実行中の全ての処理を停止しました。",1,"XODA"
 	stop
 
-*Exit
+*ExitProg
 	dxlib_End
 	BASS_Free
 	AddDebugConsole STYLE_NORMAL,"全ての処理を正常に終了しました。"
@@ -249,4 +284,8 @@ goto*Startup
 	#ifndef _debug
 	gosub*ExportLog
 	#endif
+	return
+
+*Exit
+	gosub*ExitProg
 	end

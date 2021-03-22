@@ -1,0 +1,79 @@
+#module getProcess
+//関数の登録
+#uselib "kernel32.dll"
+	#func CreateToolhelp32Snapshot "CreateToolhelp32Snapshot" int,int
+	#func Module32First "Module32First" int , sptr
+	#func Module32Next "Module32Next" int , sptr
+	#func Process32First "Process32First" int , sptr
+	#func Process32Next "Process32Next" int , sptr
+	#func CloseHandle "CloseHandle" int
+
+//プロセスの取得
+#deffunc get_process var prm1
+	dim er
+	dim  lb1
+	dim  lb2
+	sdim lbdata , 1024
+	sdim data   , 260
+	sdim mbdata , 1024
+	dim  hpsnap
+	dim  hmsnap
+	dim  p_entry, 74
+	dim  p_id , 64
+	dim  m_entry, 137
+	CreateToolhelp32Snapshot 0x0f, 0
+	hpsnap = stat
+	if hpsnap==-1 : dialog "CreateToolhelp32Snapshot error" : stop
+
+	dim  p_id , 64
+	lbdata="" : notesel lbdata
+	p_entry(0) = 296
+	Process32First hpsnap , varptr(p_entry)
+	er = stat
+	repeat -1
+		if er == 0 : break
+		getstr data , p_entry , 36 , '\0'
+		noteadd data , -1
+		p_id(cnt) = p_entry(2)
+		Process32Next hpsnap , varptr(p_entry)
+		er = stat
+	loop
+	prm1 = lbdata
+	CloseHandle hpsnap
+return
+
+//モジュールの取得
+#deffunc get_module var prm1
+	dim er
+	dim  lb1
+	dim  lb2
+	sdim lbdata , 1024
+	sdim data   , 260
+	sdim mbdata , 1024
+	dim  hpsnap
+	dim  hmsnap
+	dim  p_entry, 74
+	dim  p_id , 64
+	dim  m_entry, 137
+	get_process lbdata
+	CreateToolhelp32Snapshot 0x0f , p_id(lb1)
+	hmsnap = stat
+	if hmsnap==-1{
+		return -1
+	}
+	notesel lbdata : noteget data , lb1
+//	title TITLENAME+" : "+data
+	mbdata = "" : notesel mbdata
+	m_entry(0) = 548
+	Module32First hmsnap , varptr(m_entry) : er = stat
+	repeat -1
+		if er == 0 : break
+		getstr data , m_entry , 288 , '\0'
+		noteadd data , -1
+		Module32Next hmsnap , varptr(m_entry) : er = stat
+	loop
+	prm1 = mbdata
+	CloseHandle hmsnap
+return
+
+#global
