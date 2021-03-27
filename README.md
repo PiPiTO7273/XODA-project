@@ -15,4 +15,4 @@
 - Gogo-Five by Maniackers Design
 
 ### 画像素材の提供
-designed by freepik.com
+Designed by starline / Freepik
