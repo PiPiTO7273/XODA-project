@@ -13,3 +13,6 @@
 - Earth Orbiter by DanZadorozny
 - M+ 2m by M+ FONTS PROJECT
 - Gogo-Five by Maniackers Design
+
+### 画像素材の提供
+Designed by starline / Freepik
