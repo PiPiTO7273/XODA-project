@@ -16,6 +16,28 @@
 		sdim tmpstr,512
 		cnvstoa tmpstr,_p
 		return tmpstr
+
+	#defcfunc GetINIvalue str _inibuf,str _section,str _key
+		sdim INIBuf:sdim NoteLine:sdim curSection:sdim resValue
+		INIBuf=_inibuf
+
+		notesel INIBuf
+		repeat notemax
+			noteget NoteLine,cnt
+			if strmid(NoteLine,0,1)=="["&strmid(NoteLine,-1,1)=="]" {
+				curSection=NoteLine
+			}
+			if getpath(curSection,16)==("["+getpath(_section,16)+"]") {
+				sdim INIprm:split NoteLine,"=",INIprm
+				if getpath(INIprm(0),16)==getpath(_key,16) {
+					resValue=INIprm(1)
+					break
+				}
+			}
+		loop
+
+		noteunsel
+		return resValue
 #global
 
 #deffunc AddDebugConsole int _style,str _msg
@@ -250,32 +272,104 @@
 *OnlineSignin
 
 	//オンライン認証
-	BASS_ChannelPlay hbasssnd(bgmMain)
-	PlayMovieToGraph hdximg(iBackground),DX_PLAYTYPE_LOOP
-	repeat
-		exist"Data/OnlineAuth.dat"
-		if strsize==-1 {
-			exec"Data/svcSignin.exe h:"+hwnd+":"+DispWidth+":"+DispHeight
+	sdim authUserName
+	sdim authPassword
+
+	exist"Data/OnlineAuth.dat"
+	if strsize==-1 {
+		AddDebugConsole STYLE_NORMAL,"アカウント情報が見つかりません。ゲストユーザーで開始します。"
+		authUserName="GUEST"
+		authPassword=""
+	} else {
+		AddDebugConsole STYLE_NORMAL,"オンライン認証を開始します。"
+		sdim authInfobuf,strsize
+		notesel authInfobuf
+		noteload"Data/OnlineAuth.dat"
+		authUserName=GetINIvalue(authInfobuf,"ONLINEAUTH","ID")
+		authPassword=GetINIvalue(authInfobuf,"ONLINEAUTH","KEY")
+
+		//FTP接続
+		;ftpopen SERVICE_HOST,SERVICE_USERNAME,SERVICE_PASSWORD
+		;sdim curFTPdir:ftpdir curFTPdir,"svcsavedata"
+
+		//HTTP接続
+		AddDebugConsole STYLE_NORMAL,"HTTPリクエストを発行しました。 \""+SERVICE_HTTP+"svcsavedata/"+"\""
+		neturl SERVICE_HTTP+"svcsavedata/"
+		netdlname"Data/Savedata.dat"
+		netrequest authUserName+".dat"
+			dim netres
 			repeat
-
-				SetDrawScreen DX_SCREEN_BACK
-				ClearDrawScreen
-
-				SetDrawBlendMode DX_BLENDMODE_NOBLEND
-				DrawGraph 0,0,hdximg(iBackground),FALSE
-
-				//一秒に一回のペースで実行
-				if cnt\60==0 {
-					sdim procList
-					get_process procList
-					if instr(procList,0,"svcSignin.exe")==-1 :break
-				}
-				ScreenFlip
+				netexec netres
+				if netres!0 :break
 				await
 			loop
-		} else :break
-	loop
-	BASS_ChannelStop hbasssnd(bgmMain)
+
+		//変数初期化
+			sdim aqName
+			sdim aqPassword
+			sdim aqBadge
+			sdim aqRate
+			sdim aqLevel
+			sdim aqLastplay
+			dim aqNumClear
+			dim aqNumFullcombo
+			dim aqNumAllEx
+
+		exist"Data/Savedata.dat"
+		if strsize==-1 {
+			AddDebugConsole STYLE_WARNING,"セーブデータの同期に失敗しました。ゲストユーザーで開始します。"
+			gosub*SetGuestSavedata
+		} else {
+			sdim saveInfobuf,strsize
+			notesel saveInfobuf
+			noteload"Data/Savedata.dat"
+
+			//パスワード認証
+			sdim aqPassword,256
+			aqPassword=GetINIvalue(saveInfobuf,"SAVEDATA","PASSWORD")
+			b64decode aqPassword,aqPassword,64
+			rc4encode aqPassword,SERVICE_ENCKEY,64
+			if aqPassword==authPassword {
+
+				//初回登録
+				if instr(saveInfobuf,0,"XODA.RATE")==-1 :saveInfobuf+"XODA.RATE=0.0\n"
+				if instr(saveInfobuf,0,"XODA.BADGE")==-1 :saveInfobuf+"XODA.BADGE=\n"
+				if instr(saveInfobuf,0,"XODA.LASTPLAY")==-1 :saveInfobuf+"XODA.LASTPLAY=-\n"
+				if instr(saveInfobuf,0,"XODA.NUMCLEAR")==-1 :saveInfobuf+"XODA.NUMCLEAR=\n"
+				if instr(saveInfobuf,0,"XODA.NUMFULLCOMBO")==-1 :saveInfobuf+"XODA.NUMFULLCOMBO=\n"
+				if instr(saveInfobuf,0,"XODA.NUMALLEX")==-1 :saveInfobuf+"XODA.NUMALLEX=\n"
+
+				aqName=GetINIvalue(saveInfobuf,"SAVEDATA","USERNAME")
+				aqRate=double(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.RATE"))
+				aqBadge=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.BADGE")
+				aqLastplay=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.LASTPLAY")
+				aqNumClear=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMCLEAR"))
+				aqNumFullcombo=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMFULLCOMBO"))
+				aqNumAllEx=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMALLEX"))
+
+			} else {
+				AddDebugConsole STYLE_WARNING,"パスワードの認証エラーが発生しました。ゲストユーザーで開始します。"
+				gosub*SetGuestSavedata
+			}
+		}
+	}
+	AddDebugConsole STYLE_NORMAL,"Portalサービスにサインインしました。"
+	AddDebugConsole STYLE_STATUS,"USERNAME(ID) = "+authUserName
+	AddDebugConsole STYLE_STATUS,"PASSWORD(KEY) = "+authPassword
+	return
+
+*SetGuestSavedata
+	authUserName="GUEST"
+	authPassword=""
+
+	aqName=authUserName
+	aqRate=0.0
+	aqBadge="ゲスト"
+	aqLastplay="-"
+	aqNumClear=0
+	aqNumFullcombo=0
+	aqNumAllEx=0
+
 	return
 
 *OnlineUpdate

@@ -1,0 +1,124 @@
+
+*Scene_Init_Signin
+
+	dim curButtonPos
+	dim KeyFlag,2
+	dim bfKeyFlag,2
+
+	return
+
+*Scene_Signin
+
+	//キー判定
+		KeyFlag(0)=CheckHitKey(KEY_INPUT_LEFT)
+		KeyFlag(1)=CheckHitKey(KEY_INPUT_RIGHT)
+
+		if bfKeyFlag(0)==0&KeyFlag(0)==1 {
+			curButtonPos--
+		}
+		if bfKeyFlag(1)==0&KeyFlag(1)==1 {
+			curButtonPos++
+		}
+		if curButtonPos<0 :curButtonPos=1
+		if curButtonPos>1 :curButtonPos=0
+
+		bfKeyFlag(0)=KeyFlag(0)
+		bfKeyFlag(1)=KeyFlag(1)
+
+	//背景
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawGraph 0,0,hdximg(iBackground),FALSE
+
+	//ナビゲーション
+		setease 0,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,20)
+		setease -32,0,ease_cubic_out
+		DrawGraph 32+getease(SceneCount-10,20),16,hdximg(iNav_Signin),TRUE
+
+	//案内文字列（背景）
+		setease 0,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-15,20)
+		setease -32,0,ease_cubic_out
+		DrawGraph 32+getease(SceneCount-10,20),67,hdximg(ibg_Nav),TRUE
+
+	//案内文字列
+		setease 0,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-15,20)
+		setease -32,0,ease_cubic_out
+		DrawStringToHandle 48+getease(SceneCount-10,20),70,"使用するプレーデータを確認してください。",GetColor(230,230,230),hdxfont(fNoto_b12)
+
+	//メイン背景
+		setease 1.4,1,ease_cubic_out
+		EaseWidth=int(double(DispWidth)*geteasef(SceneCount-10,25))
+		EaseHeight=int(double(300)*geteasef(SceneCount-10,25))
+		EasePosX=DispWidth/2-EaseWidth/2
+		EasePosY=DispHeight/2-EaseHeight/2
+		setease 0,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,25)
+		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ibg_Signin),TRUE
+
+	//プレイヤーデータ
+		setease 0,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-25,20)
+		setease -128,0,ease_cubic_out
+		DrawGraph 50+getease(SceneCount-20,20),230,hdximg(ibg_PlayerData),TRUE
+		DrawGraph 50+getease(SceneCount-25,20),230,hdximg(iLayer_PlayerData),TRUE
+
+		//値
+			setease -32,0,ease_cubic_out
+			EasePosX=getease(SceneCount-30,20)
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-30,20)
+			DrawStringToHandle 240+EasePosX,255,aqName,GetColor(20,20,20),hdxfont(fPier_r24)
+			DrawStringToHandle 240+EasePosX,295,"Lv."+str(aqLevel)+" / "+strf("%.2f",str(aqRate)),GetColor(20,20,20),hdxfont(fPier_r24)
+			DrawStringToHandle 240+EasePosX,337,aqLastplay,GetColor(20,20,20),hdxfont(fPier_r22)
+			DrawStringToHandle 240+EasePosX,377,aqBadge,GetColor(20,20,20),hdxfont(fPier_r22)
+			DrawStringToHandle 170+EasePosX,420,str(aqNumClear),GetColor(20,20,20),hdxfont(fPier_r24)
+			DrawStringToHandle 340+EasePosX,420,str(aqNumFullcombo),GetColor(20,20,20),hdxfont(fPier_r24)
+			DrawStringToHandle 480+EasePosX,420,str(aqNumAllEx),GetColor(20,20,20),hdxfont(fPier_r24)
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		sdim tmpstr:tmpstr="このデータでプレイを開始します。"
+		DrawStringXCenterToHandle DispWidth/2,300,strmid(tmpstr,0,limit(SceneCount-10,0,strlen(tmpstr))),DispWidth/2,GetColor(159,245,245),hdxfont(fNoto_b22)
+		sdim tmpstr:tmpstr="よろしいですか？"
+		DrawStringXCenterToHandle DispWidth/2,341,strmid(tmpstr,0,limit(SceneCount-40,0,strlen(tmpstr))),DispWidth/2,GetColor(200,200,200),hdxfont(fNoto_b20)
+
+		setease 0,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-50,15)
+		setease 16,0,ease_cubic_out
+		if curButtonPos==0 {
+			DrawGraph 816,420+getease(SceneCount-50,15),hdxarr_Button_Yes(TRUE),TRUE
+		} else {
+			DrawGraph 816,420+getease(SceneCount-50,15),hdxarr_Button_Yes(FALSE),TRUE
+		}
+		if curButtonPos==1 {
+			DrawGraph 976,420+getease(SceneCount-50,15),hdxarr_Button_No(TRUE),TRUE
+		} else {
+			DrawGraph 976,420+getease(SceneCount-50,15),hdxarr_Button_No(FALSE),TRUE
+		}
+
+	//ガイド
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		setease DispHeight,DispHeight-128,ease_cubic_out
+		DrawGraph 0,getease(SceneCount-10,30),hdximg(ibg_GuidePanel),TRUE
+
+		setease 0,256,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-30,20)
+		DrawGraph 540,650,hdximg(iGuide_Large),TRUE
+		DrawGraph 370,660,hdximg(iGuide_Small),TRUE
+		DrawGraph 760,660,hdximg(iGuide_Small),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		sdim tmpstr:tmpstr="ENTER : 決定"
+		DrawStringXCenterToHandle 540,658,strmid(tmpstr,0,limit(SceneCount-30,0,strlen(tmpstr))),200,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="← : カーソル移動"
+		DrawStringXCenterToHandle 370,668,strmid(tmpstr,0,limit(SceneCount-30,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="→ : カーソル移動"
+		DrawStringXCenterToHandle 760,668,strmid(tmpstr,0,limit(SceneCount-30,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+
+	//暗転
+		setease 256,0,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,15)
+		DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
+
+	return

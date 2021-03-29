@@ -1,9 +1,6 @@
 
 *Scene_Play
 
-	//カウンタ開始
-	if SceneCount==0 :PlayStartMS=GetNowCount()
-
 	//キー判定
 		dim JudgeFlag,3
 		dim KeyFlag,4
@@ -265,7 +262,7 @@
 				ScoreEaseVal=getease(JudgeResCount,30)
 
 				setease -16,0,ease_cubic_out
-				DrawStringToHandle 1100,16+getease(SceneCount-20,20),strf("%08d",ScoreEaseVal),GetColor(240,240,240),hdxfont(fCurScore)
+				DrawStringToHandle 1100,16+getease(SceneCount-20,20),strf("%08d",ScoreEaseVal),GetColor(240,240,240),hdxfont(fPier_r32)
 			}
 		//判定された数・暫定ランク
 			if SceneCount>50 {
@@ -276,15 +273,15 @@
 
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,EaseAlpha
 				//Excellent
-				DrawStringToHandle EasePosX,83,strf("%04d",numExcellent),GetColor(20,20,20),hdxfont(fPlayDetail)
+				DrawStringToHandle EasePosX,83,strf("%04d",numExcellent),GetColor(20,20,20),hdxfont(fMplus_15)
 				//Great
-				DrawStringToHandle EasePosX,106,strf("%04d",numGreat),GetColor(20,20,20),hdxfont(fPlayDetail)
+				DrawStringToHandle EasePosX,106,strf("%04d",numGreat),GetColor(20,20,20),hdxfont(fMplus_15)
 				//Nice
-				DrawStringToHandle EasePosX,129,strf("%04d",numNice),GetColor(20,20,20),hdxfont(fPlayDetail)
+				DrawStringToHandle EasePosX,129,strf("%04d",numNice),GetColor(20,20,20),hdxfont(fMplus_15)
 				//Bad
-				DrawStringToHandle EasePosX,152,strf("%04d",numBad),GetColor(20,20,20),hdxfont(fPlayDetail)
+				DrawStringToHandle EasePosX,152,strf("%04d",numBad),GetColor(20,20,20),hdxfont(fMplus_15)
 				//Miss
-				DrawStringToHandle EasePosX,175,strf("%04d",numMiss),GetColor(20,20,20),hdxfont(fPlayDetail)
+				DrawStringToHandle EasePosX,175,strf("%04d",numMiss),GetColor(20,20,20),hdxfont(fMplus_15)
 
 				//暫定ランク
 				sdim curRank
@@ -300,7 +297,7 @@
 				if double(curScore)>double(mxmScore)*(double(RANK_SCORE_SSS)/10000000.0) :curRank="SSS"
 				if curScore==mxmScore :curRank="MAX"
 
-				DrawStringXCenterToHandle 1180,128,curRank,78,GetColor(25,25,25),hdxfont(fChartDetail)
+				DrawStringXCenterToHandle 1180,128,curRank,78,GetColor(25,25,25),hdxfont(fPier_r20)
 			}
 
 	//iUI_bg_Gauge
@@ -323,15 +320,15 @@
 			setease 32,0,ease_cubic_out
 			EasePosX=TxDrawPosX+getease(SceneCount-22,15)
 
-			DrawStringToHandle EasePosX,655,GaugeValStr,GetColor(15,15,15),hdxfont(fGaugeVal)
+			DrawStringToHandle EasePosX,655,GaugeValStr,GetColor(15,15,15),hdxfont(fSQ_20)
 
 			setease 16,0,ease_cubic_out
 			EasePosX=getease(SceneCount-22,20)
 			//最大コンボ
-			DrawStringToHandle 740+EasePosX,655,str(curMaxCombo),GetColor(25,25,25),hdxfont(fChartDetail)
+			DrawStringToHandle 740+EasePosX,655,str(curMaxCombo),GetColor(25,25,25),hdxfont(fPier_r20)
 
 			//BPM値
-			DrawStringToHandle 880+EasePosX,655,str(int(curBPM)),GetColor(25,25,25),hdxfont(fChartDetail)
+			DrawStringToHandle 880+EasePosX,655,str(int(curBPM)),GetColor(25,25,25),hdxfont(fPier_r20)
 
 			//ゲージ描画
 			dim hGaugeImg
@@ -467,7 +464,7 @@
 			EaseAlpha=getease(JudgeResCount,15)
 
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(JudgeResCount,15)
-			DrawStringToHandle 50+EasePosX,220,str(curCombo),GetColor(255,255,255),hdxfont(fCombo)
+			DrawStringToHandle 50+EasePosX,220,str(curCombo),GetColor(255,255,255),hdxfont(fSQ_45)
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(JudgeResCount,15)
 			DrawGraph 50+EasePosX+strlen(str(curCombo))*48,235,hdximg(iUI_tx_Combo),TRUE
 		}
@@ -535,7 +532,7 @@
 		setease 150,256,ease_cubic_out
 		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(updateLyricsCount,25)
 		setease 16,0,ease_cubic_out
-		DrawStringXCenterToHandle 0,DispHeight-180+getease(updateLyricsCount,25),curLyrics,DispWidth,GetColor(255,255,255),hdxfont(fLyrics)
+		DrawStringXCenterToHandle 0,DispHeight-180+getease(updateLyricsCount,25),curLyrics,DispWidth,GetColor(255,255,255),hdxfont(fNoto_m24)
 
 	//暗転
 		setease 256,200,ease_linear

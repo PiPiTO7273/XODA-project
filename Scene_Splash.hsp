@@ -1,0 +1,59 @@
+
+*Scene_Splash
+
+	SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+
+	//背景
+	DrawGraph 0,0,hdximg(iSplash),FALSE
+
+	DrawGraph 150,140,hdximg(iSplash_Title),TRUE
+	DrawGraph 270,256,hdximg(iSplash_Phones),TRUE
+
+	DrawStringToHandle 365,275,"よりよいサウンドを体験するには、ヘッドホンやイヤホンを使用してください。",GetColor(255,255,255),hdxfont(fNoto_r18)
+	DrawStringXCenterToHandle 0,400,"XODAはオープンソースソフトウェアです。新機能や最新情報はGithubのリポジトリを参照してください。",DispWidth,GetColor(230,230,230),hdxfont(fNoto_r14)
+	DrawStringXCenterToHandle 0,430,"https://github.com/PiPiTO7273/XODA-project/",DispWidth,GetColor(230,230,230),hdxfont(fNoto_r14)
+
+	DrawStringXCenterToHandle 0,550,"Copyright (c) 2019-2021 PiPiTO Software.",DispWidth,GetColor(230,230,230),hdxfont(fNoto_r18)
+
+	DrawStringToHandle 456,593,"DX Library",GetColor(200,200,200),hdxfont(fNoto_r12)
+	DrawStringToHandle 533,593,"Copyright (C) 2001-2021 Takumi Yamada.",GetColor(200,200,200),hdxfont(fNoto_r12)
+	DrawStringToHandle 456,615,"BASS 2.4",GetColor(200,200,200),hdxfont(fNoto_r12)
+	DrawStringToHandle 533,615,"Copyright (c) 1999-2020 Un4seen Developments Ltd.",GetColor(200,200,200),hdxfont(fNoto_r12)
+
+	//暗転
+	setease 256,0,ease_linear
+	SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,30)
+	if SceneCount>30+60*3 {
+		setease 0,256,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-30-60*3,30)
+	}
+	DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
+
+	if SceneCount>30*2+60*3 {
+		/*
+		curSceneID=ID_Play
+		gosub*InitScene
+		gosub*Scene_Init_Play
+		gosub*LoadChart
+		//カウンタ開始
+		PlayStartMS=GetNowCount()
+		*/
+		curSceneID=ID_Signin
+		gosub*InitScene
+		gosub*Scene_Init_Signin
+
+		PlayMovieToGraph hdximg(iBackground),DX_PLAYTYPE_LOOP
+		BASS_ChannelPlay hbasssnd(bgmMain)
+	}
+	if SceneCount==30+1 :gosub*Scene_Splash_SyncLoad
+
+	return
+
+*Scene_Splash_SyncLoad
+
+	//オンライン接続
+	netinit
+	gosub*OnlineSignin
+	gosub*Create_AQProfileBuf
+
+	return

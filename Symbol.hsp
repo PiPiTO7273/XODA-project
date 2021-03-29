@@ -1,20 +1,53 @@
 
 //フォントハンドル
-#enum fSysLayer	=	0
-#enum fCurScore
-#enum fGaugeVal
-#enum fChartDetail
-#enum fLyrics
-#enum fCombo
-#enum fPlayDetail
+#enum fNoto_r18	=	0
+#enum fNoto_r16
+#enum fNoto_r15
+#enum fNoto_r14
+#enum fNoto_r12
+#enum fNoto_r10
+#enum fNoto_m24
+#enum fNoto_m16
+#enum fNoto_m14
+#enum fNoto_m12
+#enum fNoto_b22
+#enum fNoto_b20
+#enum fNoto_b12
+#enum fPier_m22
+#enum fPier_m20
+#enum fPier_m16
+#enum fPier_r32
+#enum fPier_r24
+#enum fPier_r20
+#enum fPier_r16
+#enum fPier_r14
+#enum fPier_r12
+#enum fPier_r8
+#enum fSQ_45
+#enum fSQ_32
+#enum fSQ_28
+#enum fSQ_24
+#enum fSQ_20
+#enum fSQ_16
+#enum fEarth_r16
+#enum fEarth_eb16
+#enum fEarth_eb14
+#enum fGood_12
+#enum fMplus_15
 
 //シーンID
 #enum ID_Boot		=	0
+#enum ID_Splash
+#enum ID_Signin
 #enum ID_Play
 
 //DxLibグラフィック
 #enum iTmp			=	0
 #enum iBackground
+#enum ibg_Nav
+#enum ibg_GuidePanel
+#enum iGuide_Large
+#enum iGuide_Small
 #enum iUI_bg_SongInfo
 #enum iUI_bg_Profile
 #enum iUI_bg_Score
@@ -43,6 +76,15 @@
 #enum iBurst_Combo_x800
 #enum iBurst_Combo_x900
 #enum iBurst_Combo_x1000
+
+#enum iSplash
+#enum iSplash_Phones
+#enum iSplash_Title
+
+#enum ibg_Signin
+#enum iNav_Signin
+#enum ibg_PlayerData
+#enum iLayer_PlayerData
 
 #enum iMax
 

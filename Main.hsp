@@ -43,6 +43,8 @@ goto*Startup
 #include"Symbol.hsp"
 #include"Function_Default.hsp"
 #include"Function_Play.hsp"
+#include"Scene_Splash.hsp"
+#include"Scene_Signin.hsp"
 #include"Scene_Play.hsp"
 
 *Startup
@@ -65,20 +67,20 @@ goto*Startup
 	AddDebugConsole STYLE_STATUS,"DISPLAY.WIDTH = "+DispWidth
 	AddDebugConsole STYLE_STATUS,"DISPLAY.HEIGHT = "+DispHeight
 	AddDebugConsole STYLE_STATUS,"BUILD.VERSION = "+BuildVersion_Major+"."+BuildVersion_Minor
-	AddDebugConsole STYLE_STATUS,"SERVICE.HOST = "+RepHiddenWords(str(ServiceHost),"*")
-	AddDebugConsole STYLE_STATUS,"SERVICE.USERNAME = "+RepHiddenWords(str(ServiceUserName),"*")
-	AddDebugConsole STYLE_STATUS,"SERVICE.PASSWORD = "+RepHiddenWords(str(ServicePassword),"*")
+	AddDebugConsole STYLE_STATUS,"SERVICE.HOST = "+RepHiddenWords(str(SERVICE_HOST),"*")
+	AddDebugConsole STYLE_STATUS,"SERVICE.USERNAME = "+RepHiddenWords(str(SERVICE_USERNAME),"*")
+	AddDebugConsole STYLE_STATUS,"SERVICE.PASSWORD = "+RepHiddenWords(str(SERVICE_PASSWORD),"*")
 	AddDebugConsole STYLE_NORMAL,"起動設定の読み込み完了"
 
 	//DXライブラリ初期化
-	screen 0,DispWidth,DispHeight,0,ginfo(20)/2-DispWidth/2,ginfo(21)/2-DispHeight/2
 	AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化開始"
 	SetOutApplicationLogValidFlag 0
+	screen 0,DispWidth,DispHeight,0,ginfo(20)/2-DispWidth/2,ginfo(21)/2-DispHeight/2
+	SetUserWindow hwnd
+	SetMainWindowText"XODA v"+BuildVersion_Major+"."+BuildVersion_Minor
 	ChangeWindowMode TRUE
 	SetGraphMode DispWidth,DispHeight,32
-	SetUserWindow hwnd
 	SetAlwaysRunFlag TRUE
-	SetMainWindowText"XODA v"+BuildVersion_Major+"."+BuildVersion_Minor
 	SetWaitVSyncFlag TRUE
 	dxlib_Init
 	if stat==-1 {
@@ -148,18 +150,50 @@ goto*Startup
 
 	//フォントデータ初期化
 	dim hdxfont
-	hdxfont(fSysLayer)=CreateFontToHandle("SQNumber",20,-1,DX_FONTTYPE_NORMAL)
-	hdxfont(fCurScore)=CreateFontToHandle("Pier Sans",32,-1,DX_FONTTYPE_ANTIALIASING_4X4)
-	hdxfont(fGaugeVal)=CreateFontToHandle("SQNumber",20,-1,DX_FONTTYPE_NORMAL)
-	hdxfont(fChartDetail)=CreateFontToHandle("Pier Sans",20,-1,DX_FONTTYPE_ANTIALIASING_4X4)
-	hdxfont(fLyrics)=CreateFontToHandle("Noto Sans CJK JP Medium",24,-1,DX_FONTTYPE_ANTIALIASING_EDGE_4X4)
-	hdxfont(fCombo)=CreateFontToHandle("SQNumber",45,-1,DX_FONTTYPE_ANTIALIASING)
-	hdxfont(fPlayDetail)=CreateFontToHandle("M+ 2m",15,1,DX_FONTTYPE_ANTIALIASING)
+	hdxfont(fNoto_r18)=CreateFontToHandle("Noto Sans CJK JP Regular",18,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fNoto_r16)=CreateFontToHandle("Noto Sans CJK JP Regular",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fNoto_r15)=CreateFontToHandle("Noto Sans CJK JP Regular",15,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fNoto_r14)=CreateFontToHandle("Noto Sans CJK JP Regular",14,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fNoto_r12)=CreateFontToHandle("Noto Sans CJK JP Regular",12,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fNoto_r10)=CreateFontToHandle("Noto Sans CJK JP Regular",10,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fNoto_m24)=CreateFontToHandle("Noto Sans CJK JP Medium",24,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fNoto_m16)=CreateFontToHandle("Noto Sans CJK JP Medium",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fNoto_m14)=CreateFontToHandle("Noto Sans CJK JP Medium",14,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fNoto_m12)=CreateFontToHandle("Noto Sans CJK JP Medium",12,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fNoto_b22)=CreateFontToHandle("Noto Sans CJK JP Bold",22,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fNoto_b20)=CreateFontToHandle("Noto Sans CJK JP Bold",20,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fNoto_b12)=CreateFontToHandle("Noto Sans CJK JP Bold",12,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fPier_m22)=CreateFontToHandle("Pier Sans Medium",22,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fPier_m20)=CreateFontToHandle("Pier Sans Medium",20,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fPier_m16)=CreateFontToHandle("Pier Sans Medium",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fPier_r32)=CreateFontToHandle("Pier Sans",32,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fPier_r24)=CreateFontToHandle("Pier Sans",24,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fPier_r20)=CreateFontToHandle("Pier Sans",20,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fPier_r16)=CreateFontToHandle("Pier Sans",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fPier_r14)=CreateFontToHandle("Pier Sans",14,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fPier_r12)=CreateFontToHandle("Pier Sans",22,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fPier_r8)=CreateFontToHandle("Pier Sans",8,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fSQ_45)=CreateFontToHandle("SQNumber",45,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fSQ_32)=CreateFontToHandle("SQNumber",32,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fSQ_28)=CreateFontToHandle("SQNumber",28,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fSQ_24)=CreateFontToHandle("SQNumber",24,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fSQ_20)=CreateFontToHandle("SQNumber",20,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fSQ_16)=CreateFontToHandle("SQNumber",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fEarth_r16)=CreateFontToHandle("Earth Orbiter Regular",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fEarth_eb16)=CreateFontToHandle("Earth Orbiter Extra-Bold",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fEarth_eb14)=CreateFontToHandle("Earth Orbiter Extra-Bold",14,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fGood_12)=CreateFontToHandle("Good Times",12,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	hdxfont(fMplus_15)=CreateFontToHandle("M+ 2m",15,1,DX_FONTTYPE_ANTIALIASING_4X4)
 
 	//画像読み込み
 	dim hdximg,iMax
 	SetUsePremulAlphaConvertLoad TRUE
 	hdximg(iBackground)=LoadGraph("Data/Movie/background.ogv")
+	hdximg(ibg_Nav)=LoadGraph("Data/Image/bg_Navigation.png")
+	hdximg(ibg_GuidePanel)=LoadGraph("Data/Image/bg_GuidePanel.png")
+	hdximg(iGuide_Large)=LoadGraph("Data/Image/Guide_Large.png")
+	hdximg(iGuide_Small)=LoadGraph("Data/Image/Guide_Small.png")
+
 	hdximg(iUI_bg_SongInfo)=LoadGraph("Data/Image/bg_SongInfo.png")
 	hdximg(iUI_bg_Profile)=LoadGraph("Data/Image/bg_Profile.png")
 	hdximg(iUI_bg_Score)=LoadGraph("Data/Image/bg_Score.png")
@@ -168,13 +202,10 @@ goto*Startup
 	hdximg(iChar_Player)=LoadGraph("Data/Image/Player.png")
 	hdximg(iMovie_Start)=LoadGraph("Data/Movie/Start.ogv")
 	hdximg(iHitCircle)=LoadGraph("Data/Object/Hit/Circle.png")
-
 	hdximg(iParticle_Line_256_White)=LoadGraph("Data/Object/Particle/White_256.png")
 	hdximg(iParticle_Fade_White)=LoadGraph("Data/Object/Particle/White_Fade.png")
 	hdximg(iPlay_bg_Grid)=LoadGraph("Data/Object/Background/Grid.png")
-
 	hdximg(iLaneEffect)=LoadGraph("Data/Image/LaneEffect.png")
-
 	hdximg(iBurst_Combo_x50)=LoadGraph("Data/Object/Burst/Combo_50.png")
 	hdximg(iBurst_Combo_x100)=LoadGraph("Data/Object/Burst/Combo_100.png")
 	hdximg(iBurst_Combo_x200)=LoadGraph("Data/Object/Burst/Combo_200.png")
@@ -186,6 +217,20 @@ goto*Startup
 	hdximg(iBurst_Combo_x800)=LoadGraph("Data/Object/Burst/Combo_800.png")
 	hdximg(iBurst_Combo_x900)=LoadGraph("Data/Object/Burst/Combo_900.png")
 	hdximg(iBurst_Combo_x1000)=LoadGraph("Data/Object/Burst/Combo_1000.png")
+
+	hdximg(iSplash)=LoadGraph("Data/Image/bg_Splash.png")
+	hdximg(iSplash_Phones)=LoadGraph("Data/Image/Splash_Phones.png")
+	hdximg(iSplash_Title)=LoadGraph("Data/Image/Splash_Title.png")
+
+	hdximg(ibg_Signin)=LoadGraph("Data/Image/bg_Signin.png")
+	hdximg(iNav_Signin)=LoadGraph("Data/Image/Nav_Signin.png")
+	hdximg(ibg_PlayerData)=LoadGraph("Data/Image/bg_PlayerData.png")
+	hdximg(iLayer_PlayerData)=LoadGraph("Data/Image/Layer_PlayerData.png")
+
+	dim hdxarr_Button_Yes,2
+	LoadDivGraph"Data/Image/Button_Yes.png",2,1,2,128,40,varptr(hdxarr_Button_Yes)
+	dim hdxarr_Button_No,2
+	LoadDivGraph"Data/Image/Button_No.png",2,1,2,128,40,varptr(hdxarr_Button_No)
 
 	dim hdxarr_Char_Slime,9*3
 	dim hdxarr_Char_Slime_Hold,3*3*3
@@ -212,7 +257,7 @@ goto*Startup
 
 	//シーンID
 	dim curSceneID
-	curSceneID=ID_Play
+	curSceneID=ID_Splash
 
 	//現在のFPS値
 	ddim curFPSval,1
@@ -220,26 +265,11 @@ goto*Startup
 	//フレームカウンタ
 	dim FrameCount
 
-	//オンライン接続
-	gosub*OnlineSignin
-
 	//////debug
-	//AquaPass初期設定
-	sdim aqName
-	aqName="Player01"
-	ddim aqRate,1
-	aqRate=12.34
-	sdim aqBadge
-	aqBadge="GOD"
-	sdim aqIcon
-	aqIcon=".default"
-	gosub*Create_AQProfileBuf
 	//読み込む譜面ファイル名
 	sdim chartFileName
 	chartFileName="0008"
 	gosub*InitScene
-	gosub*Scene_Init_Play
-	gosub*LoadChart
 
 *MainLoop
 
@@ -248,6 +278,12 @@ goto*Startup
 
 	//シーン別描画
 	switch curSceneID
+		case ID_Splash
+			gosub*Scene_Splash
+		swbreak
+		case ID_Signin
+			gosub*Scene_Signin
+		swbreak
 		case ID_Play
 			gosub*Scene_Play
 		swbreak
@@ -257,7 +293,7 @@ goto*Startup
 	if FrameCount\4==0 {
 		GetFPS:getdouble:curFPSval=refdval
 	}
-	DrawStringToHandle 16,DispHeight-32,"FPS "+curFPSval,GetColor(255,255,255),hdxfont(fSysLayer)
+	;DrawStringToHandle 16,DispHeight-32,"FPS "+curFPSval,GetColor(255,255,255),hdxfont(fSQ_20)
 
 	//カウンタ処理
 	SceneCount++
