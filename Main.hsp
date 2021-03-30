@@ -18,6 +18,7 @@
 #include"llmod3/llmod3.hsp"
 #include"llmod3/console.hsp"
 #include"getProcess.hsp"
+#include"hspext.as"
 
 #packopt hide 1
 
@@ -36,6 +37,7 @@
 #define CodeName			"MOCHI SLIME"
 #define BuildVersion_Major	0
 #define BuildVersion_Minor	2
+#define Usebitsadmin		0
 #addition"AdminKey.hsp"
 
 goto*Startup

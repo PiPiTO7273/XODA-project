@@ -380,51 +380,72 @@
 	return
 
 *OnlineUpdate
-	dim htmpFont
-	htmpFont(0)=CreateFontToHandle("Meiryo UI",20,-1,DX_FONTTYPE_ANTIALIASING_4X4)
-	htmpFont(1)=CreateFontToHandle("Meiryo UI",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
 
-	dim updateID:dim updateres:dim updatesize:dim updatelength
+	AddDebugConsole STYLE_NORMAL,"オンラインアップデートを実行します。"
+	if Usebitsadmin==1 {
+		AddDebugConsole STYLE_NORMAL,"ファイルの処理にbitsadminを使用します。"
+		repeat length(updatepath)
+			AddDebugConsole STYLE_NORMAL,"["+(cnt+1)+"/"+length(updatepath)+"] \""+updatepath(cnt)+"\"の転送を開始します。"
+			exec"bitsadmin /transfer download "+updatelink(cnt)+" \""+dir_cur+"\\"+updatepath(cnt)+"\""
+			repeat
+				sdim ProcList
+				get_process ProcList
+				if instr(ProcList,0,"bitsadmin.exe")==-1 :break
+				wait 10
+			loop
+		loop
+		AddDebugConsole STYLE_NORMAL,"オンラインアップデートが終了しました。"
+	} else {
+		gsel 0,1
+		AddDebugConsole STYLE_NORMAL,"ファイルの処理にhspinetを使用します。"
 
-	netinit
-	CreateUpdateRequest 0
-	repeat
+		//開始
+			dim htmpFont
+			htmpFont(0)=CreateFontToHandle("Meiryo UI",20,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+			htmpFont(1)=CreateFontToHandle("Meiryo UI",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
 
-			exist updatepath(updateID)
-			updatesize=strsize
+			dim updateID:dim updateres:dim updatesize:dim updatelength
 
-			SetDrawScreen DX_SCREEN_BACK
-			ClearDrawScreen
+			netinit
+			CreateUpdateRequest 0
+			repeat
 
-			//画面初期化
-			DrawBox 0,0,DispWidth,DispHeight,GetColor(255,255,255),TRUE
-			DrawBox 0,0,DispWidth,128,GetColor(245,245,245),TRUE
-			DrawLine 0,128,DispWidth,128,GetColor(200,200,200)
+					exist updatepath(updateID)
+					updatesize=strsize
 
-			DrawStringToHandle 64,80,"オンラインアップデート",GetColor(25,25,25),htmpFont(0)
-			DrawStringToHandle 1130,85,"Ver "+BuildVersion_Major+"."+BuildVersion_Minor,GetColor(50,50,50),htmpFont(1)
+					SetDrawScreen DX_SCREEN_BACK
+					ClearDrawScreen
 
-			DrawStringXCenterToHandle 0,240,"アップデートに必要なファイルをダウンロード中です。\nしばらくお待ち下さい...",DispWidth,GetColor(40,40,40),htmpFont(1)
+					//画面初期化
+					DrawBox 0,0,DispWidth,DispHeight,GetColor(255,255,255),TRUE
+					DrawBox 0,0,DispWidth,128,GetColor(245,245,245),TRUE
+					DrawLine 0,128,DispWidth,128,GetColor(200,200,200)
 
-			DrawStringToHandle 265,360,updatepath(updateID),GetColor(50,50,50),htmpFont(1)
-			DrawStringXAlignRightToHandle 265,360,""+(updateID+1)+"/"+length(updatepath)+"件のダウンロード",750,GetColor(50,50,50),htmpFont(1)
-			DrawBox 265,400,265+750,400+20,GetColor(150,150,150),FALSE
-			DrawBox 265,400,265+int(750.0*(double(updatesize)/double(updatelength))),400+20,GetColor(184,255,41),TRUE
-			DrawBox 265,400,265+int(750.0*(double(updatesize)/double(updatelength))),400+20,GetColor(150,150,150),FALSE
+					DrawStringToHandle 64,80,"オンラインアップデート",GetColor(25,25,25),htmpFont(0)
+					DrawStringToHandle 1130,85,"Ver "+BuildVersion_Major+"."+BuildVersion_Minor,GetColor(50,50,50),htmpFont(1)
 
-			ScreenFlip
+					DrawStringXCenterToHandle 0,240,"アップデートに必要なファイルをダウンロード中です。\nしばらくお待ち下さい...",DispWidth,GetColor(40,40,40),htmpFont(1)
 
-		netexec updateres
-		if updateres!0 {
-			updateID++
-			if updateID>=length(updatepath) :break
-			CreateUpdateRequest updateID
-		}
-		await
-	loop
+					DrawStringToHandle 265,360,updatepath(updateID),GetColor(50,50,50),htmpFont(1)
+					DrawStringXAlignRightToHandle 265,360,""+(updateID+1)+"/"+length(updatepath)+"件のダウンロード",750,GetColor(50,50,50),htmpFont(1)
+					DrawBox 265,400,265+750,400+20,GetColor(150,150,150),FALSE
+					DrawBox 265,400,265+int(750.0*(double(updatesize)/double(updatelength))),400+20,GetColor(184,255,41),TRUE
+					DrawBox 265,400,265+int(750.0*(double(updatesize)/double(updatelength))),400+20,GetColor(150,150,150),FALSE
 
-	DeleteFontToHandle htmpFont(0)
-	DeleteFontToHandle htmpFont(1)
+					ScreenFlip
+
+				netexec updateres
+				if updateres!0 {
+					updateID++
+					if updateID>=length(updatepath) :break
+					CreateUpdateRequest updateID
+				}
+				await
+			loop
+
+			DeleteFontToHandle htmpFont(0)
+			DeleteFontToHandle htmpFont(1)
+	}
 	return
 
 *Create_AQProfileBuf
