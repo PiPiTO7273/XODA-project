@@ -39,6 +39,7 @@
 #enum ID_Boot		=	0
 #enum ID_Splash
 #enum ID_Signin
+#enum ID_ModeSelect
 #enum ID_Play
 
 //DxLibグラフィック
@@ -85,6 +86,16 @@
 #enum iNav_Signin
 #enum ibg_PlayerData
 #enum iLayer_PlayerData
+
+#enum iNav_ModeSelect
+#enum iMode_Item_Normal
+#enum iMode_Item_Challenge
+#enum iMode_Item_Practice
+#enum iMode_Item_Config
+#enum iMode_Item_Cursor
+#enum ibg_PlayerStatus
+#enum iLayer_PlayerStatus
+#enum iMixed_PlayerStatus
 
 #enum iMax
 

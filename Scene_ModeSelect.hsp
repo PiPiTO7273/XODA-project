@@ -1,0 +1,115 @@
+
+*Scene_Init_ModeSelect
+
+	//バッファ生成
+		if hdximg(iMixed_PlayerStatus)!0 :DeleteGraph hdximg(iMixed_PlayerStatus)
+		hdximg(iMixed_PlayerStatus)=MakeScreen(550,54,TRUE)
+		SetDrawScreen hdximg(iMixed_PlayerStatus)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 0,0,hdximg(ibg_PlayerStatus),TRUE
+		DrawGraph 0,0,hdximg(iLayer_PlayerStatus),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawStringToHandle 834-730,45-32,strf("%.2f",str(aqRate)),GetColor(30,30,30),hdxfont(fPier_r20)
+		DrawStringToHandle 910-730,47-32,"Lv."+aqLevel,GetColor(30,30,30),hdxfont(fPier_r16)
+		DrawStringToHandle 975-730,45-32,aqName,GetColor(30,30,30),hdxfont(fPier_r20)
+		DrawStringToHandle 1210-730,48-32,str(aqTicket),GetColor(30,30,30),hdxfont(fSQ_16)
+
+	//変数初期化
+		dim SelItemID
+		dim SelItemCount
+		dim bfSelItemID
+
+	return
+
+*Scene_ModeSelect
+
+	//キー判定
+	KeyFlag(0)=CheckHitKey(KEY_INPUT_LEFT)
+	KeyFlag(1)=CheckHitKey(KEY_INPUT_RIGHT)
+
+	if bfKeyFlag(0)==0&KeyFlag(0)==1 {
+		bfSelItemID=SelItemID
+		SelItemID--
+		SelItemCount=0
+	}
+	if bfKeyFlag(1)==0&KeyFlag(1)==1 {
+		bfSelItemID=SelItemID
+		SelItemID++
+		SelItemCount=0
+	}
+	if SelItemID<0 :SelItemID=3
+	if SelItemID>3 :SelItemID=0
+
+	bfKeyFlag(0)=KeyFlag(0)
+	bfKeyFlag(1)=KeyFlag(1)
+
+	//背景
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawGraph 0,0,hdximg(iBackground),FALSE
+
+	//ナビゲーション
+		if decideFlag==FALSE {
+			setease 0,256,ease_cubic_out
+			EaseAlpha=getease(SceneCount,10)
+			setease -32,0,ease_cubic_out
+			EasePosX=getease(SceneCount,10)
+		} else {
+			setease 256,0,ease_cubic_out
+			EaseAlpha=getease(decideFrameCount-20,10)
+			setease 0,-32,ease_cubic_out
+			EasePosX=getease(decideFrameCount-20,10)
+		}
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+		DrawGraph 32+EasePosX,16,hdximg(iNav_ModeSelect),TRUE
+
+	//案内文字列（背景）
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 32,67,hdximg(ibg_Nav),TRUE
+
+	//案内文字列
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawStringToHandle 48,72,"遊びたいモードを選択してください。",GetColor(230,230,230),hdxfont(fNoto_b12)
+
+	//項目
+	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		setease 0,-20,ease_cubic_out
+		EasePosY=getease(SelItemCount,20)
+		dim ItemPosOffset,4
+		ItemPosOffset(SelItemID)=EasePosY
+
+		DrawGraph 192,200+ItemPosOffset(0),hdximg(iMode_Item_Normal),TRUE
+		DrawGraph 424,200+ItemPosOffset(1),hdximg(iMode_Item_Challenge),TRUE
+		DrawGraph 656,200+ItemPosOffset(2),hdximg(iMode_Item_Practice),TRUE
+		DrawGraph 888,200+ItemPosOffset(3),hdximg(iMode_Item_Config),TRUE
+
+		setease 0,256,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,15)
+		setease 192+232*bfSelItemID+25,192+232*SelItemID+25,ease_cubic_out
+		DrawGraph getease(SelItemCount,15),472,hdximg(iMode_Item_Cursor),TRUE
+
+	//ステータス
+	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 730,32,hdximg(iMixed_PlayerStatus),TRUE
+
+	//ガイド
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 0,DispHeight-128,hdximg(ibg_GuidePanel),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 540,650,hdximg(iGuide_Large),TRUE
+		DrawGraph 370,660,hdximg(iGuide_Small),TRUE
+		DrawGraph 760,660,hdximg(iGuide_Small),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		sdim tmpstr:tmpstr="ENTER : 決定"
+		DrawStringXCenterToHandle 540,658,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),200,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="← : カーソル移動"
+		DrawStringXCenterToHandle 370,668,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="→ : カーソル移動"
+		DrawStringXCenterToHandle 760,668,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+
+	//カウンタ
+		SelItemCount++
+
+	return

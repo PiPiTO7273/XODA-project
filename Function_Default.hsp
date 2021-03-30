@@ -275,7 +275,7 @@
 	sdim authUserName
 	sdim authPassword
 
-	exist"Data/OnlineAuth.dat"
+	exist"Data/core_OnlineAuth.dat"
 	if strsize==-1 {
 		AddDebugConsole STYLE_NORMAL,"アカウント情報が見つかりません。ゲストユーザーで開始します。"
 		authUserName="GUEST"
@@ -284,7 +284,7 @@
 		AddDebugConsole STYLE_NORMAL,"オンライン認証を開始します。"
 		sdim authInfobuf,strsize
 		notesel authInfobuf
-		noteload"Data/OnlineAuth.dat"
+		noteload"Data/core_OnlineAuth.dat"
 		authUserName=GetINIvalue(authInfobuf,"ONLINEAUTH","ID")
 		authPassword=GetINIvalue(authInfobuf,"ONLINEAUTH","KEY")
 
@@ -295,7 +295,7 @@
 		//HTTP接続
 		AddDebugConsole STYLE_NORMAL,"HTTPリクエストを発行しました。 \""+SERVICE_HTTP+"svcsavedata/"+"\""
 		neturl SERVICE_HTTP+"svcsavedata/"
-		netdlname"Data/Savedata.dat"
+		netdlname"Data/Cache/tmp_Savedata.dat"
 		netrequest authUserName+".dat"
 			dim netres
 			repeat
@@ -309,20 +309,21 @@
 			sdim aqPassword
 			sdim aqBadge
 			sdim aqRate
-			sdim aqLevel
+			dim aqLevel
 			sdim aqLastplay
 			dim aqNumClear
 			dim aqNumFullcombo
 			dim aqNumAllEx
+			dim aqNumTicket
 
-		exist"Data/Savedata.dat"
+		exist"Data/Cache/tmp_Savedata.dat"
 		if strsize==-1 {
 			AddDebugConsole STYLE_WARNING,"セーブデータの同期に失敗しました。ゲストユーザーで開始します。"
 			gosub*SetGuestSavedata
 		} else {
 			sdim saveInfobuf,strsize
 			notesel saveInfobuf
-			noteload"Data/Savedata.dat"
+			noteload"Data/Cache/tmp_Savedata.dat"
 
 			//パスワード認証
 			sdim aqPassword,256
@@ -333,19 +334,23 @@
 
 				//初回登録
 				if instr(saveInfobuf,0,"XODA.RATE")==-1 :saveInfobuf+"XODA.RATE=0.0\n"
+				if instr(saveInfobuf,0,"XODA.LEVEL")==-1 :saveInfobuf+"XODA.LEVEL=0\n"
 				if instr(saveInfobuf,0,"XODA.BADGE")==-1 :saveInfobuf+"XODA.BADGE=\n"
 				if instr(saveInfobuf,0,"XODA.LASTPLAY")==-1 :saveInfobuf+"XODA.LASTPLAY=-\n"
 				if instr(saveInfobuf,0,"XODA.NUMCLEAR")==-1 :saveInfobuf+"XODA.NUMCLEAR=\n"
 				if instr(saveInfobuf,0,"XODA.NUMFULLCOMBO")==-1 :saveInfobuf+"XODA.NUMFULLCOMBO=\n"
 				if instr(saveInfobuf,0,"XODA.NUMALLEX")==-1 :saveInfobuf+"XODA.NUMALLEX=\n"
+				if instr(saveInfobuf,0,"XODA.NUMTICKET")==-1 :saveInfobuf+"XODA.NUMTICKET=\n"
 
 				aqName=GetINIvalue(saveInfobuf,"SAVEDATA","USERNAME")
 				aqRate=double(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.RATE"))
+				aqLevel=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.LEVEL"))
 				aqBadge=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.BADGE")
 				aqLastplay=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.LASTPLAY")
 				aqNumClear=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMCLEAR"))
 				aqNumFullcombo=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMFULLCOMBO"))
 				aqNumAllEx=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMALLEX"))
+				aqNumTicket=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMTICKET"))
 
 			} else {
 				AddDebugConsole STYLE_WARNING,"パスワードの認証エラーが発生しました。ゲストユーザーで開始します。"
@@ -364,18 +369,20 @@
 
 	aqName=authUserName
 	aqRate=0.0
+	aqLevel=0
 	aqBadge="ゲスト"
 	aqLastplay="-"
 	aqNumClear=0
 	aqNumFullcombo=0
 	aqNumAllEx=0
+	aqNumTicket=0
 
 	return
 
 *OnlineUpdate
 	dim htmpFont
-	htmpFont(0)=CreateFontToHandle("Noto Sans CJK JP Medium",20,-1,DX_FONTTYPE_ANTIALIASING_4X4)
-	htmpFont(1)=CreateFontToHandle("Noto Sans CJK JP Regular",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	htmpFont(0)=CreateFontToHandle("Meiryo UI",20,-1,DX_FONTTYPE_ANTIALIASING_4X4)
+	htmpFont(1)=CreateFontToHandle("Meiryo UI",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
 
 	dim updateID:dim updateres:dim updatesize:dim updatelength
 
