@@ -90,13 +90,13 @@
 	return
 
 #defcfunc LoadGraph str _filename
-	exist _filename
-	if strsize==-1 {
-		AddDebugConsole TYPE_ERROR,"[IMG] \""+_filename+"\" ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB"
+	dim htmpgraph:htmpgraph=LoadGraph_org(_filename)
+	if htmpgraph==-1 {
+		AddDebugConsole TYPE_ERROR,"[IMG] \""+_filename+"\" ‚Ì“Ç‚İ‚İ‚ÅƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½"
 		goto*StopError
 	}
 	AddDebugConsole TYPE_NORMAL,"[IMG] \""+_filename+"\" ‚Ì“Ç‚İ‚İŠ®—¹"
-	return LoadGraph_org(_filename)
+	return htmpgraph
 
 #defcfunc ConvBooltoStr int _val
 	if _val==TRUE :return"TRUE":else:return"FALSE"

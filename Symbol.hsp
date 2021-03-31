@@ -40,11 +40,13 @@
 #enum ID_Splash
 #enum ID_Signin
 #enum ID_ModeSelect
+#enum ID_MusicSelect
 #enum ID_Play
 
 //DxLibグラフィック
 #enum iTmp			=	0
 #enum iBackground
+#enum iLayer_Scene
 #enum ibg_Nav
 #enum ibg_GuidePanel
 #enum iGuide_Large
@@ -96,6 +98,8 @@
 #enum ibg_PlayerStatus
 #enum iLayer_PlayerStatus
 #enum iMixed_PlayerStatus
+
+#enum iNav_MusicSelect
 
 #enum iMax
 

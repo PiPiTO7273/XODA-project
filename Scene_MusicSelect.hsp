@@ -1,0 +1,239 @@
+
+*Scene_Init_MusicSelect
+
+	//楽曲一覧を読み込み
+	exist"Data/core_Playlist.dat"
+	if strsize==-1 {
+		AddDebugConsole STYLE_ERROR,"楽曲のデータベースが見つかりません。"
+		goto*StopError
+	} else {
+		sdim SongLibBuf,strsize		//データベースのバッファ
+		sdim NoteLine
+
+		notesel SongLibBuf
+		noteload"Data/core_Playlist.dat"
+
+		sdim SongLibChartPath,64,3,notemax		//譜面ファイルの場所
+
+		sdim Libarr_ChartID,32,3,notemax		//譜面ファイルのパス
+		sdim Libarr_Title,64,3,notemax		//タイトル
+		sdim Libarr_Artist,64,3,notemax		//アーティスト
+		sdim Libarr_Difficulty,8,3,notemax		//難易度区分
+		sdim Libarr_Lyrics,512,3,notemax		//歌詞データ
+		dim Libarr_Level,3,notemax			//難易度数値
+		dim Libarr_Flag,3,notemax			//使用可能フラグ
+		ddim Libarr_DefBPM,3,notemax			//既定のBPM
+		ddim Libarr_MinBPM,3,notemax			//最低BPM
+		ddim Libarr_MaxBPM,3,notemax			//最高BPM
+		dim Libarr_TotalNotes,3,notemax		//ノーツ数
+		dim Libarr_Max						//項目数
+		Libarr_Max=notemax
+
+		dim SongLibLevID
+		dim SongLibSelID
+
+		//データベース解析
+		repeat notemax
+			notesel SongLibBuf
+			noteget NoteLine,cnt
+			split NoteLine,":",SongLibChartPath(0,cnt),SongLibChartPath(1,cnt),SongLibChartPath(2,cnt)
+			SongLibSelID=cnt
+			repeat 3
+				Libarr_ChartID(cnt,SongLibSelID)=getpath(SongLibChartPath(cnt,SongLibSelID),8+1)
+				exist SongLibChartPath(cnt,SongLibSelID)
+				if strsize==-1 {
+					//存在しない譜面ファイル
+					Libarr_Title(cnt,SongLibSelID)=""
+					Libarr_Artist(cnt,SongLibSelID)=""
+					Libarr_Difficulty(cnt,SongLibSelID)=""
+					Libarr_Lyrics(cnt,SongLibSelID)=""
+					Libarr_Level(cnt,SongLibSelID)=0
+					Libarr_Flag(cnt,SongLibSelID)=FALSE
+				} else {
+					//構文解析
+					sdim SongItemBuf,strsize
+					sdim ChartCmdName
+					sdim ChartPrm
+					sdim ChartDivPrm
+					notesel SongItemBuf
+					noteload SongLibChartPath(cnt,SongLibSelID)
+
+					SongLibLevID=cnt
+					repeat notemax
+						noteget NoteLine,cnt
+						split NoteLine,":",chartCmdName,ChartPrm
+						split ChartPrm,",",chartDivPrm
+
+						switch chartCmdName
+							case"#TITLE"
+								Libarr_Title(SongLibLevID,SongLibSelID)=ChartPrm
+							swbreak
+							case"#ARTIST"
+								Libarr_Artist(SongLibLevID,SongLibSelID)=ChartPrm
+							swbreak
+							case"#DIFFICULTY"
+								Libarr_Difficulty(SongLibLevID,SongLibSelID)=ChartPrm
+							swbreak
+							case"#LEVEL"
+								Libarr_Level(SongLibLevID,SongLibSelID)=int(ChartPrm)
+							swbreak
+							case"#DEFBPM"
+								Libarr_DefBPM(SongLibLevID,SongLibSelID)=double(ChartPrm)
+							swbreak
+							case"#SETBPM"
+								if Libarr_MinBPM(SongLibLevID,SongLibSelID)==0.0&Libarr_MaxBPM(SongLibLevID,SongLibSelID)==0.0 {
+									Libarr_DefBPM(SongLibLevID,SongLibSelID)=double(chartDivPrm(1))
+								}
+								if Libarr_MinBPM(SongLibLevID,SongLibSelID)==0.0 :Libarr_MinBPM(SongLibLevID,SongLibSelID)=double(ChartDivPrm(1))
+								if Libarr_MaxBPM(SongLibLevID,SongLibSelID)==0.0 :Libarr_MaxBPM(SongLibLevID,SongLibSelID)=double(ChartDivPrm(1))
+								if Libarr_MinBPM(SongLibLevID,SongLibSelID)>double(chartDivPrm(1)) {
+									Libarr_MinBPM(SongLibLevID,SongLibSelID)=double(chartDivPrm(1))
+								}
+								if Libarr_MaxBPM(SongLibLevID,SongLibSelID)<double(chartDivPrm(1)) {
+									Libarr_MaxBPM(SongLibLevID,SongLibSelID)=double(ChartDivPrm(1))
+								}
+							swbreak
+							case"#LYRICS"
+								strrep chartDivPrm(1),"*com",","	//置換
+								Libarr_Lyrics(SongLibLevID,SongLibSelID)+chartDivPrm(1)+"\n"
+							swbreak
+							case"#OBJ"
+								Libarr_TotalNotes(SongLibLevID,SongLibSelID)++
+							swbreak
+						swend
+					loop
+				}
+			loop
+		loop
+	}
+
+	//HTTP接続
+		AddDebugConsole STYLE_NORMAL,"HTTPリクエストを発行しました。 \""+SERVICE_HTTP+"svcsavedata/"+"\""
+		neturl SERVICE_HTTP+"svcsavedata/"
+		netdlname"Data/Cache/tmp_Savedata.dat"
+		netrequest"Shared.dat"
+			dim netres
+			repeat
+				netexec netres
+				if netres!0 :break
+				await
+			loop
+		exist"Data/Cache/tmp_Savedata.dat"
+		if strsize==-1 {
+			AddDebugConsole STYLE_WARNING,"オンラインランキングの取得に失敗しました。"
+		} else {
+			sdim IRsavedatabuf,strsize
+			notesel IRsavedatabuf
+			noteload"Data/Cache/tmp_Savedata.dat"
+			dim Libarr_IRrank,3,Libarr_Max,9
+			sdim Libarr_IRname,16,3,Libarr_Max,9
+			dim Libarr_IRscore,3,Libarr_Max,9
+			dim Libarr_MyIRrank,3,Libarr_Max
+			dim Libarr_MyIRscore,3,Libarr_Max
+
+			sdim TargetIRdata
+			sdim TargetIRchartID:sdim TargetIRrank
+			sdim TargetIRname:sdim TargetIRscore
+			sdim INIkey:sdim INIval
+
+			repeat notemax
+				noteget NoteLine,cnt
+				if cnt==0 :continue		//セクション行は無視
+
+				split NoteLine,"=",INIkey,INIval
+				split INIkey,".",TargetIRchartID,TargetIRrank
+				strrep TargetIRrank,"RANK#",""
+				split INIval,",",TargetIRname,TargetIRscore
+
+				dim TargetArrLevID:TargetArrLevID=-1
+				dim TargetArrSelID:TargetArrSelID=-1
+				dim CurArrID
+
+				repeat Libarr_Max
+					CurArrID=cnt
+					repeat 3
+						if TargetIRchartID==Libarr_ChartID(cnt,CurArrID) {
+							TargetArrLevID=cnt
+							TargetArrSelID=cnt
+						}
+					loop
+				loop
+				if TargetArrSelID==-1|TargetArrLevID==-1 {
+					AddDebugConsole STYLE_WARNING,"[SHARED] 無効なスコアデータです。"
+				} else {
+					TargetIRrank=int(TargetIRrank)
+					Libarr_IRrank(TargetArrLevID,TargetArrSelID,TargetIRrank)=int(TargetIRrank)
+					Libarr_IRname(TargetArrLevID,TargetArrSelID,TargetIRrank)=TargetIRname
+					Libarr_IRscore(TargetArrLevID,TargetArrSelID,TargetIRrank)=int(TargetIRscore)
+					if TargetIRname==aqName {
+						Libarr_MyIRrank(TargetArrLevID,TargetArrSelID)=int(TargetIRrank)
+						Libarr_MyIRscore(TargetArrLevID,TargetArrSelID)=int(TargetIRscore)
+					}
+				}
+			loop
+		}
+	return
+
+*Scene_MusicSelect
+
+	//背景
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawGraph 0,0,hdximg(iBackground),FALSE
+
+	//ナビゲーション
+		if decideFlag==FALSE {
+			setease 0,256,ease_cubic_out
+			EaseAlpha=getease(SceneCount,10)
+			setease -32,0,ease_cubic_out
+			EasePosX=getease(SceneCount,10)
+		} else {
+			setease 256,0,ease_cubic_out
+			EaseAlpha=getease(decideFrameCount-10,10)
+			setease 0,-32,ease_cubic_out
+			EasePosX=getease(decideFrameCount-10,10)
+		}
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+		DrawGraph 32+EasePosX,16,hdximg(iNav_MusicSelect),TRUE
+
+	//案内文字列（背景）
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 32,67,hdximg(ibg_Nav),TRUE
+
+	//案内文字列
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawStringToHandle 48,72,"プレーする楽曲を選択してください。",GetColor(230,230,230),hdxfont(fNoto_b12)
+
+	//プリローダ
+		setease 100,0,ease_cubic_out
+		EaseWidth=getease(SceneCount-10,20)
+		EaseHeight=getease(SceneCount-10,20)
+		EasePosX=DispWidth/2-EaseWidth/2
+		EasePosY=DispHeight/2-EaseHeight/2
+		setease 256,0,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,20)
+		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdxarr_Blocks(FrameCount/2\20),TRUE
+
+	//ガイド
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 0,DispHeight-128,hdximg(ibg_GuidePanel),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 540,650,hdximg(iGuide_Large),TRUE
+		DrawGraph 370,640,hdximg(iGuide_Small),TRUE
+		DrawGraph 760,640,hdximg(iGuide_Small),TRUE
+		DrawGraph 370,676,hdximg(iGuide_Small),TRUE
+		DrawGraph 760,676,hdximg(iGuide_Small),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		sdim tmpstr:tmpstr="ENTER : 決定"
+		DrawStringXCenterToHandle 540,658,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),200,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="D : オプション"
+		DrawStringXCenterToHandle 370,648,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="F : エフェクト設定"
+		DrawStringXCenterToHandle 760,648,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="↑↓ : カーソル移動"
+		DrawStringXCenterToHandle 370,684,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="←→ : 難易度変更"
+		DrawStringXCenterToHandle 760,684,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+
+	return

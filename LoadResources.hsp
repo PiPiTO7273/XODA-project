@@ -143,6 +143,8 @@
 		hdximg(ibg_PlayerStatus)=LoadGraph("Data/Image/bg_ModeSelect_Status.png")
 		hdximg(iLayer_PlayerStatus)=LoadGraph("Data/Image/Layer_ModeSelect_Status.png")
 
+		hdximg(iNav_MusicSelect)=LoadGraph("Data/Image/Nav_MusicSelect.png")
+
 	//配列画像素材の読み込み
 		dim hdxarr_Button_Yes,2
 		LoadDivGraph"Data/Image/Button_Yes.png",2,1,2,128,40,varptr(hdxarr_Button_Yes)
@@ -169,5 +171,14 @@
 		LoadDivGraph"Data/Image/Gauge_Normal.png",100,100,1,7,32,varptr(hdxarr_Gauge_Normal)
 		LoadDivGraph"Data/Image/Gauge_Hard.png",100,100,1,7,32,varptr(hdxarr_Gauge_Hard)
 		LoadDivGraph"Data/Image/Gauge_Madness.png",100,100,1,7,32,varptr(hdxarr_Gauge_Madness)
+
+		SetDXArchiveExtension"dat"
+		dim hdxarr_Blocks,24
+		repeat 24
+			hdxarr_Blocks(cnt)=LoadGraph("Data/Blocks/img"+(cnt+1)+".png")
+		loop
+
+	//レイヤー関連
+		hdximg(iLayer_Scene)=MakeScreen(DispWidth,DispHeight,TRUE)
 
 	return

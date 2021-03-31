@@ -25,24 +25,30 @@
 *Scene_ModeSelect
 
 	//キー判定
-	KeyFlag(0)=CheckHitKey(KEY_INPUT_LEFT)
-	KeyFlag(1)=CheckHitKey(KEY_INPUT_RIGHT)
+		KeyFlag(0)=CheckHitKey(KEY_INPUT_LEFT)
+		KeyFlag(1)=CheckHitKey(KEY_INPUT_RIGHT)
 
-	if bfKeyFlag(0)==0&KeyFlag(0)==1 {
-		bfSelItemID=SelItemID
-		SelItemID--
-		SelItemCount=0
-	}
-	if bfKeyFlag(1)==0&KeyFlag(1)==1 {
-		bfSelItemID=SelItemID
-		SelItemID++
-		SelItemCount=0
-	}
-	if SelItemID<0 :SelItemID=3
-	if SelItemID>3 :SelItemID=0
+		if bfKeyFlag(0)==0&KeyFlag(0)==1 {
+			bfSelItemID=SelItemID
+			SelItemID--
+			SelItemCount=0
+		}
+		if bfKeyFlag(1)==0&KeyFlag(1)==1 {
+			bfSelItemID=SelItemID
+			SelItemID++
+			SelItemCount=0
+		}
+		if SelItemID<0 :SelItemID=3
+		if SelItemID>3 :SelItemID=0
 
-	bfKeyFlag(0)=KeyFlag(0)
-	bfKeyFlag(1)=KeyFlag(1)
+		bfKeyFlag(0)=KeyFlag(0)
+		bfKeyFlag(1)=KeyFlag(1)
+		
+		if CheckHitKey(KEY_INPUT_RETURN)==TRUE :decideFlag=TRUE
+			if decideFlag==TRUE&decideFrameCount==0 {
+				//初回処理
+				SetDrawScreen DX_SCREEN_BACK
+			}
 
 	//背景
 		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
@@ -71,28 +77,56 @@
 		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 		DrawStringToHandle 48,72,"遊びたいモードを選択してください。",GetColor(230,230,230),hdxfont(fNoto_b12)
 
-	//項目
-	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-		setease 0,-20,ease_cubic_out
-		EasePosY=getease(SelItemCount,20)
-		dim ItemPosOffset,4
-		ItemPosOffset(SelItemID)=EasePosY
+	//----- 以下、シーン別レイヤー -----
+		SetDrawScreen hdximg(iLayer_Scene)
+		ClearDrawScreen
 
-		DrawGraph 192,200+ItemPosOffset(0),hdximg(iMode_Item_Normal),TRUE
-		DrawGraph 424,200+ItemPosOffset(1),hdximg(iMode_Item_Challenge),TRUE
-		DrawGraph 656,200+ItemPosOffset(2),hdximg(iMode_Item_Practice),TRUE
-		DrawGraph 888,200+ItemPosOffset(3),hdximg(iMode_Item_Config),TRUE
+		//項目
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			setease 0,-20,ease_cubic_out
+			EasePosY=getease(SelItemCount,20)
+			dim ItemPosOffset,4
+			ItemPosOffset(SelItemID)=EasePosY
 
-		setease 0,256,ease_linear
-		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,15)
-		setease 192+232*bfSelItemID+25,192+232*SelItemID+25,ease_cubic_out
-		DrawGraph getease(SelItemCount,15),472,hdximg(iMode_Item_Cursor),TRUE
+			DrawGraph 192,200+ItemPosOffset(0),hdximg(iMode_Item_Normal),TRUE
+			DrawGraph 424,200+ItemPosOffset(1),hdximg(iMode_Item_Challenge),TRUE
+			DrawGraph 656,200+ItemPosOffset(2),hdximg(iMode_Item_Practice),TRUE
+			DrawGraph 888,200+ItemPosOffset(3),hdximg(iMode_Item_Config),TRUE
 
-	//ステータス
-	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-		DrawGraph 730,32,hdximg(iMixed_PlayerStatus),TRUE
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,15)
+			setease 192+232*bfSelItemID+25,192+232*SelItemID+25,ease_cubic_out
+			DrawGraph getease(SelItemCount,15),472,hdximg(iMode_Item_Cursor),TRUE
+
+		//ステータス
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 730,32,hdximg(iMixed_PlayerStatus),TRUE
 
 	//ガイド
+		SetDrawScreen DX_SCREEN_BACK
+		if decideFlag==FALSE {
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawGraph 0,0,hdximg(iLayer_Scene),TRUE
+		} else {
+			setease 1,1.2,ease_cubic_out
+			EaseWidth=int(double(DispWidth)*geteasef(decideFrameCount,20))
+			EaseHeight=int(double(DispHeight)*geteasef(decideFrameCount,20))
+			EasePosX=DispWidth/2-EaseWidth/2
+			EasePosY=DispHeight/2-EaseHeight/2
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(decideFrameCount,20)
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iLayer_Scene),TRUE
+
+			setease 0,100,ease_cubic_out
+			EaseWidth=getease(decideFrameCount,20)
+			EaseHeight=getease(decideFrameCount,20)
+			EasePosX=DispWidth/2-EaseWidth/2
+			EasePosY=DispHeight/2-EaseHeight/2
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(decideFrameCount,20)
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdxarr_Blocks(FrameCount/2\20),TRUE
+		}
+
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 		DrawGraph 0,DispHeight-128,hdximg(ibg_GuidePanel),TRUE
 
@@ -111,5 +145,14 @@
 
 	//カウンタ
 		SelItemCount++
+		if decideFlag==TRUE :decideFrameCount++
+		if decideFrameCount>40+1 {
+			curSceneID=ID_MusicSelect
+			gosub*InitScene
+			//変数初期化
+			dim decideFlag
+			dim decideFrameCount
+			gosub*Scene_Init_MusicSelect
+		}
 
 	return

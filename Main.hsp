@@ -38,6 +38,8 @@
 #define BuildVersion_Major	0
 #define BuildVersion_Minor	2
 #define Usebitsadmin		0
+#define SplashTime			0
+
 #addition"AdminKey.hsp"
 
 goto*Startup
@@ -49,6 +51,7 @@ goto*Startup
 #include"Scene_Splash.hsp"
 #include"Scene_Signin.hsp"
 #include"Scene_ModeSelect.hsp"
+#include"Scene_MusicSelect.hsp"
 #include"Scene_Play.hsp"
 
 *Startup
@@ -142,6 +145,9 @@ goto*Startup
 		swbreak
 		case ID_ModeSelect	//モード選択
 			gosub*Scene_ModeSelect
+		swbreak
+		case ID_MusicSelect	//曲選択
+			gosub*Scene_MusicSelect
 		swbreak
 		case ID_Play		//プレイ
 			gosub*Scene_Play

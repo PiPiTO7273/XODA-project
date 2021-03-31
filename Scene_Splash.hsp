@@ -23,13 +23,13 @@
 	//ˆÃ“]
 	setease 256,0,ease_linear
 	SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,30)
-	if SceneCount>30+60*3 {
+	if SceneCount>30+60*SplashTime {
 		setease 0,256,ease_linear
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-30-60*3,30)
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-30-60*SplashTime,30)
 	}
 	DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
 
-	if SceneCount>30*2+60*3 {
+	if SceneCount>30*2+60*SplashTime {
 		/*
 		curSceneID=ID_Play
 		gosub*InitScene
