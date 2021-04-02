@@ -7,54 +7,58 @@
 // |   _   ||       ||       ||   _   |           |   |    |   |  |||       |   |    ||   |___ |     |_   |   |
 // |__| |__||_______||______| |__| |__|           |___|    |___|  |||_______|   |____||_______||_______|  |___|
 
+//(c) 2019-2021 PiPiTO Software.
 
-#include"hsp3utf.as"
-#include"DxLib.as"
-#include"bass.as"
-#include"a2dp.hsp"
-#include"hspinet.as"
-#include"mod_dxlibplus.hsp"
-#include"gm_crlf.hsp"
-#include"llmod3/llmod3.hsp"
-#include"llmod3/console.hsp"
-#include"getProcess.hsp"
-#include"hspext.as"
+//Official Webpage		https://pipito7273.github.io/
+//Github Repository		https://github.com/PiPiTO7273/XODA-project
+//Contact				pipito7273@gmail.com
+
+//	-	ソースコードはオープンソース化されていますが、セキュリティ上の問題がある情報（サーバーに接続するユーザー名やパスワード）は
+//		外部のソースコードにマクロとして定義されています。これらの情報が欠損している場合でも起動は可能ですが、全ての機能は利用できません。
+//		全ての機能をテスト、デバッグするには開発メンバーに連絡し、該当のファイル"AdminKey.hsp"を入手してください。
+
+//	-	開発メンバーの方へ
+//		Portalアカウントに接続する際、以下のアカウントを使用してください。
+//		ユーザー名	:	devuser
+//		パスワード	:	password
 
 #packopt hide 1
 
-#ifdef _debug
-	gsel 0,-1
-	exist"Main.ax"
-	if strsize!-1 {
-		delete"Main.ax"
-	}
-	console
-#endif
+//----- モジュール -----
+#include"hsp3utf.as"				//UTF-8対応ランタイム
+#include"a2dp.hsp"					//Artlet2D + Artlet2D Plus
+#include"DxLib.as"					//DXライブラリ
+#include"mod_dxlibplus.hsp"			//DXライブラリ拡張モジュール
+#include"bass.as"					//BASS Audio Library
+#include"hspinet.as"				//hspinet プラグイン
+#include"gm_crlf.hsp"				//改行コード変換モジュール
+#include"llmod3/llmod3.hsp"			//llmod3基本モジュール
+#include"llmod3/console.hsp"			//llmod3コンソール機能モジュール
+#include"getProcess.hsp"				//プロセス一覧取得モジュール
+#include"hspext.as"					//hspext プラグイン
+#addition"AdminKey.hsp"				//セキュリティキー
+#include"Symbol.hsp"				//マクロ定義
+#include"Function_Default.hsp"		//基本命令・関数
+#include"Function_MusicSelect.hsp"		//楽曲選択画面の命令・関数
+#include"Function_Play.hsp"			//ゲームプレイ画面の命令・関数
+#include"LoadResources.hsp"			//リソース処理関連のサブルーチン
+#include"Scene_Splash.hsp"			//スプラッシュ（起動時の待機画面）
+#include"Scene_Signin.hsp"			//サインイン
+#include"Scene_ModeSelect.hsp"		//モード選択
+#include"Scene_MusicSelect.hsp"		//楽曲選択
+#include"Scene_Play.hsp"				//ゲームプレイ
 
-//起動設定
-#define DispWidth			1280
-#define DispHeight			720
-#define CodeName			"MOCHI SLIME"
-#define BuildVersion_Major	0
-#define BuildVersion_Minor	2
-#define Usebitsadmin		0
-#define SplashTime			0
-
-#addition"AdminKey.hsp"
-
-goto*Startup
-
-#include"Symbol.hsp"
-#include"Function_Default.hsp"
-#include"Function_Play.hsp"
-#include"LoadResources.hsp"
-#include"Scene_Splash.hsp"
-#include"Scene_Signin.hsp"
-#include"Scene_ModeSelect.hsp"
-#include"Scene_MusicSelect.hsp"
-#include"Scene_Play.hsp"
-
+//----- 起動開始 -----
 *Startup
+
+	#ifdef _debug
+		gsel 0,-1
+		exist"Main.ax"
+		if strsize!-1 {
+			delete"Main.ax"
+		}
+		console
+	#endif
 
 	sdim ConsoleLogBuf
 

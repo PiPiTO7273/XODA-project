@@ -40,9 +40,12 @@
 			SongLibSelID=cnt
 			repeat 3
 				Libarr_ChartID(cnt,SongLibSelID)=getpath(SongLibChartPath(cnt,SongLibSelID),8+1)
-				exist SongLibChartPath(cnt,SongLibSelID)
+				exist"Data/"+SongLibChartPath(cnt,SongLibSelID)
 				if strsize==-1 {
 					//存在しない譜面ファイル
+					if SongLibChartPath(cnt,SongLibSelID)!"-" {
+						AddDebugConsole STYLE_WARNING,"存在しない譜面ファイルが指定されました。"
+					}
 					Libarr_Title(cnt,SongLibSelID)=""
 					Libarr_Artist(cnt,SongLibSelID)=""
 					Libarr_Difficulty(cnt,SongLibSelID)=""
@@ -56,7 +59,7 @@
 					sdim ChartPrm
 					sdim ChartDivPrm
 					notesel SongItemBuf
-					noteload SongLibChartPath(cnt,SongLibSelID)
+					noteload"Data/"+SongLibChartPath(cnt,SongLibSelID)
 
 					SongLibLevID=cnt
 					repeat notemax
@@ -172,9 +175,67 @@
 				}
 			loop
 		}
+
+	//変数初期化
+		dim CursorSelID		//項目ID
+		dim CursorLevID		//難易度ID
+		dim CursorSelCount		//カーソル待機カウンタ
+		dim KeyFlag,4			//キーフラグ
+		dim bfKeyFlag,4		//前フレームのキーフラグ
+		dim KeyPushCount,2		//キー押下時間
+		dim CursorOffsetEase	//カーソル移動のオフセット値
+		dim DrawColumnID		//描画する項目ID
+		dim DrawColumnPos		//描画する項目の位置
+		dim LevColorCode		//難易度の色コード
+
 	return
 
 *Scene_MusicSelect
+
+	//キー判定
+		KeyFlag(0)=CheckHitKey(KEY_INPUT_LEFT)
+		KeyFlag(1)=CheckHitKey(KEY_INPUT_RIGHT)
+		KeyFlag(2)=CheckHitKey(KEY_INPUT_UP)
+		KeyFlag(3)=CheckHitKey(KEY_INPUT_DOWN)
+
+		//左右（難易度変更）
+			if bfKeyFlag(0)==0&KeyFlag(0)==1 {		//←
+				CursorOffsetEase=0
+				CursorSelCount=0
+				CursorLevID--
+			}
+			if bfKeyFlag(1)==0&KeyFlag(1)==1 {		//→
+				CursorOffsetEase=0
+				CursorSelCount=0
+				CursorLevID++
+			}
+			if CursorLevID<0 :CursorLevID=2
+			if CursorLevID>2 :CursorLevID=0
+
+		//上下（カーソル移動）
+			if bfKeyFlag(2)==1&KeyFlag(2)==1 {		//↑
+				KeyPushCount(0)++
+				CursorOffsetEase=-40
+			} else :KeyPushCount(0)=0
+			if (bfKeyFlag(2)==0&KeyFlag(2)==1)|(KeyPushCount(0)>16&SceneCount\2==0) {	//連続↑
+				CursorSelCount=0
+				CursorSelID--
+				if CursorSelID<0 :CursorSelID=Libarr_Max-1
+			}
+			if bfKeyFlag(3)==1&KeyFlag(3)==1 {		//↓
+				KeyPushCount(1)++
+				CursorOffsetEase=40
+			} else :KeyPushCount(1)=0
+			if (bfKeyFlag(3)==0&KeyFlag(3)==1)|(KeyPushCount(1)>16&SceneCount\2==0) {	//連続↓
+				CursorSelCount=0
+				CursorSelID++
+				if CursorSelID>=Libarr_Max :CursorSelID=0
+			}
+
+		//前フレーム
+			repeat 4
+				bfKeyFlag(cnt)=KeyFlag(cnt)
+			loop
 
 	//背景
 		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
@@ -202,6 +263,134 @@
 	//案内文字列
 		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 		DrawStringToHandle 48,72,"プレーする楽曲を選択してください。",GetColor(230,230,230),hdxfont(fNoto_b12)
+
+	//----- 以下、シーン別レイヤー -----
+		SetDrawScreen hdximg(iLayer_Scene)
+		ClearDrawScreen
+
+		//項目
+			//基準より下
+				DrawColumnID=CursorSelID
+				DrawColumnPos=314
+				repeat
+					setease CursorOffsetEase,0,ease_cubic_out
+					EasePosY=DrawColumnPos+getease(CursorSelCount,12)
+					if cnt==0 {
+						setease 0,-32,ease_cubic_out
+						EasePosX=getease(CursorSelCount,12)
+					} else :EasePosX=0
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+					DrawGraph 784+EasePosX,EasePosY,hdximg(ibg_MusicSelect_Item),TRUE	//背景
+
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+					DrawStringToHandle 880+EasePosX,EasePosY+8,Libarr_Title(CursorLevID,DrawColumnID),GetColor(255,255,255),hdxfont(fNoto_m16)	//タイトル
+
+					LevColorCode=GetDifficultyColor(Libarr_Difficulty(CursorLevID,DrawColumnID))
+					tmpstr=str(Libarr_Level(CursorLevID,DrawColumnID))
+					DrawStringXCenterToHandle 784+EasePosX,EasePosY+10,tmpstr,80,LevColorCode,hdxfont(fSQ_20)	//難易度
+
+					DrawColumnPos+40
+					if EasePosY>DispHeight :break
+					DrawColumnID++
+					if DrawColumnID>=Libarr_Max :DrawColumnID=0
+				loop
+			//基準より上
+				DrawColumnID=CursorSelID
+				DrawColumnPos=314
+				repeat
+					setease CursorOffsetEase,0,ease_cubic_out
+					EasePosY=DrawColumnPos+getease(CursorSelCount,12)
+					if cnt!0 {
+						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+						DrawGraph 784,EasePosY,hdximg(ibg_MusicSelect_Item),TRUE	//背景
+
+						SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+						DrawStringToHandle 880,EasePosY+8,Libarr_Title(CursorLevID,DrawColumnID),GetColor(255,255,255),hdxfont(fNoto_m16)	//タイトル
+
+						LevColorCode=GetDifficultyColor(Libarr_Difficulty(CursorLevID,DrawColumnID))
+						tmpstr=str(Libarr_Level(CursorLevID,DrawColumnID))
+						DrawStringXCenterToHandle 784+EasePosX,EasePosY+10,tmpstr,80,LevColorCode,hdxfont(fSQ_20)	//難易度
+					}
+					DrawColumnPos-40
+					if EasePosY<-40 :break
+					DrawColumnID--
+					if DrawColumnID<0 :DrawColumnID=Libarr_Max-1
+				loop
+
+		//楽曲情報
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,120,hdximg(ibg_MusicSelect_ItemInfo),TRUE
+
+			setease 0,256,ease_cubic_out
+			EaseAlpha=getease(CursorSelCount,20)
+			setease -32,0,ease_cubic_out
+			EasePosX=getease(CursorSelCount,20)
+
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,EaseAlpha
+			DrawStringToHandle 50+EasePosX,146,Libarr_Title(CursorLevID,CursorSelID),GetColor(250,250,250),hdxfont(fNoto_m24)	//タイトル
+			DrawStringToHandle 50+EasePosX,191,Libarr_Artist(CursorLevID,CursorSelID),GetColor(230,230,230),hdxfont(fNoto_m14)	//アーティスト名
+			sdim tmpstr:tmpstr=Libarr_Difficulty(CursorLevID,CursorSelID)+" Lv."+Libarr_Level(CursorLevID,CursorSelID)
+			DrawStringToHandle 50+EasePosX,227,tmpstr,GetDifficultyColor(Libarr_Difficulty(CursorLevID,CursorSelID)),hdxfont(fGood_14)	//難易度
+
+		//詳細
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,278,hdximg(ibg_MusicSelect_Detail),TRUE
+
+		//難易度選択
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 420,300,hdximg(ibg_MusicSelect_Level),TRUE
+			DrawGraph 420,300,hdximg(iLayer_LevelSelect),TRUE
+
+			//ディスクアイコン
+				DrawRotaGraph 434+96*CursorLevID+80/2,330+80/2,1.0,deg2rad(SceneCount*8\360),hdximg(ibg_Disc_Normal+CursorLevID),TRUE,FALSE
+				repeat 3
+					if cnt==CursorLevID :continue
+					DrawGraph 434+96*cnt,330,hdximg(ibg_Disc),TRUE
+				loop
+
+			//難易度数値
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 434+96*0,330,hdximg(iLayer_LevelSelect_Normal),TRUE
+				DrawGraph 434+96*1,330,hdximg(iLayer_LevelSelect_Hard),TRUE
+				DrawGraph 434+96*2,330,hdximg(iLayer_LevelSelect_Chaos),TRUE
+
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				repeat 3
+					setease 0,Libarr_Level(cnt,CursorSelID),ease_cubic_out
+					tmpstr=str(getease(CursorSelCount,25))
+					DrawStringXCenterToHandle 434+96*cnt,387,tmpstr,80,GetColor(255,255,255),hdxfont(fGood_12)
+				loop
+
+			//プレイヤーデータ,譜面情報
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringToHandle 470,449,aqName,GetColor(20,20,20),hdxfont(fPier_m12)
+				DrawStringToHandle 470,467,strf("%.2f",str(aqRate)),GetColor(20,20,20),hdxfont(fPier_m12)
+				setease 0,Libarr_TotalNotes(CursorLevID,CursorSelID),ease_cubic_out
+				sdim tmpstr:tmpstr=strf("%04d",str(getease(CursorSelCount,20)))
+				DrawStringToHandle 650,449,tmpstr,GetColor(20,20,20),hdxfont(fPier_m12)
+				setease 0,Libarr_DefBPM(CursorLevID,CursorSelID),ease_cubic_out
+				sdim tmpstr:tmpstr=strf("%04d",str(getease(CursorSelCount,20)))
+				DrawStringToHandle 615,467,tmpstr,GetColor(20,20,20),hdxfont(fPier_m12)
+				if Libarr_DefBPM(CursorLevID,CursorSelID)!Libarr_MinBPM(CursorLevID,CursorSelID)&Libarr_DefBPM(CursorLevID,CursorSelID)!Libarr_MaxBPM(CursorLevID,CursorSelID) {
+					DrawStringToHandle 652,470,strf("%04d - %04d",str(Libarr_MinBPM(CursorLevID,CursorSelID)),str(Libarr_MaxBPM(CursorLevID,CursorSelID))),GetColor(50,50,50),hdxfont(fPier_m8)
+				}
+				foreach aqHistory
+					DrawStringToHandle 440,505+15*cnt,aqHistory(cnt),GetColor(20,20,20),hdxfont(fNoto_r12)
+				loop
+
+		//パートナー選択
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 860,0,hdximg(ibg_MusicSelect_Partner),TRUE
+
+		SetDrawScreen DX_SCREEN_BACK
+			setease 1.2,1,ease_cubic_out
+			EaseWidth=int(double(DispWidth)*geteasef(SceneCount,20))
+			EaseHeight=int(double(DispHeight)*geteasef(SceneCount,20))
+			EasePosX=DispWidth/2-EaseWidth/2
+			EasePosY=DispHeight/2-EaseHeight/2
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,20)
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iLayer_Scene),TRUE
 
 	//プリローダ
 		setease 100,0,ease_cubic_out
@@ -236,4 +425,6 @@
 		sdim tmpstr:tmpstr="←→ : 難易度変更"
 		DrawStringXCenterToHandle 760,684,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
 
+	//カウンタ
+		CursorSelCount++
 	return

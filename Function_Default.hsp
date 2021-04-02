@@ -1,4 +1,7 @@
 
+//エラー回避
+goto*Startup
+
 #module
 	#uselib "kernel32.dll"
 	#func VirtualProtect "VirtualProtect" int, int, int, int
@@ -315,6 +318,7 @@
 			dim aqNumFullcombo
 			dim aqNumAllEx
 			dim aqNumTicket
+			sdim aqHistory
 
 		exist"Data/Cache/tmp_Savedata.dat"
 		if strsize==-1 {
@@ -341,6 +345,7 @@
 				if instr(saveInfobuf,0,"XODA.NUMFULLCOMBO")==-1 :saveInfobuf+"XODA.NUMFULLCOMBO=\n"
 				if instr(saveInfobuf,0,"XODA.NUMALLEX")==-1 :saveInfobuf+"XODA.NUMALLEX=\n"
 				if instr(saveInfobuf,0,"XODA.NUMTICKET")==-1 :saveInfobuf+"XODA.NUMTICKET=\n"
+				if instr(saveInfobuf,0,"XODA.HISTORY")==-1 :saveInfobuf+"XODA.HISTORY=++++\n"
 
 				aqName=GetINIvalue(saveInfobuf,"SAVEDATA","USERNAME")
 				aqRate=double(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.RATE"))
@@ -351,6 +356,9 @@
 				aqNumFullcombo=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMFULLCOMBO"))
 				aqNumAllEx=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMALLEX"))
 				aqNumTicket=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMTICKET"))
+
+				sdim tmpstr:tmpstr=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.HISTORY")
+				split tmpstr,"+",aqHistory
 
 			} else {
 				AddDebugConsole STYLE_WARNING,"パスワードの認証エラーが発生しました。ゲストユーザーで開始します。"
@@ -385,6 +393,7 @@
 	if Usebitsadmin==1 {
 		AddDebugConsole STYLE_NORMAL,"ファイルの処理にbitsadminを使用します。"
 		repeat length(updatepath)
+			if updateflag(cnt)==FALSE :continue
 			AddDebugConsole STYLE_NORMAL,"["+(cnt+1)+"/"+length(updatepath)+"] \""+updatepath(cnt)+"\"の転送を開始します。"
 			exec"bitsadmin /transfer download "+updatelink(cnt)+" \""+dir_cur+"\\"+updatepath(cnt)+"\""
 			repeat
@@ -404,10 +413,14 @@
 			htmpFont(0)=CreateFontToHandle("Meiryo UI",20,-1,DX_FONTTYPE_ANTIALIASING_4X4)
 			htmpFont(1)=CreateFontToHandle("Meiryo UI",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
 
-			dim updateID:dim updateres:dim updatesize:dim updatelength
+			dim updateID:dim updateres:dim updatesize:dim updatelength:dim updatesuc
 
 			netinit
-			CreateUpdateRequest 0
+
+			repeat
+				if updateflag(updateID)==FALSE :updateID++:else:break
+			loop
+			CreateUpdateRequest updateID
 			repeat
 
 					exist updatepath(updateID)
@@ -427,7 +440,7 @@
 					DrawStringXCenterToHandle 0,240,"アップデートに必要なファイルをダウンロード中です。\nしばらくお待ち下さい...",DispWidth,GetColor(40,40,40),htmpFont(1)
 
 					DrawStringToHandle 265,360,updatepath(updateID),GetColor(50,50,50),htmpFont(1)
-					DrawStringXAlignRightToHandle 265,360,""+(updateID+1)+"/"+length(updatepath)+"件のダウンロード",750,GetColor(50,50,50),htmpFont(1)
+					DrawStringXAlignRightToHandle 265,360,""+(updatesuc+1)+"/"+updatemax+"件のダウンロード",750,GetColor(50,50,50),htmpFont(1)
 					DrawBox 265,400,265+750,400+20,GetColor(150,150,150),FALSE
 					DrawBox 265,400,265+int(750.0*(double(updatesize)/double(updatelength))),400+20,GetColor(184,255,41),TRUE
 					DrawBox 265,400,265+int(750.0*(double(updatesize)/double(updatelength))),400+20,GetColor(150,150,150),FALSE
@@ -436,9 +449,14 @@
 
 				netexec updateres
 				if updateres!0 {
-					updateID++
+					repeat
+						updateID++
+						if updateID>=length(updateflag) :break
+						if updateflag(updateID)==FALSE :updateID++:else:break
+					loop
 					if updateID>=length(updatepath) :break
 					CreateUpdateRequest updateID
+					updatesuc++
 				}
 				await
 			loop

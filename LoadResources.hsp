@@ -10,13 +10,20 @@
 		sdim updatepath
 		sdim updatelink
 		dim updateflag
+		dim updatemax
 		sdim procjumpflag
 		repeat notemax
 			noteget NoteLine,cnt
 			split NoteLine,"=",updatepath(cnt),updatelink(cnt)
 
 			exist updatepath(cnt)
-			if strsize==-1 :updateflag(cnt)=TRUE:procjumpflag=TRUE
+			if strsize==-1 {
+				updateflag(cnt)=TRUE
+				updatemax++
+				procjumpflag=TRUE
+			} else {
+				updateflag(cnt)=FALSE
+			}
 		loop
 
 		if procjumpflag==TRUE {
@@ -70,13 +77,13 @@
 		hdxfont(fPier_m22)=LoadFontDataToHandle("Data/Font/PSM22.bin",0)		//Pier Sans Medium 22px
 		hdxfont(fPier_m20)=LoadFontDataToHandle("Data/Font/PSM20.bin",0)		//Pier Sans Medium 20px
 		hdxfont(fPier_m16)=LoadFontDataToHandle("Data/Font/PSM16.bin",0)		//Pier Sans Medium 16px
+		hdxfont(fPier_m12)=LoadFontDataToHandle("Data/Font/PSM12.bin",0)		//Pier Sans Medium 12px
+		hdxfont(fPier_m8)=LoadFontDataToHandle("Data/Font/PSM8.bin",0)		//Pier Sans Medium 8px
 		hdxfont(fPier_r32)=LoadFontDataToHandle("Data/Font/PSR32.bin",0)		//Pier Sans 32px
 		hdxfont(fPier_r24)=LoadFontDataToHandle("Data/Font/PSR24.bin",0)		//Pier Sans 24px
 		hdxfont(fPier_r20)=LoadFontDataToHandle("Data/Font/PSR20.bin",0)		//Pier Sans 20px
 		hdxfont(fPier_r16)=LoadFontDataToHandle("Data/Font/PSR16.bin",0)		//Pier Sans 16px
 		hdxfont(fPier_r14)=LoadFontDataToHandle("Data/Font/PSR14.bin",0)		//Pier Sans 14px
-		hdxfont(fPier_r12)=LoadFontDataToHandle("Data/Font/PSR12.bin",0)		//Pier Sans 12px
-		hdxfont(fPier_r8)=LoadFontDataToHandle("Data/Font/PSR8.bin",0)		//Pier Sans 8px
 		hdxfont(fSQ_45)=LoadFontDataToHandle("Data/Font/SQN45.bin",0)		//SQNumber 45px
 		hdxfont(fSQ_32)=LoadFontDataToHandle("Data/Font/SQN32.bin",0)		//SQNumber 32px
 		hdxfont(fSQ_28)=LoadFontDataToHandle("Data/Font/SQN28.bin",0)		//SQNumber 28px
@@ -87,6 +94,7 @@
 		hdxfont(fEarth_eb16)=LoadFontDataToHandle("Data/Font/EOEXB16.bin",0)	//Earth Orbiter Extra-Bold 16px
 		hdxfont(fEarth_eb14)=LoadFontDataToHandle("Data/Font/EOEXB14.bin",0)	//Earth Orbiter Extra-Bold 14px
 		hdxfont(fGood_12)=LoadFontDataToHandle("Data/Font/GT12.bin",0)		//Good Times 12px
+		hdxfont(fGood_14)=LoadFontDataToHandle("Data/Font/GT14.bin",0)		//Good Times 14px
 		hdxfont(fMplus_15)=LoadFontDataToHandle("Data/Font/MP2M15.bin",0)	//M+ 2m 15px
 
 	return
@@ -144,6 +152,19 @@
 		hdximg(iLayer_PlayerStatus)=LoadGraph("Data/Image/Layer_ModeSelect_Status.png")
 
 		hdximg(iNav_MusicSelect)=LoadGraph("Data/Image/Nav_MusicSelect.png")
+		hdximg(ibg_MusicSelect_ItemInfo)=LoadGraph("Data/Image/bg_MusicSelect_ItemInfo.png")
+		hdximg(ibg_MusicSelect_Detail)=LoadGraph("Data/Image/bg_MusicSelect_Detail.png")
+		hdximg(ibg_MusicSelect_Level)=LoadGraph("Data/Image/bg_MusicSelect_Level.png")
+		hdximg(ibg_MusicSelect_Item)=LoadGraph("Data/Image/bg_MusicSelect_Item.png")
+		hdximg(ibg_MusicSelect_Partner)=LoadGraph("Data/Image/bg_MusicSelect_Partner.png")
+		hdximg(ibg_Disc)=LoadGraph("Data/Image/bg_LevelSelect.png")
+		hdximg(ibg_Disc_Normal)=LoadGraph("Data/Image/bg_LevelSelect_Normal.png")
+		hdximg(ibg_Disc_Hard)=LoadGraph("Data/Image/bg_LevelSelect_Hard.png")
+		hdximg(ibg_Disc_Chaos)=LoadGraph("Data/Image/bg_LevelSelect_Chaos.png")
+		hdximg(iLayer_LevelSelect)=LoadGraph("Data/Image/Layer_LevelSelect.png")
+		hdximg(iLayer_LevelSelect_Normal)=LoadGraph("Data/Image/Layer_LevelSelect_Normal.png")
+		hdximg(iLayer_LevelSelect_Hard)=LoadGraph("Data/Image/Layer_LevelSelect_Hard.png")
+		hdximg(iLayer_LevelSelect_Chaos)=LoadGraph("Data/Image/Layer_LevelSelect_Chaos.png")
 
 	//îzóÒâÊëúëfçﬁÇÃì«Ç›çûÇ›
 		dim hdxarr_Button_Yes,2

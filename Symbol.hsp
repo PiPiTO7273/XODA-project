@@ -1,4 +1,13 @@
 
+//起動設定
+#define DispWidth			1280
+#define DispHeight			720
+#define CodeName			"MOCHI SLIME"
+#define BuildVersion_Major	0
+#define BuildVersion_Minor	2
+#define Usebitsadmin		0
+#define SplashTime			0
+
 //フォントハンドル
 #enum fNoto_r18	=	0
 #enum fNoto_r16
@@ -16,13 +25,13 @@
 #enum fPier_m22
 #enum fPier_m20
 #enum fPier_m16
+#enum fPier_m12
+#enum fPier_m8
 #enum fPier_r32
 #enum fPier_r24
 #enum fPier_r20
 #enum fPier_r16
 #enum fPier_r14
-#enum fPier_r12
-#enum fPier_r8
 #enum fSQ_45
 #enum fSQ_32
 #enum fSQ_28
@@ -32,6 +41,7 @@
 #enum fEarth_r16
 #enum fEarth_eb16
 #enum fEarth_eb14
+#enum fGood_14
 #enum fGood_12
 #enum fMplus_15
 
@@ -100,6 +110,19 @@
 #enum iMixed_PlayerStatus
 
 #enum iNav_MusicSelect
+#enum ibg_MusicSelect_ItemInfo
+#enum ibg_MusicSelect_Detail
+#enum ibg_MusicSelect_Level
+#enum ibg_MusicSelect_Item
+#enum ibg_MusicSelect_Partner
+#enum ibg_Disc
+#enum ibg_Disc_Normal
+#enum ibg_Disc_Hard
+#enum ibg_Disc_Chaos
+#enum iLayer_LevelSelect
+#enum iLayer_LevelSelect_Normal
+#enum iLayer_LevelSelect_Hard
+#enum iLayer_LevelSelect_Chaos
 
 #enum iMax
 
