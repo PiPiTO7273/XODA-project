@@ -128,8 +128,6 @@
 
 	//////debug
 	//“Ç‚İ‚Ş•ˆ–Êƒtƒ@ƒCƒ‹–¼
-	sdim chartFileName
-	chartFileName="0008"
 	gosub*InitScene
 
 	gsel 0,1

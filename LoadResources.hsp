@@ -165,6 +165,10 @@
 		hdximg(iLayer_LevelSelect_Normal)=LoadGraph("Data/Image/Layer_LevelSelect_Normal.png")
 		hdximg(iLayer_LevelSelect_Hard)=LoadGraph("Data/Image/Layer_LevelSelect_Hard.png")
 		hdximg(iLayer_LevelSelect_Chaos)=LoadGraph("Data/Image/Layer_LevelSelect_Chaos.png")
+		hdximg(iIcon_IR_1st)=LoadGraph("Data/Image/Icon_IR_1st.png")
+		hdximg(iIcon_IR_2nd)=LoadGraph("Data/Image/Icon_IR_2nd.png")
+		hdximg(iIcon_IR_3rd)=LoadGraph("Data/Image/Icon_IR_3rd.png")
+		hdximg(iIcon_IR)=LoadGraph("Data/Image/Icon_IR.png")
 
 	//îzóÒâÊëúëfçﬁÇÃì«Ç›çûÇ›
 		dim hdxarr_Button_Yes,2

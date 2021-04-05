@@ -177,16 +177,22 @@
 		}
 
 	//変数初期化
-		dim CursorSelID		//項目ID
-		dim CursorLevID		//難易度ID
-		dim CursorSelCount		//カーソル待機カウンタ
-		dim KeyFlag,4			//キーフラグ
-		dim bfKeyFlag,4		//前フレームのキーフラグ
-		dim KeyPushCount,2		//キー押下時間
-		dim CursorOffsetEase	//カーソル移動のオフセット値
-		dim DrawColumnID		//描画する項目ID
-		dim DrawColumnPos		//描画する項目の位置
-		dim LevColorCode		//難易度の色コード
+		dim CursorSelID			//項目ID
+		dim CursorLevID			//難易度ID
+		dim CursorSelCount			//カーソル待機カウンタ
+		dim KeyFlag,4				//キーフラグ
+		dim bfKeyFlag,4			//前フレームのキーフラグ
+		dim decideFlag				//決定キーフラグ
+		dim decideFrameCount		//決定キーが押されてからのカウンタ
+		dim KeyPushCount,2			//キー押下時間
+		dim CursorOffsetEase		//カーソル移動のオフセット値
+		dim DrawColumnID			//描画する項目ID
+		dim DrawColumnPos			//描画する項目の位置
+		dim LevColorCode			//難易度の色コード
+		dim DetailWindowCount		//詳細ウィンドウの出現カウンタ
+		dim DetailWindowPageID		//詳細ウィンドウのページID
+		dim DetailWindowChangeFlag	//詳細ウィンドウのページ切り替えフラグ
+		dim bfDetailWindowChangeFlag	//前フレームのページ切り替えフラグ
 
 	return
 
@@ -231,6 +237,19 @@
 				CursorSelID++
 				if CursorSelID>=Libarr_Max :CursorSelID=0
 			}
+
+		//決定キー判定
+			if CheckHitKey(KEY_INPUT_RETURN)==TRUE {
+				decideFlag=TRUE
+			}
+
+		//ページ切り替えキー判定
+			DetailWindowChangeFlag=CheckHitKey(KEY_INPUT_J)
+			if bfDetailWindowChangeFlag==0&DetailWindowChangeFlag==1 {
+				DetailWindowPageID++
+				if DetailWindowPageID>3 :DetailWindowPageID=0
+			}
+			bfDetailWindowChangeFlag=DetailWindowChangeFlag
 
 		//前フレーム
 			repeat 4
@@ -336,6 +355,40 @@
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 0,278,hdximg(ibg_MusicSelect_Detail),TRUE
 
+			switch DetailWindowPageID
+				//オンラインランキング
+					case ID_IR
+						SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+						DrawStringToHandle 20,278+12,"ONLINE",GetColor(240,240,240),hdxfont(fPier_m16)
+						if DetailWindowCount==0 {
+							//バッファ生成
+								if hdximg(iLayer_Detail_IR)!0 :DeleteGraph hdximg(iLayer_Detail_IR)
+								hdximg(iLayer_Detail_IR)=MakeScreen(400,330,TRUE)
+								SetDrawScreen hdximg(iLayer_Detail_IR)
+								DrawGraph 24,46,hdximg(iIcon_IR_1st),TRUE		//1st アイコン
+						}
+					swbreak
+
+				//自己ベスト詳細
+					case ID_RECORD
+						SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+						DrawStringToHandle 20,278+12,"MY RECORD",GetColor(240,240,240),hdxfont(fPier_m16)
+					swbreak
+
+				//歌詞
+					case ID_LYRICS
+						SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+						DrawStringToHandle 20,278+12,"LYRICS",GetColor(240,240,240),hdxfont(fPier_m16)
+						DrawStringToHandle 20,278+41,Libarr_Lyrics(CursorLevID,CursorSelID),GetColor(200,200,200),hdxfont(fNoto_m12)
+					swbreak
+
+				//ターミナル
+					case ID_TERMINAL
+						SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+						DrawStringToHandle 20,278+12,"TERMINAL",GetColor(240,240,240),hdxfont(fPier_m16)
+					swbreak
+			swend
+
 		//難易度選択
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 420,300,hdximg(ibg_MusicSelect_Level),TRUE
@@ -427,4 +480,16 @@
 
 	//カウンタ
 		CursorSelCount++
+		if decideFlag==TRUE :decideFrameCount++
+		if decideFrameCount>0 {
+			//ゲームプレイに移行
+			BASS_ChannelStop hbasssnd(bgmMain)
+			sdim chartFileName
+			chartFileName=Libarr_ChartID(CursorLevID,CursorSelID)
+			gosub*LoadChart
+			gosub*Scene_Init_Play
+			curSceneID=ID_Play
+			gosub*InitScene
+			PlayStartMS=GetNowCount()
+		}
 	return

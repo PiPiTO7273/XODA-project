@@ -123,6 +123,14 @@
 #enum iLayer_LevelSelect_Normal
 #enum iLayer_LevelSelect_Hard
 #enum iLayer_LevelSelect_Chaos
+#enum iIcon_IR_1st
+#enum iIcon_IR_2nd
+#enum iIcon_IR_3rd
+#enum iIcon_IR
+#enum iLayer_Detail_IR
+#enum iLayer_Detail_Record
+#enum iLayer_Detail_Lyrics
+#enum iLayer_Detail_Terminal
 
 #enum iMax
 
@@ -187,3 +195,9 @@
 #define RANK_SCORE_B	5000000
 #define RANK_SCORE_C	2500000
 #define RANK_SCORE_D	1000000
+
+//MusicSelect - DetailÇÃÉyÅ[ÉWID
+#enum ID_IR		=	0
+#enum ID_RECORD
+#enum ID_LYRICS
+#enum ID_TERMINAL
