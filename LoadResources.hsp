@@ -197,6 +197,9 @@
 		LoadDivGraph"Data/Image/Gauge_Hard.png",100,100,1,7,32,varptr(hdxarr_Gauge_Hard)
 		LoadDivGraph"Data/Image/Gauge_Madness.png",100,100,1,7,32,varptr(hdxarr_Gauge_Madness)
 
+		dim hdxarr_MusicSelect_Action,35
+		LoadDivGraph"Data/Image/Layer_MusicSelect_Action.png",35,1,35,1080,180,varptr(hdxarr_MusicSelect_Action)
+
 		SetDXArchiveExtension"dat"
 		dim hdxarr_Blocks,24
 		repeat 24
