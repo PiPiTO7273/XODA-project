@@ -346,6 +346,7 @@ goto*Startup
 				if instr(saveInfobuf,0,"XODA.NUMALLEX")==-1 :saveInfobuf+"XODA.NUMALLEX=\n"
 				if instr(saveInfobuf,0,"XODA.NUMTICKET")==-1 :saveInfobuf+"XODA.NUMTICKET=\n"
 				if instr(saveInfobuf,0,"XODA.HISTORY")==-1 :saveInfobuf+"XODA.HISTORY=++++\n"
+				if instr(saveInfobuf,0,"XODA.PARTNER.SELECT")==-1 :saveInfobuf+"XODA.PARTNER.SELECT={empty}\n"
 
 				aqName=GetINIvalue(saveInfobuf,"SAVEDATA","USERNAME")
 				aqRate=double(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.RATE"))
@@ -356,6 +357,17 @@ goto*Startup
 				aqNumFullcombo=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMFULLCOMBO"))
 				aqNumAllEx=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMALLEX"))
 				aqNumTicket=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMTICKET"))
+
+				sdim pnCurSelect:pnCurSelect="{empty}"
+				gosub*LoadSkillData
+				repeat pnMax
+					sdim tmpstr
+					tmpstr=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.PARTNER."+pnID(cnt))
+					sdim tmp_pnlev:sdim tmp_pnexp
+					split tmpstr,",",tmp_pnlev,tmp_pnexp
+					pnLevel(cnt)=int(tmp_pnlev)
+					pnExp(cnt)=int(tmp_pnexp)
+				loop
 
 				sdim tmpstr:tmpstr=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.HISTORY")
 				split tmpstr,"+",aqHistory

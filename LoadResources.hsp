@@ -66,7 +66,6 @@
 		hdxfont(fNoto_r15)=LoadFontDataToHandle("Data/Font/NSCJR15.bin",0)	//Noto Sans CJK JP Regular 15px
 		hdxfont(fNoto_r14)=LoadFontDataToHandle("Data/Font/NSCJR14.bin",0)	//Noto Sans CJK JP Regular 14px
 		hdxfont(fNoto_r12)=LoadFontDataToHandle("Data/Font/NSCJR12.bin",0)	//Noto Sans CJK JP Regular 12px
-		hdxfont(fNoto_r10)=LoadFontDataToHandle("Data/Font/NSCJR10.bin",0)	//Noto Sans CJK JP Regular 10px
 		hdxfont(fNoto_m24)=LoadFontDataToHandle("Data/Font/NSCJM24.bin",0)	//Noto Sans CJK JP Medium 24px
 		hdxfont(fNoto_m16)=LoadFontDataToHandle("Data/Font/NSCJM16.bin",0)	//Noto Sans CJK JP Medium 16px
 		hdxfont(fNoto_m14)=LoadFontDataToHandle("Data/Font/NSCJM14.bin",0)	//Noto Sans CJK JP Medium 14px
@@ -90,6 +89,7 @@
 		hdxfont(fSQ_24)=LoadFontDataToHandle("Data/Font/SQN24.bin",0)		//SQNumber 24px
 		hdxfont(fSQ_20)=LoadFontDataToHandle("Data/Font/SQN20.bin",0)		//SQNumber 20px
 		hdxfont(fSQ_16)=LoadFontDataToHandle("Data/Font/SQN16.bin",0)		//SQNumber 16px
+		hdxfont(fSQ_12)=LoadFontDataToHandle("Data/Font/SQN12.bin",0)		//SQNumber 12px
 		hdxfont(fEarth_r16)=LoadFontDataToHandle("Data/Font/EOR16.bin",0)	//Earth Orbiter 16px
 		hdxfont(fEarth_eb16)=LoadFontDataToHandle("Data/Font/EOEXB16.bin",0)	//Earth Orbiter Extra-Bold 16px
 		hdxfont(fEarth_eb14)=LoadFontDataToHandle("Data/Font/EOEXB14.bin",0)	//Earth Orbiter Extra-Bold 14px
@@ -169,6 +169,7 @@
 		hdximg(iIcon_IR_2nd)=LoadGraph("Data/Image/Icon_IR_2nd.png")
 		hdximg(iIcon_IR_3rd)=LoadGraph("Data/Image/Icon_IR_3rd.png")
 		hdximg(iIcon_IR)=LoadGraph("Data/Image/Icon_IR.png")
+		hdximg(iIcon_IR_best)=LoadGraph("Data/Image/Icon_IR_best.png")
 
 	//配列画像素材の読み込み
 		dim hdxarr_Button_Yes,2
@@ -208,5 +209,40 @@
 
 	//レイヤー関連
 		hdximg(iLayer_Scene)=MakeScreen(DispWidth,DispHeight,TRUE)
+
+	return
+
+*LoadSkillData
+
+	//ファイル読み込み
+	exist"Data/core_Skill.dat"
+	if strsize==-1 {
+		AddDebugConsole STYLE_WARNING,"パートナーデータが見つかりませんでした。"
+		AddDebugConsole STYLE_NORMAL,"空のパートナーデータを作成します。"
+		sdim pnDataBuf
+		pnDataBuf="{empty},,*,パートナースキルを使用しません。"
+	} else {
+		sdim pnDataBuf,strsize
+		notesel pnDataBuf
+		noteload"Data/core_Skill.dat"
+	}
+
+	//データ解析
+
+	sdim NoteLine
+	sdim pnID			//管理ID
+	sdim pnName		//名前
+	sdim pnIconPath	//アイコンの場所
+	sdim pnDesc		//スキル説明
+	dim pnLevel		//レベル値
+	dim pnExp			//経験値
+	dim pnMax			//データ個数
+
+	notesel pnDataBuf
+	pnMax=notemax
+	repeat pnMax
+		noteget NoteLine,cnt
+		split NoteLine,",",pnID(cnt),pnName(cnt),pnIconPath(cnt),pnDesc(cnt)
+	loop
 
 	return

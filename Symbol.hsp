@@ -14,7 +14,6 @@
 #enum fNoto_r15
 #enum fNoto_r14
 #enum fNoto_r12
-#enum fNoto_r10
 #enum fNoto_m24
 #enum fNoto_m16
 #enum fNoto_m14
@@ -38,6 +37,7 @@
 #enum fSQ_24
 #enum fSQ_20
 #enum fSQ_16
+#enum fSQ_12
 #enum fEarth_r16
 #enum fEarth_eb16
 #enum fEarth_eb14
@@ -127,6 +127,7 @@
 #enum iIcon_IR_2nd
 #enum iIcon_IR_3rd
 #enum iIcon_IR
+#enum iIcon_IR_best
 #enum iLayer_Detail_IR
 #enum iLayer_Detail_Record
 #enum iLayer_Detail_Lyrics
