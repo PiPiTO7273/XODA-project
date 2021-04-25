@@ -98,11 +98,9 @@
 
 				//SE
 					if JudgeRes==JUDGE_RES_EMPTY {
-						BASS_ChannelSetPosition hbasssnd(sndHitempty),0,0,0
-						BASS_ChannelPlay hbasssnd(sndHitempty)
+						PlaySE hbasssnd(sndHitempty)
 					} else {
-						BASS_ChannelSetPosition hbasssnd(sndHitobj),0,0,0
-						BASS_ChannelPlay hbasssnd(sndHitobj)
+						PlaySE hbasssnd(sndHitobj)
 					}
 			}
 		loop
@@ -390,8 +388,7 @@
 						LaneEffCount(hitobjLaneID(cnt))=0
 						BombFlag(hitobjLaneID(cnt))=TRUE
 						BombCount(hitobjLaneID(cnt))=0
-						BASS_ChannelSetPosition hbasssnd(sndHitobj),0,0,0
-						BASS_ChannelPlay hbasssnd(sndHitobj)
+						PlaySE hbasssnd(sndHitobj)
 						if hitobjType(cnt)==HITOBJ_HOLDSTART {
 							HoldFlag(hitobjLaneID(cnt))=TRUE
 							HoldCount(hitobjLaneID(cnt))=0
@@ -472,8 +469,7 @@
 	//バースト
 		if hcbDraw!-1 {
 			if comboBurstCount==0 {
-				BASS_ChannelSetPosition hbasssnd(sndBurst),0,0,0
-				BASS_ChannelPlay hbasssnd(sndBurst)
+				PlaySE hbasssnd(sndBurst)
 			}
 			EasePosX=0
 			EaseAlpha=256

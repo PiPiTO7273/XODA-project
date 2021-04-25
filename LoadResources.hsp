@@ -36,25 +36,56 @@
 	//サウンドの読み込み
 		dim hbasssnd:dim hsmpsnd
 		//開始音
-		hsmpsnd(sndStart)=BASS_SampleLoad(FALSE,"Data/Sound/Start.wav",0,0,0,16,0)
+		hsmpsnd(sndStart)=BASS_SampleLoad(FALSE,"Data/Sound/Gameplay_Start.wav",0,0,0,16,0)
 		hbasssnd(sndStart)=BASS_SampleGetChannel(hsmpsnd(sndStart),FALSE)
-		RegAudioLib TYPE_SE,"Data/Sound/Start.wav"
+		RegAudioLib TYPE_SE,"Data/Sound/Gameplay_Start.wav"
 		//ヒット
-		hsmpsnd(sndHitobj)=BASS_SampleLoad(FALSE,"Data/Sound/Hit.wav",0,0,0,16,0)
+		hsmpsnd(sndHitobj)=BASS_SampleLoad(FALSE,"Data/Sound/Gameplay_Hit.wav",0,0,0,16,0)
 		hbasssnd(sndHitobj)=BASS_SampleGetChannel(hsmpsnd(sndHitobj),FALSE)
-		RegAudioLib TYPE_SE,"Data/Sound/Hit.wav"
+		RegAudioLib TYPE_SE,"Data/Sound/Gameplay_Hit.wav"
 		//空打ち
-		hsmpsnd(sndHitempty)=BASS_SampleLoad(FALSE,"Data/Sound/Empty.wav",0,0,0,16,0)
+		hsmpsnd(sndHitempty)=BASS_SampleLoad(FALSE,"Data/Sound/Gameplay_Empty.wav",0,0,0,16,0)
 		hbasssnd(sndHitempty)=BASS_SampleGetChannel(hsmpsnd(sndHitempty),FALSE)
-		RegAudioLib TYPE_SE,"Data/Sound/Empty.wav"
+		RegAudioLib TYPE_SE,"Data/Sound/Gameplay_Empty.wav"
 		//バースト
-		hsmpsnd(sndBurst)=BASS_SampleLoad(FALSE,"Data/Sound/Burst.wav",0,0,0,16,0)
+		hsmpsnd(sndBurst)=BASS_SampleLoad(FALSE,"Data/Sound/Gameplay_Burst.wav",0,0,0,16,0)
 		hbasssnd(sndBurst)=BASS_SampleGetChannel(hsmpsnd(sndBurst),FALSE)
 		BASS_ChannelSetAttribute hbasssnd(sndBurst),BASS_ATTRIB_VOL,tofloat(0.8)
-		RegAudioLib TYPE_SE,"Data/Sound/Burst.wav"
+		RegAudioLib TYPE_SE,"Data/Sound/Gameplay_Burst.wav"
+		//UI キャンセル
+		hsmpsnd(sndUI_Cancel)=BASS_SampleLoad(FALSE,"Data/Sound/System_UI_Cancel.wav",0,0,0,16,0)
+		hbasssnd(sndUI_Cancel)=BASS_SampleGetChannel(hsmpsnd(sndUI_Cancel),FALSE)
+		RegAudioLib TYPE_SE,"Data/Sound/System_UI_Cancel.wav"
+		BASS_ChannelSetAttribute hbasssnd(sndUI_Cancel),BASS_ATTRIB_VOL,tofloat(0.7)
+		//UI 難易度切り替え
+		hsmpsnd(sndUI_ChangeDifficulty)=BASS_SampleLoad(FALSE,"Data/Sound/System_UI_ChangeDifficulty.wav",0,0,0,16,0)
+		hbasssnd(sndUI_ChangeDifficulty)=BASS_SampleGetChannel(hsmpsnd(sndUI_ChangeDifficulty),FALSE)
+		RegAudioLib TYPE_SE,"Data/Sound/System_UI_Decide.wav"
+		BASS_ChannelSetAttribute hbasssnd(sndUI_ChangeDifficulty),BASS_ATTRIB_VOL,tofloat(0.5)
+		//UI カーソル
+		hsmpsnd(sndUI_Cursor)=BASS_SampleLoad(FALSE,"Data/Sound/System_UI_Cursor.wav",0,0,0,16,0)
+		hbasssnd(sndUI_Cursor)=BASS_SampleGetChannel(hsmpsnd(sndUI_Cursor),FALSE)
+		RegAudioLib TYPE_SE,"Data/Sound/System_UI_Cursor.wav"
+		BASS_ChannelSetAttribute hbasssnd(sndUI_Cursor),BASS_ATTRIB_VOL,tofloat(0.3)
+		//UI 決定効果音
+		hsmpsnd(sndUI_Decide)=BASS_SampleLoad(FALSE,"Data/Sound/System_UI_Decide.wav",0,0,0,16,0)
+		hbasssnd(sndUI_Decide)=BASS_SampleGetChannel(hsmpsnd(sndUI_Decide),FALSE)
+		RegAudioLib TYPE_SE,"Data/Sound/System_UI_Decide.wav"
+		BASS_ChannelSetAttribute hbasssnd(sndUI_Decide),BASS_ATTRIB_VOL,tofloat(0.9)
+		//UI エラー
+		hsmpsnd(sndUI_Error)=BASS_SampleLoad(FALSE,"Data/Sound/System_UI_Error.wav",0,0,0,16,0)
+		hbasssnd(sndUI_Error)=BASS_SampleGetChannel(hsmpsnd(sndUI_Error),FALSE)
+		RegAudioLib TYPE_SE,"Data/Sound/System_UI_Error.wav"
+		BASS_ChannelSetAttribute hbasssnd(sndUI_Error),BASS_ATTRIB_VOL,tofloat(0.7)
+		//UI テキスト表示
+		hsmpsnd(sndUI_Text)=BASS_SampleLoad(FALSE,"Data/Sound/System_UI_Text.wav",0,0,0,16,0)
+		hbasssnd(sndUI_Text)=BASS_SampleGetChannel(hsmpsnd(sndUI_Text),FALSE)
+		RegAudioLib TYPE_SE,"Data/Sound/System_UI_Text.wav"
+		BASS_ChannelSetAttribute hbasssnd(sndUI_Text),BASS_ATTRIB_VOL,tofloat(0.3)
 
 		//BGM
-		hbasssnd(bgmMain)=BASS_StreamCreateFile(FALSE,"Data/Sound/bgm_Main.ogg",0,0,0,0,BASS_SAMPLE_LOOP)
+		hbasssnd(bgmMain)=BASS_StreamCreateFile(FALSE,"Data/Sound/bgm_Main.flac",0,0,0,0,BASS_SAMPLE_LOOP)
+		BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.7)
 
 	return
 
@@ -170,6 +201,7 @@
 		hdximg(iIcon_IR_3rd)=LoadGraph("Data/Image/Icon_IR_3rd.png")
 		hdximg(iIcon_IR)=LoadGraph("Data/Image/Icon_IR.png")
 		hdximg(iIcon_IR_best)=LoadGraph("Data/Image/Icon_IR_best.png")
+		hdximg(iMovie_Decide)=LoadGraph("Data/Movie/Decide.ogv")
 
 	//配列画像素材の読み込み
 		dim hdxarr_Button_Yes,2
@@ -237,12 +269,17 @@
 	dim pnLevel		//レベル値
 	dim pnExp			//経験値
 	dim pnMax			//データ個数
+	dim pnhIcon		//アイコンのハンドル
 
 	notesel pnDataBuf
 	pnMax=notemax
 	repeat pnMax
 		noteget NoteLine,cnt
 		split NoteLine,",",pnID(cnt),pnName(cnt),pnIconPath(cnt),pnDesc(cnt)
+		if pnIconPath(cnt)=="*" {
+			pnIconPath(cnt)="Icon_Empty.png"
+		}
+		pnhIcon(cnt)=LoadGraph("Data/Object/Skill/"+pnIconPath(cnt))
 	loop
 
 	return

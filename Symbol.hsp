@@ -132,6 +132,7 @@
 #enum iLayer_Detail_Record
 #enum iLayer_Detail_Lyrics
 #enum iLayer_Detail_Terminal
+#enum iMovie_Decide
 
 #enum iMax
 
@@ -144,6 +145,12 @@
 #enum sndHitobj
 #enum sndHitempty
 #enum sndBurst
+#enum sndUI_Cancel
+#enum sndUI_ChangeDifficulty
+#enum sndUI_Cursor
+#enum sndUI_Decide
+#enum sndUI_Error
+#enum sndUI_Text
 #enum bgmMain
 
 //オブジェクトID

@@ -32,11 +32,13 @@
 			bfSelItemID=SelItemID
 			SelItemID--
 			SelItemCount=0
+			PlaySE hbasssnd(sndUI_Cursor)
 		}
 		if bfKeyFlag(1)==0&KeyFlag(1)==1 {
 			bfSelItemID=SelItemID
 			SelItemID++
 			SelItemCount=0
+			PlaySE hbasssnd(sndUI_Cursor)
 		}
 		if SelItemID<0 :SelItemID=3
 		if SelItemID>3 :SelItemID=0
@@ -47,6 +49,7 @@
 		if CheckHitKey(KEY_INPUT_RETURN)==TRUE :decideFlag=TRUE
 			if decideFlag==TRUE&decideFrameCount==0 {
 				//èââÒèàóù
+				PlaySE hbasssnd(sndUI_Decide)
 				SetDrawScreen DX_SCREEN_BACK
 			}
 

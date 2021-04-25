@@ -209,11 +209,13 @@
 				CursorOffsetEase=0
 				CursorSelCount=0
 				CursorLevID--
+				PlaySE hbasssnd(sndUI_ChangeDifficulty)
 			}
 			if bfKeyFlag(1)==0&KeyFlag(1)==1 {		//→
 				CursorOffsetEase=0
 				CursorSelCount=0
 				CursorLevID++
+				PlaySE hbasssnd(sndUI_ChangeDifficulty)
 			}
 			if CursorLevID<0 :CursorLevID=2
 			if CursorLevID>2 :CursorLevID=0
@@ -227,6 +229,7 @@
 				CursorSelCount=0
 				CursorSelID--
 				if CursorSelID<0 :CursorSelID=Libarr_Max-1
+				PlaySE hbasssnd(sndUI_Cursor)
 			}
 			if bfKeyFlag(3)==1&KeyFlag(3)==1 {		//↓
 				KeyPushCount(1)++
@@ -236,6 +239,7 @@
 				CursorSelCount=0
 				CursorSelID++
 				if CursorSelID>=Libarr_Max :CursorSelID=0
+				PlaySE hbasssnd(sndUI_Cursor)
 			}
 
 		//決定キー判定
@@ -479,6 +483,16 @@
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 860,0,hdximg(ibg_MusicSelect_Partner),TRUE
 
+			//パートナーアイコン
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 875,28,pnhIcon(pnCurID),TRUE
+
+			//パートナー情報
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringToHandle 970,32,pnName(pnCurID),GetColor(240,240,240),hdxfont(fNoto_m16)
+				DrawStringToHandle 970,64,"Lv. "+pnLevel(pnCurID),GetColor(220,220,220),hdxfont(fPier_m12)
+				DrawStringToHandle 1020,64,pnDesc(pnCurID),GetColor(201,253,255),hdxfont(fNoto_m12)
+
 		//シーン別レイヤー
 			SetDrawScreen DX_SCREEN_BACK
 				setease 1.2,1,ease_cubic_out
@@ -533,6 +547,24 @@
 		CursorSelCount++
 		if decideFlag==TRUE :decideFrameCount++
 		if decideFrameCount>0 {
+			//決定画面
+			SeekMovieToGraph hdximg(iMovie_Decide),0
+			PlayMovieToGraph hdximg(iMovie_Decide)
+			repeat 60*5
+				ProcessMessage
+				SetDrawScreen DX_SCREEN_BACK
+				ClearDrawScreen
+					SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+					DrawGraph 0,0,hdximg(iMovie_Decide),FALSE
+				ScreenFlip
+				await
+			loop
+			PauseMovieToGraph hdximg(iMovie_Decide)
+
+			//黒背景
+				SetDrawScreen DX_SCREEN_FRONT
+				SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+				DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),1
 			//ゲームプレイに移行
 			BASS_ChannelStop hbasssnd(bgmMain)
 			sdim chartFileName

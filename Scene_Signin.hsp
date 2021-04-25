@@ -16,9 +16,11 @@
 		KeyFlag(1)=CheckHitKey(KEY_INPUT_RIGHT)
 
 		if bfKeyFlag(0)==0&KeyFlag(0)==1 {
+			PlaySE hbasssnd(sndUI_Cursor)
 			curButtonPos--
 		}
 		if bfKeyFlag(1)==0&KeyFlag(1)==1 {
+			PlaySE hbasssnd(sndUI_Cursor)
 			curButtonPos++
 		}
 		if curButtonPos<0 :curButtonPos=1
@@ -31,6 +33,7 @@
 		if decideFlag==TRUE&decideFrameCount==0 {
 			if curButtonPos==1 :goto*Exit
 			//‰‰ñˆ—
+			PlaySE hbasssnd(sndUI_Decide)
 			gosub*Scene_Init_ModeSelect
 			SetDrawScreen DX_SCREEN_BACK
 		}
@@ -183,6 +186,10 @@
 			//•Ï”‰Šú‰»
 			dim decideFlag
 			dim decideFrameCount
+		}
+
+		if SceneCount==10 {
+			PlaySE hbasssnd(sndUI_Text)
 		}
 
 	return
