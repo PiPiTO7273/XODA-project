@@ -543,7 +543,8 @@
 	//開始時のムービー
 		if SceneCount==20 {
 			PlayMovieToGraph hdximg(iMovie_Start)
-			BASS_ChannelPlay hbasssnd(sndStart)
+			PlaySE hbasssnd(sndStart)
+			PlaySE hbasssnd(vocReady)
 		}
 		if SceneCount>20 {
 			SetDrawBlendMode DX_BLENDMODE_ADD,256

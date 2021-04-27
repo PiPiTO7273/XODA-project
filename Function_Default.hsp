@@ -254,6 +254,14 @@ goto*Startup
 	BASS_ChannelPlay _h
 	return
 
+#deffunc LoadSE int _id,str _path,double _vol
+	hsmpsnd(_id)=BASS_SampleLoad(FALSE,_path,0,0,0,16,0)
+	hbasssnd(_id)=BASS_SampleGetChannel(hsmpsnd(_id),FALSE)
+	RegAudioLib TYPE_SE,_path
+	BASS_ChannelSetAttribute hbasssnd(_id),BASS_ATTRIB_VOL,tofloat(_vol)
+
+	return
+
 *ExportLog
 	notesel ConsoleLogBuf
 	notesave"Log.txt"

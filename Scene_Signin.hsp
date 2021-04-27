@@ -190,6 +190,7 @@
 
 		if SceneCount==10 {
 			PlaySE hbasssnd(sndUI_Text)
+			PlaySE hbasssnd(vocSignin)
 		}
 
 	return

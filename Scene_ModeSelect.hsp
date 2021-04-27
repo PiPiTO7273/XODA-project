@@ -157,5 +157,9 @@
 			dim decideFrameCount
 			gosub*Scene_Init_MusicSelect
 		}
+		if SceneCount==1 {
+			PlaySE hbasssnd(sndUI_Text)
+			PlaySE hbasssnd(vocModeSel)
+		}
 
 	return

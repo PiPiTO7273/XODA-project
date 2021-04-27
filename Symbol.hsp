@@ -21,6 +21,7 @@
 #enum fNoto_b22
 #enum fNoto_b20
 #enum fNoto_b12
+#enum fNoto_m30
 #enum fPier_m22
 #enum fPier_m20
 #enum fPier_m16
@@ -152,6 +153,11 @@
 #enum sndUI_Error
 #enum sndUI_Text
 #enum bgmMain
+#enum vocModeSel
+#enum vocMusicSel
+#enum vocPartnerSel
+#enum vocReady
+#enum vocSignin
 
 //オブジェクトID
 #define HITOBJ_NORMAL		0

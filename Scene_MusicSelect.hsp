@@ -550,12 +550,41 @@
 			//決定画面
 			SeekMovieToGraph hdximg(iMovie_Decide),0
 			PlayMovieToGraph hdximg(iMovie_Decide)
+			PlaySE hbasssnd(sndUI_Decide)
 			repeat 60*5
 				ProcessMessage
 				SetDrawScreen DX_SCREEN_BACK
 				ClearDrawScreen
 					SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
 					DrawGraph 0,0,hdximg(iMovie_Decide),FALSE
+
+					//プレイする楽曲情報
+						if cnt<25 {
+							setease 0,256,ease_cubic_out
+							SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(cnt,25)
+						} else {
+							setease 0,256,ease_cubic_in
+							SetDrawBlendMode DX_BLENDMODE_ALPHA,256-getease(cnt-60*5+25,25)
+						}
+						dim tmpease
+						if cnt<25 {
+							setease 0,128,ease_cubic_out
+							tmpease=getease(cnt,25)
+						} else {
+							setease 0,128,ease_cubic_in
+							tmpease=128-getease(cnt-60*5+25,25)
+						}
+
+						//ステージ名
+							DrawStringXCenterToHandle -128+tmpease,280,"NORMAL MODE 1st Stage",DispWidth,GetColor(50,50,50),hdxfont(fPier_m16)
+						//曲名
+							DrawStringXCenterToHandle 128-tmpease,315,Libarr_Title(CursorLevID,CursorSelID),DispWidth,GetColor(15,15,15),hdxfont(fNoto_m30)
+						//アーティスト名
+							DrawStringXCenterToHandle -128+tmpease,384,Libarr_Artist(CursorLevID,CursorSelID),DispWidth,GetColor(30,30,30),hdxfont(fNoto_m16)
+						//難易度
+							sdim tmpstr:tmpstr=Libarr_Difficulty(CursorLevID,CursorSelID)+" Lv."+Libarr_Level(CursorLevID,CursorSelID)
+							DrawStringXCenterToHandle 128-tmpease,428,tmpstr,DispWidth,GetDifficultyColor(Libarr_Difficulty(CursorLevID,CursorSelID)),hdxfont(fGood_14)
+
 				ScreenFlip
 				await
 			loop
@@ -575,4 +604,5 @@
 			gosub*InitScene
 			PlayStartMS=GetNowCount()
 		}
+		if SceneCount==10 :PlaySE hbasssnd(vocMusicSel)
 	return

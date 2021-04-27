@@ -35,53 +35,22 @@
 *LoadSoundEffects
 	//サウンドの読み込み
 		dim hbasssnd:dim hsmpsnd
-		//開始音
-		hsmpsnd(sndStart)=BASS_SampleLoad(FALSE,"Data/Sound/Gameplay_Start.wav",0,0,0,16,0)
-		hbasssnd(sndStart)=BASS_SampleGetChannel(hsmpsnd(sndStart),FALSE)
-		RegAudioLib TYPE_SE,"Data/Sound/Gameplay_Start.wav"
-		//ヒット
-		hsmpsnd(sndHitobj)=BASS_SampleLoad(FALSE,"Data/Sound/Gameplay_Hit.wav",0,0,0,16,0)
-		hbasssnd(sndHitobj)=BASS_SampleGetChannel(hsmpsnd(sndHitobj),FALSE)
-		RegAudioLib TYPE_SE,"Data/Sound/Gameplay_Hit.wav"
-		//空打ち
-		hsmpsnd(sndHitempty)=BASS_SampleLoad(FALSE,"Data/Sound/Gameplay_Empty.wav",0,0,0,16,0)
-		hbasssnd(sndHitempty)=BASS_SampleGetChannel(hsmpsnd(sndHitempty),FALSE)
-		RegAudioLib TYPE_SE,"Data/Sound/Gameplay_Empty.wav"
-		//バースト
-		hsmpsnd(sndBurst)=BASS_SampleLoad(FALSE,"Data/Sound/Gameplay_Burst.wav",0,0,0,16,0)
-		hbasssnd(sndBurst)=BASS_SampleGetChannel(hsmpsnd(sndBurst),FALSE)
-		BASS_ChannelSetAttribute hbasssnd(sndBurst),BASS_ATTRIB_VOL,tofloat(0.8)
-		RegAudioLib TYPE_SE,"Data/Sound/Gameplay_Burst.wav"
-		//UI キャンセル
-		hsmpsnd(sndUI_Cancel)=BASS_SampleLoad(FALSE,"Data/Sound/System_UI_Cancel.wav",0,0,0,16,0)
-		hbasssnd(sndUI_Cancel)=BASS_SampleGetChannel(hsmpsnd(sndUI_Cancel),FALSE)
-		RegAudioLib TYPE_SE,"Data/Sound/System_UI_Cancel.wav"
-		BASS_ChannelSetAttribute hbasssnd(sndUI_Cancel),BASS_ATTRIB_VOL,tofloat(0.7)
-		//UI 難易度切り替え
-		hsmpsnd(sndUI_ChangeDifficulty)=BASS_SampleLoad(FALSE,"Data/Sound/System_UI_ChangeDifficulty.wav",0,0,0,16,0)
-		hbasssnd(sndUI_ChangeDifficulty)=BASS_SampleGetChannel(hsmpsnd(sndUI_ChangeDifficulty),FALSE)
-		RegAudioLib TYPE_SE,"Data/Sound/System_UI_Decide.wav"
-		BASS_ChannelSetAttribute hbasssnd(sndUI_ChangeDifficulty),BASS_ATTRIB_VOL,tofloat(0.5)
-		//UI カーソル
-		hsmpsnd(sndUI_Cursor)=BASS_SampleLoad(FALSE,"Data/Sound/System_UI_Cursor.wav",0,0,0,16,0)
-		hbasssnd(sndUI_Cursor)=BASS_SampleGetChannel(hsmpsnd(sndUI_Cursor),FALSE)
-		RegAudioLib TYPE_SE,"Data/Sound/System_UI_Cursor.wav"
-		BASS_ChannelSetAttribute hbasssnd(sndUI_Cursor),BASS_ATTRIB_VOL,tofloat(0.3)
-		//UI 決定効果音
-		hsmpsnd(sndUI_Decide)=BASS_SampleLoad(FALSE,"Data/Sound/System_UI_Decide.wav",0,0,0,16,0)
-		hbasssnd(sndUI_Decide)=BASS_SampleGetChannel(hsmpsnd(sndUI_Decide),FALSE)
-		RegAudioLib TYPE_SE,"Data/Sound/System_UI_Decide.wav"
-		BASS_ChannelSetAttribute hbasssnd(sndUI_Decide),BASS_ATTRIB_VOL,tofloat(0.9)
-		//UI エラー
-		hsmpsnd(sndUI_Error)=BASS_SampleLoad(FALSE,"Data/Sound/System_UI_Error.wav",0,0,0,16,0)
-		hbasssnd(sndUI_Error)=BASS_SampleGetChannel(hsmpsnd(sndUI_Error),FALSE)
-		RegAudioLib TYPE_SE,"Data/Sound/System_UI_Error.wav"
-		BASS_ChannelSetAttribute hbasssnd(sndUI_Error),BASS_ATTRIB_VOL,tofloat(0.7)
-		//UI テキスト表示
-		hsmpsnd(sndUI_Text)=BASS_SampleLoad(FALSE,"Data/Sound/System_UI_Text.wav",0,0,0,16,0)
-		hbasssnd(sndUI_Text)=BASS_SampleGetChannel(hsmpsnd(sndUI_Text),FALSE)
-		RegAudioLib TYPE_SE,"Data/Sound/System_UI_Text.wav"
-		BASS_ChannelSetAttribute hbasssnd(sndUI_Text),BASS_ATTRIB_VOL,tofloat(0.3)
+		LoadSE sndStart,"Data/Sound/Gameplay_Start.wav",1.0							//開始音
+		LoadSE sndHitobj,"Data/Sound/Gameplay_Hit.wav",1.0							//ヒット
+		LoadSE sndHitempty,"Data/Sound/Gameplay_Empty.wav",1.0							//空打ち
+		LoadSE sndBurst,"Data/Sound/Gameplay_Burst.wav",0.8							//バースト
+		LoadSE sndUI_Cancel,"Data/Sound/System_UI_Cancel.wav",0.7						//UI キャンセル
+		LoadSE sndUI_ChangeDifficulty,"Data/Sound/System_UI_ChangeDifficulty.wav",0.5		//UI 難易度切り替え
+		LoadSE sndUI_Cursor,"Data/Sound/System_UI_Cursor.wav",0.3						//UI カーソル
+		LoadSE sndUI_Decide,"Data/Sound/System_UI_Decide.wav",0.9						//UI 決定効果音
+		LoadSE sndUI_Error,"Data/Sound/System_UI_Error.wav",0.7						//UI エラー
+		LoadSE sndUI_Text,"Data/Sound/System_UI_Text.wav",0.3							//UI テキスト表示
+
+		LoadSE vocModeSel,"Data/Sound/Voice_ModeSelect.wav",1.0						//ボイス モード選択
+		LoadSE vocMusicSel,"Data/Sound/Voice_MusicSelect.wav",1.0						//ボイス 楽曲選択
+		LoadSE vocPartnerSel,"Data/Sound/Voice_PartnerSelect.wav",1.0					//ボイス パートナー選択
+		LoadSE vocReady,"Data/Sound/Voice_Ready.wav",1.0								//ボイス 開始
+		LoadSE vocSignin,"Data/Sound/Voice_Signin.wav",1.0							//ボイス サインイン
 
 		//BGM
 		hbasssnd(bgmMain)=BASS_StreamCreateFile(FALSE,"Data/Sound/bgm_Main.flac",0,0,0,0,BASS_SAMPLE_LOOP)
@@ -97,6 +66,7 @@
 		hdxfont(fNoto_r15)=LoadFontDataToHandle("Data/Font/NSCJR15.bin",0)	//Noto Sans CJK JP Regular 15px
 		hdxfont(fNoto_r14)=LoadFontDataToHandle("Data/Font/NSCJR14.bin",0)	//Noto Sans CJK JP Regular 14px
 		hdxfont(fNoto_r12)=LoadFontDataToHandle("Data/Font/NSCJR12.bin",0)	//Noto Sans CJK JP Regular 12px
+		hdxfont(fNoto_m30)=LoadFontDataToHandle("Data/Font/NSCJM30.bin",0)	//Noto Sans CJK JP Medium 30px
 		hdxfont(fNoto_m24)=LoadFontDataToHandle("Data/Font/NSCJM24.bin",0)	//Noto Sans CJK JP Medium 24px
 		hdxfont(fNoto_m16)=LoadFontDataToHandle("Data/Font/NSCJM16.bin",0)	//Noto Sans CJK JP Medium 16px
 		hdxfont(fNoto_m14)=LoadFontDataToHandle("Data/Font/NSCJM14.bin",0)	//Noto Sans CJK JP Medium 14px
