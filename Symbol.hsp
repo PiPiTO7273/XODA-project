@@ -6,7 +6,7 @@
 #define BuildVersion_Major	0
 #define BuildVersion_Minor	2
 #define Usebitsadmin		0
-#define SplashTime			0
+#define SplashTime			3
 
 //フォントハンドル
 #enum fNoto_r18	=	0

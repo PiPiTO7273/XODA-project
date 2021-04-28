@@ -23,6 +23,7 @@
 				procjumpflag=TRUE
 			} else {
 				updateflag(cnt)=FALSE
+				dialog updatepath(cnt)+"\n"+strsize
 			}
 		loop
 
