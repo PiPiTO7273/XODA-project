@@ -99,7 +99,9 @@
 			setease 0,256,ease_linear
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,15)
 			setease 192+232*bfSelItemID+25,192+232*SelItemID+25,ease_cubic_out
-			DrawGraph getease(SelItemCount,15),472,hdximg(iMode_Item_Cursor),TRUE
+			EasePosX=getease(SelItemCount,15)
+			setease 0,10,ease_linear+ease_loop
+			DrawGraph EasePosX,472+getease(SceneCount,15),hdximg(iMode_Item_Cursor),TRUE
 
 		//ステータス
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256

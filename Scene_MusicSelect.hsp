@@ -585,6 +585,13 @@
 							sdim tmpstr:tmpstr=Libarr_Difficulty(CursorLevID,CursorSelID)+" Lv."+Libarr_Level(CursorLevID,CursorSelID)
 							DrawStringXCenterToHandle 128-tmpease,428,tmpstr,DispWidth,GetDifficultyColor(Libarr_Difficulty(CursorLevID,CursorSelID)),hdxfont(fGood_14)
 
+					//ˆÃ“]
+						if cnt>60*5-20 {
+							setease 0,256,ease_linear
+							SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(cnt-(60*5-20),20)
+							DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
+						}
+
 				ScreenFlip
 				await
 			loop
