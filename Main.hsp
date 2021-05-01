@@ -168,6 +168,10 @@
 	FrameCount++
 
 	ScreenFlip
+
+	//デバッグ用遅延処理
+		if CheckHitKey(KEY_INPUT_TAB)==TRUE :WaitVSync 10
+
 	await
 
 	goto*MainLoop

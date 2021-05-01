@@ -21,8 +21,10 @@
 				updateflag(cnt)=TRUE
 				updatemax++
 				procjumpflag=TRUE
+				AddDebugConsole STYLE_NORMAL,"アップデートを予約しました。 ["+updatepath(cnt)+"]"
 			} else {
 				updateflag(cnt)=FALSE
+				AddDebugConsole STYLE_NORMAL,"アップデートをスキップしました。 ["+updatepath(cnt)+"]"
 			}
 		loop
 
@@ -172,6 +174,11 @@
 		hdximg(iIcon_IR)=LoadGraph("Data/Image/Icon_IR.png")
 		hdximg(iIcon_IR_best)=LoadGraph("Data/Image/Icon_IR_best.png")
 		hdximg(iMovie_Decide)=LoadGraph("Data/Movie/Decide.ogv")
+
+		hdximg(iMovie_stg_Clear)=LoadGraph("Data/Movie/stg_Clear.ogv")
+		hdximg(iMovie_stg_Fullcombo)=LoadGraph("Data/Movie/stg_Clear.ogv")
+		hdximg(iMovie_stg_ALLex)=LoadGraph("Data/Movie/stg_Clear.ogv")
+		hdximg(iMovie_stg_Failed)=LoadGraph("Data/Movie/stg_Clear.ogv")
 
 	//配列画像素材の読み込み
 		dim hdxarr_Button_Yes,2

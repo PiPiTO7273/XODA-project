@@ -396,6 +396,7 @@
 						if hitobjType(cnt)==HITOBJ_HOLDEND {
 							HoldFlag(hitobjLaneID(cnt))=FALSE
 						}
+						if cnt==hitobjMax-1 :stgClearEffFlag=TRUE
 					}
 				}
 			//見逃し判定
@@ -406,6 +407,7 @@
 						hitJudgeFlag(cnt+1)=TRUE
 						UpdateJudgeValue JUDGE_RES_MISS
 					}
+					if cnt==hitobjMax-1 :stgClearEffFlag=TRUE
 				}
 		loop
 
@@ -549,6 +551,27 @@
 		if SceneCount>20 {
 			SetDrawBlendMode DX_BLENDMODE_ADD,256
 			DrawGraph 0,0,hdximg(iMovie_Start),TRUE
+		}
+
+	//クリア演出
+		if stgClearEffFlag==TRUE {
+			if stgClearEffCount==10 {
+				//クリア演出の動画再生開始
+				PlayMovieToGraph hdximg(iMovie_stg_Clear)
+			}
+			if stgClearEffCount<=10 {
+				setease 0,200,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(stgClearEffCount,10)
+			} else {
+				setease 200,256,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(stgClearEffCount-60*3,15)
+			}
+			DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
+			if stgClearEffCount>=10 {
+				SetDrawBlendMode DX_BLENDMODE_ADD,256
+				DrawGraph 0,0,hdximg(iMovie_stg_Clear),FALSE
+			}
+			stgClearEffCount++
 		}
 
 	//パーティクル生成

@@ -135,6 +135,11 @@
 #enum iLayer_Detail_Terminal
 #enum iMovie_Decide
 
+#enum iMovie_stg_Clear
+#enum iMovie_stg_Fullcombo
+#enum iMovie_stg_ALLex
+#enum iMovie_stg_Failed
+
 #enum iMax
 
 //Artlet2DƒCƒ[ƒW

@@ -484,6 +484,11 @@
 	dim DebugKeyFlag,12
 	dim DebugbfKeyFlag,12
 
+	//クリア演出フラグ
+	dim stgClearEffFlag
+	dim stgClearEffCount
+	stgClearEffFlag=FALSE
+
 	AddDebugConsole STYLE_NORMAL,"プレイ画面の初期化完了"
 	return
 

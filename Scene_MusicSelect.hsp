@@ -223,22 +223,22 @@
 		//上下（カーソル移動）
 			if bfKeyFlag(2)==1&KeyFlag(2)==1 {		//↑
 				KeyPushCount(0)++
-				CursorOffsetEase=-40
 			} else :KeyPushCount(0)=0
 			if (bfKeyFlag(2)==0&KeyFlag(2)==1)|(KeyPushCount(0)>16&SceneCount\2==0) {	//連続↑
 				CursorSelCount=0
 				CursorSelID--
 				if CursorSelID<0 :CursorSelID=Libarr_Max-1
+				CursorOffsetEase=-40
 				PlaySE hbasssnd(sndUI_Cursor)
 			}
 			if bfKeyFlag(3)==1&KeyFlag(3)==1 {		//↓
 				KeyPushCount(1)++
-				CursorOffsetEase=40
 			} else :KeyPushCount(1)=0
 			if (bfKeyFlag(3)==0&KeyFlag(3)==1)|(KeyPushCount(1)>16&SceneCount\2==0) {	//連続↓
 				CursorSelCount=0
 				CursorSelID++
 				if CursorSelID>=Libarr_Max :CursorSelID=0
+				CursorOffsetEase=40
 				PlaySE hbasssnd(sndUI_Cursor)
 			}
 
