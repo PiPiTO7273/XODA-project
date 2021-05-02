@@ -176,9 +176,9 @@
 		hdximg(iMovie_Decide)=LoadGraph("Data/Movie/Decide.ogv")
 
 		hdximg(iMovie_stg_Clear)=LoadGraph("Data/Movie/stg_Clear.ogv")
-		hdximg(iMovie_stg_Fullcombo)=LoadGraph("Data/Movie/stg_Clear.ogv")
-		hdximg(iMovie_stg_ALLex)=LoadGraph("Data/Movie/stg_Clear.ogv")
-		hdximg(iMovie_stg_Failed)=LoadGraph("Data/Movie/stg_Clear.ogv")
+		hdximg(iMovie_stg_Fullcombo)=LoadGraph("Data/Movie/stg_Fullcombo.ogv")
+		hdximg(iMovie_stg_ALLex)=LoadGraph("Data/Movie/stg_Allex.ogv")
+		hdximg(iMovie_stg_Failed)=LoadGraph("Data/Movie/stg_Failed.ogv")
 
 	//îzóÒâÊëúëfçﬁÇÃì«Ç›çûÇ›
 		dim hdxarr_Button_Yes,2

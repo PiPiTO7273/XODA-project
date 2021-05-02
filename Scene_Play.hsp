@@ -73,6 +73,7 @@
 						if abs(NearNoteDif)<JUDGE_WIDTH_EXCELLENT :JudgeRes=JUDGE_RES_EXCELLENT
 
 						UpdateJudgeValue JudgeRes
+						if NearNoteID==hitobjMax-1 :stgClearEffFlag=TRUE
 
 					//ホールド判定
 						if hitobjType(NearNoteID)==HITOBJ_HOLDSTART {
@@ -555,9 +556,40 @@
 
 	//クリア演出
 		if stgClearEffFlag==TRUE {
+			//クリアの種類を判別
+				if stgClearEffCount==0 {
+					//初回処理
+					dim stgClearType
+					stgClearType=ID_Failed
+					switch GaugeType
+						case GAUGE_ASSIST		//アシストクリア
+							if curGaugeVal>60.0 :stgClearType=ID_Clear
+						swbreak
+						case GAUGE_NORMAL		//クリア
+							if curGaugeVal>70.0 :stgClearType=ID_Clear
+						swbreak
+						case GAUGE_HARD		//ハードクリア
+							if curGaugeVal>=0.0 :stgClearType=ID_Clear
+						swbreak
+						case GAUGE_MADNESS		//マドネスクリア
+							if curGaugeVal>=0.0 :stgClearType=ID_Clear
+						swbreak
+					swend
+					if hitobjMax==curCombo :stgClearType=ID_Fullcombo
+					if curScore==10000000 :stgClearType=ID_Allex
+
+					dim stgEffMovieHWND
+					switch stgClearType
+						case ID_Failed:stgEffMovieHWND=hdximg(iMovie_stg_Failed):swbreak			//クリア失敗
+						case ID_Clear:stgEffMovieHWND=hdximg(iMovie_stg_Clear):swbreak			//クリア
+						case ID_Fullcombo:stgEffMovieHWND=hdximg(iMovie_stg_Fullcombo):swbreak	//フルコンボ
+						case ID_Allex:stgEffMovieHWND=hdximg(iMovie_stg_ALLex):swbreak			//オールエクセレント
+					swend
+				}
+
 			if stgClearEffCount==10 {
 				//クリア演出の動画再生開始
-				PlayMovieToGraph hdximg(iMovie_stg_Clear)
+				PlayMovieToGraph stgEffMovieHWND
 			}
 			if stgClearEffCount<=10 {
 				setease 0,200,ease_linear
@@ -569,7 +601,7 @@
 			DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
 			if stgClearEffCount>=10 {
 				SetDrawBlendMode DX_BLENDMODE_ADD,256
-				DrawGraph 0,0,hdximg(iMovie_stg_Clear),FALSE
+				DrawGraph 0,0,stgEffMovieHWND,FALSE
 			}
 			stgClearEffCount++
 		}
