@@ -1,4 +1,4 @@
-Data/Movie/background.ogv=https://dl.dropboxusercontent.com/s/lpofmuawxkvlo0p/background.ogv
+Data/Movie/bg_Main.ogv=https://dl.dropboxusercontent.com/s/lpofmuawxkvlo0p/background.ogv
 Data/Object/Hit/Charge.png=https://dl.dropboxusercontent.com/s/ile2qobu1xlhhn1/Charge.png
 Data/Sound/bgm_Main.flac=https://dl.dropboxusercontent.com/s/yw7wryhispqe22m/bgm_Main.flac
 Data/Movie/Start.ogv=https://dl.dropboxusercontent.com/s/jg3trlp779o9bl8/Start.ogv
@@ -43,3 +43,5 @@ Data/Movie/stg_AllEx.ogv=https://dl.dropboxusercontent.com/s/77wjgsoou29r924/stg
 Data/Movie/stg_Clear.ogv=https://dl.dropboxusercontent.com/s/mmt6fejioqyi29y/stg_Clear.ogv
 Data/Movie/stg_Failed.ogv=https://dl.dropboxusercontent.com/s/75g06qb8892h34x/stg_Failed.ogv
 Data/Movie/stg_FullCombo.ogv=https://dl.dropboxusercontent.com/s/0yegj5fkxi7sw4h/stg_Fullcombo.ogv
+Data/Movie/bg_Decide.ogv=https://dl.dropboxusercontent.com/s/rhx98ah0346bdrx/bg_Decide.ogv
+Data/Movie/bg_Result.ogv=https://dl.dropboxusercontent.com/s/mr9cphugoxnuea3/bg_Result.ogv

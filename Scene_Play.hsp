@@ -590,6 +590,12 @@
 			if stgClearEffCount==10 {
 				//クリア演出の動画再生開始
 				PlayMovieToGraph stgEffMovieHWND
+
+				if stgClearType==ID_Failed {
+					PlaySE hbasssnd(sndRes_Failed)
+				} else {
+					PlaySE hbasssnd(sndRes_Clear)
+				}
 			}
 			if stgClearEffCount<=10 {
 				setease 0,200,ease_linear
@@ -602,6 +608,41 @@
 			if stgClearEffCount>=10 {
 				SetDrawBlendMode DX_BLENDMODE_ADD,256
 				DrawGraph 0,0,stgEffMovieHWND,FALSE
+
+				setease 0.5,0,ease_linear
+				BASS_ChannelSetAttribute hplaybgm,BASS_ATTRIB_VOL,tofloat(geteasef(stgClearEffCount-10,60*3+50))
+			}
+
+			if stgClearEffCount==10+60*3 :PlaySE hbasssnd(sndUI_Trans_In)
+			if stgClearEffCount>=10+60*3 {
+				//トランジション
+					setease -DispWidth,0,ease_cubic_out
+					EasePosX=getease(stgClearEffCount-10-60*3,50)
+					setease DispHeight,0,ease_cubic_out
+					EasePosY=getease(stgClearEffCount-10-60*3,50)
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+					DrawGraph EasePosX,EasePosY,hdximg(iTrans_In_L),TRUE
+
+					setease DispWidth,0,ease_cubic_out
+					EasePosX=getease(stgClearEffCount-10-60*3,50)
+					setease -DispHeight,0,ease_cubic_out
+					EasePosY=getease(stgClearEffCount-10-60*3,50)
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+					DrawGraph EasePosX,EasePosY,hdximg(iTrans_In_R),TRUE
+
+					setease -DispWidth,0,ease_cubic_out
+					EasePosX=getease(stgClearEffCount-10-60*3,25)
+					setease DispHeight,0,ease_cubic_out
+					EasePosY=getease(stgClearEffCount-10-60*3,25)
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+					DrawGraph EasePosX,EasePosY,hdximg(iTrans_Out_L),TRUE
+
+					setease DispWidth,0,ease_cubic_out
+					EasePosX=getease(stgClearEffCount-10-60*3,25)
+					setease -DispHeight,0,ease_cubic_out
+					EasePosY=getease(stgClearEffCount-10-60*3,25)
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+					DrawGraph EasePosX,EasePosY,hdximg(iTrans_Out_R),TRUE
 			}
 			stgClearEffCount++
 		}

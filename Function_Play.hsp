@@ -438,7 +438,7 @@
 
 	//ユーザー指定スピード値
 	ddim AddSpeed,1
-	AddSpeed=8.0
+	AddSpeed=10.0
 
 	//判定するフラグ
 	dim JudgeFlag,3

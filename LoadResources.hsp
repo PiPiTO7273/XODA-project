@@ -47,6 +47,9 @@
 		LoadSE sndUI_Decide,"Data/Sound/System_UI_Decide.wav",0.9						//UI 決定効果音
 		LoadSE sndUI_Error,"Data/Sound/System_UI_Error.wav",0.7						//UI エラー
 		LoadSE sndUI_Text,"Data/Sound/System_UI_Text.wav",0.3							//UI テキスト表示
+		LoadSE sndUI_Trans_In,"Data/Sound/System_UI_Transition_In.wav",1.0				//トランジション（In）
+		LoadSE sndRes_Failed,"Data/Sound/Gameplay_Failed.wav",1.0						//失敗
+		LoadSE sndRes_Clear,"Data/Sound/Gameplay_Clear.wav",1.0						//クリア
 
 		LoadSE vocModeSel,"Data/Sound/Voice_ModeSelect.wav",1.0						//ボイス モード選択
 		LoadSE vocMusicSel,"Data/Sound/Voice_MusicSelect.wav",1.0						//ボイス 楽曲選択
@@ -106,7 +109,7 @@
 	//画像読み込み
 		dim hdximg,iMax
 		SetUsePremulAlphaConvertLoad TRUE
-		hdximg(iBackground)=LoadGraph("Data/Movie/background.ogv")
+		hdximg(iBackground)=LoadGraph("Data/Movie/bg_Main.ogv")
 		hdximg(ibg_Nav)=LoadGraph("Data/Image/bg_Navigation.png")
 		hdximg(ibg_GuidePanel)=LoadGraph("Data/Image/bg_GuidePanel.png")
 		hdximg(iGuide_Large)=LoadGraph("Data/Image/Guide_Large.png")
@@ -173,12 +176,17 @@
 		hdximg(iIcon_IR_3rd)=LoadGraph("Data/Image/Icon_IR_3rd.png")
 		hdximg(iIcon_IR)=LoadGraph("Data/Image/Icon_IR.png")
 		hdximg(iIcon_IR_best)=LoadGraph("Data/Image/Icon_IR_best.png")
-		hdximg(iMovie_Decide)=LoadGraph("Data/Movie/Decide.ogv")
+		hdximg(iMovie_Decide)=LoadGraph("Data/Movie/bg_Decide.ogv")
 
 		hdximg(iMovie_stg_Clear)=LoadGraph("Data/Movie/stg_Clear.ogv")
 		hdximg(iMovie_stg_Fullcombo)=LoadGraph("Data/Movie/stg_Fullcombo.ogv")
 		hdximg(iMovie_stg_ALLex)=LoadGraph("Data/Movie/stg_Allex.ogv")
 		hdximg(iMovie_stg_Failed)=LoadGraph("Data/Movie/stg_Failed.ogv")
+
+		hdximg(iTrans_Out_L)=LoadGraph("Data/Image/Transition_Out_L.png")
+		hdximg(iTrans_Out_R)=LoadGraph("Data/Image/Transition_Out_R.png")
+		hdximg(iTrans_In_L)=LoadGraph("Data/Image/Transition_In_L.png")
+		hdximg(iTrans_In_R)=LoadGraph("Data/Image/Transition_In_R.png")
 
 	//配列画像素材の読み込み
 		dim hdxarr_Button_Yes,2

@@ -140,6 +140,11 @@
 #enum iMovie_stg_ALLex
 #enum iMovie_stg_Failed
 
+#enum iTrans_Out_L
+#enum iTrans_Out_R
+#enum iTrans_In_L
+#enum iTrans_In_R
+
 #enum iMax
 
 //Artlet2DƒCƒ[ƒW
@@ -157,6 +162,9 @@
 #enum sndUI_Decide
 #enum sndUI_Error
 #enum sndUI_Text
+#enum sndUI_Trans_In
+#enum sndRes_Failed
+#enum sndRes_Clear
 #enum bgmMain
 #enum vocModeSel
 #enum vocMusicSel
