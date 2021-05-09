@@ -1,0 +1,6 @@
+
+*Scene_Init_Result
+	return
+
+*Scene_Result
+	return

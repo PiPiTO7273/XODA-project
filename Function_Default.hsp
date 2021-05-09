@@ -81,6 +81,7 @@ goto*Startup
 	return
 
 #defcfunc RepHiddenWords str _p,str _hiddenstr
+	if SecViewFlag==TRUE :return _p
 	sdim tmpstr
 	repeat strlen(_p)
 		tmpstr+_hiddenstr
@@ -260,6 +261,14 @@ goto*Startup
 	RegAudioLib TYPE_SE,_path
 	BASS_ChannelSetAttribute hbasssnd(_id),BASS_ATTRIB_VOL,tofloat(_vol)
 
+	return
+
+#deffunc DrawDebugString int _posx,int _posy,str _string
+	SetDrawScreen DX_SCREEN_BACK
+	SetDrawBlendMode DX_BLENDMODE_ALPHA,200
+	DrawBox _posx,_posy,_posx+GetDrawStringWidthToHandle(_string,strlen(_string),hdxfont(fSystem)),_posy+16,GetColor(0,0,0),TRUE
+	SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+	DrawStringToHandle _posx,_posy,_string,GetColor(255,255,255),hdxfont(fSystem)
 	return
 
 *ExportLog

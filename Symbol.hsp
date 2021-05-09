@@ -9,7 +9,8 @@
 #define SplashTime			0
 
 //フォントハンドル
-#enum fNoto_r18	=	0
+#enum fSystem		=	0
+#enum fNoto_r18
 #enum fNoto_r16
 #enum fNoto_r15
 #enum fNoto_r14
@@ -53,6 +54,7 @@
 #enum ID_ModeSelect
 #enum ID_MusicSelect
 #enum ID_Play
+#enum ID_Result
 
 //DxLibグラフィック
 #enum iTmp			=	0
@@ -163,6 +165,7 @@
 #enum sndUI_Error
 #enum sndUI_Text
 #enum sndUI_Trans_In
+#enum sndUI_Trans_Out
 #enum sndRes_Failed
 #enum sndRes_Clear
 #enum bgmMain

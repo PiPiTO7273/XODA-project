@@ -48,6 +48,7 @@
 		LoadSE sndUI_Error,"Data/Sound/System_UI_Error.wav",0.7						//UI エラー
 		LoadSE sndUI_Text,"Data/Sound/System_UI_Text.wav",0.3							//UI テキスト表示
 		LoadSE sndUI_Trans_In,"Data/Sound/System_UI_Transition_In.wav",1.0				//トランジション（In）
+		LoadSE sndUI_Trans_Out,"Data/Sound/System_UI_Transition_Out.wav",1.0				//トランジション（Out）
 		LoadSE sndRes_Failed,"Data/Sound/Gameplay_Failed.wav",1.0						//失敗
 		LoadSE sndRes_Clear,"Data/Sound/Gameplay_Clear.wav",1.0						//クリア
 
@@ -66,6 +67,7 @@
 *LoadFontData
 	//フォントデータ初期化
 		dim hdxfont
+		hdxfont(fSystem)=CreateFontToHandle("MS GOTHIC",16,-1,DX_FONTTYPE_NORMAL)
 		hdxfont(fNoto_r18)=LoadFontDataToHandle("Data/Font/NSCJR18.bin",0)	//Noto Sans CJK JP Regular 18px
 		hdxfont(fNoto_r16)=LoadFontDataToHandle("Data/Font/NSCJR16.bin",0)	//Noto Sans CJK JP Regular 16px
 		hdxfont(fNoto_r15)=LoadFontDataToHandle("Data/Font/NSCJR15.bin",0)	//Noto Sans CJK JP Regular 15px

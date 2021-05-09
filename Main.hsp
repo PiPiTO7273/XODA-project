@@ -47,6 +47,7 @@
 #include"Scene_ModeSelect.hsp"		//モード選択
 #include"Scene_MusicSelect.hsp"		//楽曲選択
 #include"Scene_Play.hsp"				//ゲームプレイ
+#include"Scene_Result.hsp"			//リザルト
 
 //----- 起動開始 -----
 *Startup
@@ -125,6 +126,10 @@
 	ddim curFPSval,1
 	//フレームカウンタ
 	dim FrameCount
+	//セキュリティ情報の開示
+	dim SecViewFlag
+	//デバッグメニューのログのスクロール値
+	dim DebugLogScr
 
 	//////debug
 	//読み込む譜面ファイル名
@@ -154,6 +159,9 @@
 		case ID_Play		//プレイ
 			gosub*Scene_Play
 		swbreak
+		case ID_Result		//リザルト
+			gosub*Scene_Result
+		swbreak
 	swend
 
 	//FPS表示
@@ -167,10 +175,38 @@
 	SceneCount++
 	FrameCount++
 
-	ScreenFlip
-
 	//デバッグ用遅延処理
-		if CheckHitKey(KEY_INPUT_TAB)==TRUE :WaitVSync 10
+		if CheckHitKey(KEY_INPUT_TAB)==TRUE :WaitVSync 4
+		if CheckHitKey(KEY_INPUT_F1)==TRUE {
+			//デバッグメニュー
+			DrawDebugString 0,16*0,"XODA ver"+BuildVersion_Major+"."+BuildVersion_Minor
+			DrawDebugString 0,16*1,"HD "+DispWidth+"x"+DispHeight+" ["+ginfo(20)+"x"+ginfo(21)+"]"
+			DrawDebugString 0,16*3,"PATH : "+SERVICE_HOST
+			DrawDebugString 0,16*4,"ID : "+RepHiddenWords(str(SERVICE_USERNAME),"*")
+			DrawDebugString 0,16*5,"KEY : "+RepHiddenWords(str(SERVICE_PASSWORD),"*")
+			DrawDebugString 0,16*7,"FPS : "+strf("%.3f",curFPSval)+" ["+strf("%.2f",1000.0/curFPSval)+"ms]"
+			DrawDebugString 0,16*8,"SCENE : ID["+curSceneID+"]"
+			DrawDebugString 0,16*9,"F:"+FrameCount+" , F(S):"+SceneCount
+
+			//ログ
+			sdim tmpstr
+			tmpstr=cnvatos(ConsoleLogBuf)
+			notesel tmpstr
+			repeat 25
+				noteget NoteLine,notemax-cnt+DebugLogScr
+				DrawDebugString 0,16*12+(25-cnt)*16,NoteLine
+			loop
+			noteunsel
+
+			DrawDebugString 0,DispHeight-16,"F1:デバッグ情報の表示 , F2:セキュリティ情報の表示 , TAB:進行速度を1/4にする , PAGE UP:ログを上にスクロール , PAGE DOWN:ログを下にスクロール"
+		}
+		if CheckHitKey(KEY_INPUT_F2)==TRUE :SecViewFlag=TRUE:else:SecViewFlag=FALSE
+		if FrameCount\2==0 {
+			if CheckHitKey(KEY_INPUT_PGUP)==TRUE : DebugLogScr--
+			if CheckHitKey(KEY_INPUT_PGDN)==TRUE : DebugLogScr++
+		}
+
+	ScreenFlip
 
 	await
 

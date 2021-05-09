@@ -12,7 +12,7 @@
 	//デバッグキー判定
 		dim DebugKeyFlag,12
 		repeat 12
-			DebugKeyFlag(cnt)=CheckHitKey(KEY_INPUT_F1+cnt)
+			DebugKeyFlag(cnt)=CheckHitKey(KEY_INPUT_F3+cnt)
 			if DebugbfKeyFlag(cnt)==FALSE&DebugKeyFlag(cnt)==TRUE {
 				switch cnt
 					case DEBUG_AUTOPLAY
@@ -613,36 +613,46 @@
 				BASS_ChannelSetAttribute hplaybgm,BASS_ATTRIB_VOL,tofloat(geteasef(stgClearEffCount-10,60*3+50))
 			}
 
-			if stgClearEffCount==10+60*3 :PlaySE hbasssnd(sndUI_Trans_In)
-			if stgClearEffCount>=10+60*3 {
+			if stgClearEffCount==60*3-25 :PlaySE hbasssnd(sndUI_Trans_In)
+			if stgClearEffCount>=60*3-25 {
 				//トランジション
 					setease -DispWidth,0,ease_cubic_out
-					EasePosX=getease(stgClearEffCount-10-60*3,50)
+					EasePosX=getease(stgClearEffCount-60*3+25,50)
 					setease DispHeight,0,ease_cubic_out
-					EasePosY=getease(stgClearEffCount-10-60*3,50)
+					EasePosY=getease(stgClearEffCount-60*3+25,50)
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 					DrawGraph EasePosX,EasePosY,hdximg(iTrans_In_L),TRUE
 
 					setease DispWidth,0,ease_cubic_out
-					EasePosX=getease(stgClearEffCount-10-60*3,50)
+					EasePosX=getease(stgClearEffCount-60*3+25,50)
 					setease -DispHeight,0,ease_cubic_out
-					EasePosY=getease(stgClearEffCount-10-60*3,50)
+					EasePosY=getease(stgClearEffCount-60*3+25,50)
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 					DrawGraph EasePosX,EasePosY,hdximg(iTrans_In_R),TRUE
 
 					setease -DispWidth,0,ease_cubic_out
-					EasePosX=getease(stgClearEffCount-10-60*3,25)
+					EasePosX=getease(stgClearEffCount-60*3+25,25)
 					setease DispHeight,0,ease_cubic_out
-					EasePosY=getease(stgClearEffCount-10-60*3,25)
+					EasePosY=getease(stgClearEffCount-60*3+25,25)
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 					DrawGraph EasePosX,EasePosY,hdximg(iTrans_Out_L),TRUE
 
 					setease DispWidth,0,ease_cubic_out
-					EasePosX=getease(stgClearEffCount-10-60*3,25)
+					EasePosX=getease(stgClearEffCount-60*3+25,25)
 					setease -DispHeight,0,ease_cubic_out
-					EasePosY=getease(stgClearEffCount-10-60*3,25)
+					EasePosY=getease(stgClearEffCount-60*3+25,25)
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 					DrawGraph EasePosX,EasePosY,hdximg(iTrans_Out_R),TRUE
+			}
+			if stgClearEffCount==60*3-25+50 {
+				//リザルトへ
+				curSceneID=ID_Result
+				gosub*InitScene
+				//変数初期化
+				dim decideFlag
+				dim decideFrameCount
+
+				gosub*Scene_Init_Result
 			}
 			stgClearEffCount++
 		}
