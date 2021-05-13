@@ -47,6 +47,18 @@
 #enum fGood_12
 #enum fMplus_15
 
+#undef fNoto_r12
+#const fNoto_r12 fNoto_m12
+#undef fNoto_r14
+#const fNoto_r14 fNoto_m14
+#undef fNoto_r16
+#const fNoto_r16 fNoto_m16
+#undef fPier_r16
+#const fPier_r16 fPier_m16
+#undef fPier_r20
+#const fPier_r20 fPier_m20
+#const fPier_r22 fPier_m22
+
 //シーンID
 #enum ID_Boot		=	0
 #enum ID_Splash
@@ -59,6 +71,7 @@
 //DxLibグラフィック
 #enum iTmp			=	0
 #enum iBackground
+#enum ibg_Result
 #enum iLayer_Scene
 #enum ibg_Nav
 #enum ibg_GuidePanel
@@ -147,6 +160,13 @@
 #enum iTrans_In_L
 #enum iTrans_In_R
 
+#enum iNav_Result
+#enum ibg_Result_Info
+#enum ibg_Result_Score
+#enum iLayer_Result_Info
+#enum iLayer_Result_Score
+#enum iTx_Result_Score
+
 #enum iMax
 
 //Artlet2Dイメージ
@@ -169,6 +189,7 @@
 #enum sndRes_Failed
 #enum sndRes_Clear
 #enum bgmMain
+#enum bgmResult
 #enum vocModeSel
 #enum vocMusicSel
 #enum vocPartnerSel

@@ -122,7 +122,7 @@
 	//シーンID
 	dim curSceneID
 	curSceneID=ID_Splash
-	//現在のFPS値
+	//現在のFPS値5
 	ddim curFPSval,1
 	//フレームカウンタ
 	dim FrameCount
@@ -166,7 +166,7 @@
 
 	//FPS表示
 	if FrameCount\4==0 {
-		GetFPS:getdouble:curFPSval=refdval
+		GetFPS:getdouble:curFPSval=refdval 
 	}
 	;SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 	;DrawStringToHandle DispWidth-256,16,"FPS "+strf("%.3f",curFPSval),GetColor(0,0,0),hdxfont(fSQ_16)

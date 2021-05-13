@@ -588,7 +588,7 @@
 					//ˆÃ“]
 						if cnt>60*5-20 {
 							setease 0,256,ease_linear
-							SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(cnt-(60*5-20),20)
+							SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(cnt-(60*5-20),20-1)
 							DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
 						}
 

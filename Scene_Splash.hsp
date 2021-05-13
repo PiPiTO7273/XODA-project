@@ -54,6 +54,5 @@
 	//ƒIƒ“ƒ‰ƒCƒ“Ú‘±
 	netinit
 	gosub*OnlineSignin
-	gosub*Create_AQProfileBuf
 
 	return

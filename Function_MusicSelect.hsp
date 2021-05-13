@@ -1,8 +1,0 @@
-
-#defcfunc GetDifficultyColor str _difficulty
-
-	if _difficulty=="NORMAL" :return GetColor(83,208,255)
-	if _difficulty=="HARD" :return GetColor(255,221,83)
-	if _difficulty=="CHAOS" :return GetColor(255,83,249)
-
-	return GetColor(200,200,200)

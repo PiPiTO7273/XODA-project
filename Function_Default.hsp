@@ -271,6 +271,14 @@ goto*Startup
 	DrawStringToHandle _posx,_posy,_string,GetColor(255,255,255),hdxfont(fSystem)
 	return
 
+#defcfunc GetDifficultyColor str _difficulty
+
+	if _difficulty=="NORMAL" :return GetColor(83,208,255)
+	if _difficulty=="HARD" :return GetColor(255,221,83)
+	if _difficulty=="CHAOS" :return GetColor(255,83,249)
+
+	return GetColor(200,200,200)
+
 *ExportLog
 	notesel ConsoleLogBuf
 	notesave"Log.txt"
@@ -508,6 +516,7 @@ goto*Startup
 
 *Create_AQProfileBuf
 
+	/*
 	alCreateImage i2D_Profile,300,120
 		alColor 230,230,230,255
 		alFont"Pier Sans",20	//名前
@@ -520,6 +529,17 @@ goto*Startup
 	if hdximg(iUI_tx_Profile)!0 :DeleteGraph hdximg(iUI_tx_Profile)
 	hdximg(iUI_tx_Profile)=MakeScreen(300,120,TRUE)
 	alCopyImageToDXBuf i2D_Profile,hdximg(iUI_tx_Profile)
+	*/
+	if hdximg(iUI_tx_Profile)!0 :DeleteGraph hdximg(iUI_tx_Profile)
+	hdximg(iUI_tx_Profile)=MakeScreen(300,120,TRUE)
+		SetDrawScreen hdximg(iUI_tx_Profile)
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		ChangeFontType DX_FONTTYPE_ANTIALIASING_4X4
+		ChangeFont"Pier Sans"
+		SetFontSize 20:DrawString 120,14,aqName,GetColor(230,230,230)
+		SetFontSize 16:DrawString 120,47,"RATE:"+strf("%.2f",aqRate),GetColor(230,230,230)
+		ChangeFont"Noto Sans CJK JP Regular"
+		SetFontSize 14:DrawString 120,70,aqBadge,GetColor(230,230,230)
 
 	AddDebugConsole STYLE_NORMAL,"アカウント情報が更新されました。"
 	AddDebugConsole STYLE_STATUS,"NAME = "+aqName

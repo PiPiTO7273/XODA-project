@@ -1,6 +1,159 @@
 
 *Scene_Init_Result
+
+	//ムービーの再生開始
+	PlayMovieToGraph hdximg(ibg_Result),DX_PLAYTYPE_LOOP
+	BASS_ChannelPlay hbasssnd(bgmResult)
+
+	//スコア数値の描画
+	if hdximg(iTx_Result_Score)!0 :DeleteGraph hdximg(iTx_Result_Score)
+	hdximg(iTx_Result_Score)=MakeScreen(256,64,TRUE)
+
 	return
 
 *Scene_Result
+
+	//背景
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawGraph 0,0,hdximg(ibg_Result),FALSE
+
+	//ナビゲーション
+		if decideFlag==FALSE {
+			setease 0,256,ease_cubic_out
+			EaseAlpha=getease(SceneCount-10,20)
+			setease -32,0,ease_cubic_out
+			EasePosX=getease(SceneCount-10,20)
+		} else {
+			setease 256,0,ease_cubic_out
+			EaseAlpha=getease(decideFrameCount-20,10)
+			setease 0,-32,ease_cubic_out
+			EasePosX=getease(decideFrameCount-20,10)
+		}
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+		DrawGraph 32+EasePosX,16,hdximg(Nav_Result),TRUE
+
+	if SceneCount>10 {
+		//左パネル背景
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-20,25)
+			setease -128,0,ease_cubic_out
+			DrawGraph getease(SceneCount-10,25),170,hdximg(ibg_Result_Info),TRUE
+
+		//右パネル背景
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-20,25)
+			setease 640+128,640,ease_cubic_out
+			DrawGraph getease(SceneCount-15,25),0,hdximg(ibg_Result_Score),TRUE
+	}
+	if SceneCount>20 {
+		//左パネルレイヤー
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-30,25)
+			setease -128,0,ease_cubic_out
+			DrawGraph getease(SceneCount-20,25),170,hdximg(iLayer_Result_Info),TRUE
+		//右パネルレイヤー
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-30,25)
+			setease 640+128,640,ease_cubic_out
+			DrawGraph getease(SceneCount-25,25),0,hdximg(iLayer_Result_Score),TRUE
+	}
+
+	if SceneCount>30 {
+		//左パネル
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-30,10)
+
+			//曲名
+				sdim tmpstr:tmpstr=chartTitle
+				DrawStringToHandle 40,194,strmid(tmpstr,0,limit(SceneCount-30,0,strlen(tmpstr))),GetColor(10,10,10),hdxfont(fNoto_m24)
+			//アーティスト名
+				sdim tmpstr:tmpstr=chartArtist
+				DrawStringToHandle 40,234,strmid(tmpstr,0,limit(SceneCount-40,0,strlen(tmpstr))),GetColor(25,25,25),hdxfont(fNoto_m16)
+			//難易度（文字列）
+				DrawStringToHandle 410,205,chartDifficulty,GetDifficultyColor(chartDifficulty),hdxfont(fGood_14)
+			//難易度（数値）
+				DrawStringToHandle 510,205,"Lv."+str(chartLevel),GetDifficultyColor(chartDifficulty),hdxfont(fGood_14)
+
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-60,20)
+			setease -32,0,ease_cubic_out
+			EasePosX=getease(SceneCount-60,20)
+
+			//TOTAL NOTES
+				setease 0,hitobjMax,ease_cubic_out
+				DrawStringToHandle 182+EasePosX,290,strf("%04d",getease(SceneCount-60,25)),GetColor(30,30,30),hdxfont(fPier_m20)
+			//BPM
+				setease 0,Libarr_DefBPM(CursorLevID,CursorSelID),ease_cubic_out
+				DrawStringToHandle 182+EasePosX,317,strf("%04d",getease(SceneCount-60,25)),GetColor(30,30,30),hdxfont(fPier_m20)
+				if Libarr_DefBPM(CursorLevID,CursorSelID)!Libarr_MinBPM(CursorLevID,CursorSelID)&Libarr_DefBPM(CursorLevID,CursorSelID)!Libarr_MaxBPM(CursorLevID,CursorSelID) {
+					DrawStringToHandle 182+EasePosX,345,strf("%04d - %04d",str(Libarr_MinBPM(CursorLevID,CursorSelID)),str(Libarr_MaxBPM(CursorLevID,CursorSelID))),GetColor(50,50,50),hdxfont(fPier_r14)
+				}
+			//クリアの種類
+				sdim tmpstr
+				if stgClearType==ID_Failed :tmpstr="FAILED"
+				if stgClearType==ID_Clear {
+					switch GaugeType
+						case Gauge_Assist:tmpstr="EASY":swbreak
+						case Gauge_Normal:tmpstr="NORMAL":swbreak
+						case Gauge_Hard:tmpstr="HARD":swbreak
+						case Gauge_Madness:tmpstr="MADNESS":swbreak
+					swend
+				}
+				if stgClearType==ID_Fullcombo :tmpstr="FULL COMBO"
+				if stgClearType==ID_Allex :tmpstr="ALL EXCELLENT"
+				DrawStringToHandle 182+EasePosX,376,tmpstr,GetColor(30,30,30),hdxfont(fPier_m16)
+			//最大コンボ
+				setease 0,curMaxCombo,ease_cubic_out
+				DrawStringToHandle 182+EasePosX,401,str(getease(SceneCount-60,25)),GetColor(30,30,30),hdxfont(fPier_m20)
+			}
+
+		//右パネル
+			//スコア表示
+
+	//ガイド
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		setease DispHeight,DispHeight-128,ease_cubic_out
+		DrawGraph 0,getease(SceneCount-10,30),hdximg(ibg_GuidePanel),TRUE
+
+		setease 0,256,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-30,20)
+		DrawGraph 540,650,hdximg(iGuide_Large),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		sdim tmpstr:tmpstr="ENTER : 次へ進む"
+		DrawStringXCenterToHandle 540,658,strmid(tmpstr,0,limit(SceneCount-30,0,strlen(tmpstr))),200,GetColor(230,230,230),hdxfont(fNoto_m14)
+
+	//前シーンからの引き継ぎ
+	if SceneCount<50 {
+		if SceneCount==1 {
+			BASS_ChannelPlay hbasssnd(sndUI_Trans_Out)
+		}
+		setease 0,-DispWidth,ease_cubic_in
+		EasePosX=getease(SceneCount,25)
+		setease 0,DispHeight,ease_cubic_in
+		EasePosY=getease(SceneCount,25)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph EasePosX,EasePosY,hdximg(iTrans_In_L),TRUE
+
+		setease 0,DispWidth,ease_cubic_in
+		EasePosX=getease(SceneCount,25)
+		setease 0,-DispHeight,ease_cubic_in
+		EasePosY=getease(SceneCount,25)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph EasePosX,EasePosY,hdximg(iTrans_In_R),TRUE
+
+		setease 0,-DispWidth,ease_cubic_in
+		EasePosX=getease(SceneCount,50)
+		setease 0,DispHeight,ease_cubic_in
+		EasePosY=getease(SceneCount,50)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph EasePosX,EasePosY,hdximg(iTrans_Out_L),TRUE
+
+		setease 0,DispWidth,ease_cubic_in
+		EasePosX=getease(SceneCount,50)
+		setease 0,-DispHeight,ease_cubic_in
+		EasePosY=getease(SceneCount,50)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph EasePosX,EasePosY,hdximg(iTrans_Out_R),TRUE
+	}
 	return

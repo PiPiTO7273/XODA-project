@@ -61,6 +61,8 @@
 		//BGM
 		hbasssnd(bgmMain)=BASS_StreamCreateFile(FALSE,"Data/Sound/bgm_Main.flac",0,0,0,0,BASS_SAMPLE_LOOP)
 		BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.7)
+		hbasssnd(bgmResult)=BASS_StreamCreateFile(FALSE,"Data/Sound/bgm_Result.flac",0,0,0,0,BASS_SAMPLE_LOOP)
+		BASS_ChannelSetAttribute hbasssnd(bgmResult),BASS_ATTRIB_VOL,tofloat(0.4)
 
 	return
 
@@ -69,10 +71,10 @@
 		dim hdxfont
 		hdxfont(fSystem)=CreateFontToHandle("MS GOTHIC",16,-1,DX_FONTTYPE_NORMAL)
 		hdxfont(fNoto_r18)=LoadFontDataToHandle("Data/Font/NSCJR18.bin",0)	//Noto Sans CJK JP Regular 18px
-		hdxfont(fNoto_r16)=LoadFontDataToHandle("Data/Font/NSCJR16.bin",0)	//Noto Sans CJK JP Regular 16px
+		;hdxfont(fNoto_r16)=LoadFontDataToHandle("Data/Font/NSCJR16.bin",0)	//Noto Sans CJK JP Regular 16px
 		hdxfont(fNoto_r15)=LoadFontDataToHandle("Data/Font/NSCJR15.bin",0)	//Noto Sans CJK JP Regular 15px
-		hdxfont(fNoto_r14)=LoadFontDataToHandle("Data/Font/NSCJR14.bin",0)	//Noto Sans CJK JP Regular 14px
-		hdxfont(fNoto_r12)=LoadFontDataToHandle("Data/Font/NSCJR12.bin",0)	//Noto Sans CJK JP Regular 12px
+		;hdxfont(fNoto_r14)=LoadFontDataToHandle("Data/Font/NSCJR14.bin",0)	//Noto Sans CJK JP Regular 14px
+		;hdxfont(fNoto_r12)=LoadFontDataToHandle("Data/Font/NSCJR12.bin",0)	//Noto Sans CJK JP Regular 12px
 		hdxfont(fNoto_m30)=LoadFontDataToHandle("Data/Font/NSCJM30.bin",0)	//Noto Sans CJK JP Medium 30px
 		hdxfont(fNoto_m24)=LoadFontDataToHandle("Data/Font/NSCJM24.bin",0)	//Noto Sans CJK JP Medium 24px
 		hdxfont(fNoto_m16)=LoadFontDataToHandle("Data/Font/NSCJM16.bin",0)	//Noto Sans CJK JP Medium 16px
@@ -88,8 +90,8 @@
 		hdxfont(fPier_m8)=LoadFontDataToHandle("Data/Font/PSM8.bin",0)		//Pier Sans Medium 8px
 		hdxfont(fPier_r32)=LoadFontDataToHandle("Data/Font/PSR32.bin",0)		//Pier Sans 32px
 		hdxfont(fPier_r24)=LoadFontDataToHandle("Data/Font/PSR24.bin",0)		//Pier Sans 24px
-		hdxfont(fPier_r20)=LoadFontDataToHandle("Data/Font/PSR20.bin",0)		//Pier Sans 20px
-		hdxfont(fPier_r16)=LoadFontDataToHandle("Data/Font/PSR16.bin",0)		//Pier Sans 16px
+		;hdxfont(fPier_r20)=LoadFontDataToHandle("Data/Font/PSR20.bin",0)	//Pier Sans 20px
+		;hdxfont(fPier_r16)=LoadFontDataToHandle("Data/Font/PSR16.bin",0)	//Pier Sans 16px
 		hdxfont(fPier_r14)=LoadFontDataToHandle("Data/Font/PSR14.bin",0)		//Pier Sans 14px
 		hdxfont(fSQ_45)=LoadFontDataToHandle("Data/Font/SQN45.bin",0)		//SQNumber 45px
 		hdxfont(fSQ_32)=LoadFontDataToHandle("Data/Font/SQN32.bin",0)		//SQNumber 32px
@@ -112,6 +114,7 @@
 		dim hdximg,iMax
 		SetUsePremulAlphaConvertLoad TRUE
 		hdximg(iBackground)=LoadGraph("Data/Movie/bg_Main.ogv")
+		hdximg(ibg_Result)=LoadGraph("Data/Movie/bg_Result.ogv")
 		hdximg(ibg_Nav)=LoadGraph("Data/Image/bg_Navigation.png")
 		hdximg(ibg_GuidePanel)=LoadGraph("Data/Image/bg_GuidePanel.png")
 		hdximg(iGuide_Large)=LoadGraph("Data/Image/Guide_Large.png")
@@ -189,6 +192,12 @@
 		hdximg(iTrans_Out_R)=LoadGraph("Data/Image/Transition_Out_R.png")
 		hdximg(iTrans_In_L)=LoadGraph("Data/Image/Transition_In_L.png")
 		hdximg(iTrans_In_R)=LoadGraph("Data/Image/Transition_In_R.png")
+
+		hdximg(iNav_Result)=LoadGraph("Data/Image/Nav_Result.png")
+		hdximg(ibg_Result_Info)=LoadGraph("Data/Image/bg_Result_Info.png")
+		hdximg(ibg_Result_Score)=LoadGraph("Data/Image/bg_Result_Score.png")
+		hdximg(iLayer_Result_Info)=LoadGraph("Data/Image/Layer_Result_Info.png")
+		hdximg(iLayer_Result_Score)=LoadGraph("Data/Image/Layer_Result_Score.png")
 
 	//îzóÒâÊëúëfçﬁÇÃì«Ç›çûÇ›
 		dim hdxarr_Button_Yes,2
