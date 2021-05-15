@@ -199,6 +199,16 @@
 		hdximg(iLayer_Result_Info)=LoadGraph("Data/Image/Layer_Result_Info.png")
 		hdximg(iLayer_Result_Score)=LoadGraph("Data/Image/Layer_Result_Score.png")
 
+		hdximg(iIcon_Rank_SSS)=LoadGraph("Data/Image/Result_rank_SSS.png")
+		hdximg(iIcon_Rank_SS)=LoadGraph("Data/Image/Result_rank_SS.png")
+		hdximg(iIcon_Rank_S)=LoadGraph("Data/Image/Result_rank_S.png")
+		hdximg(iIcon_Rank_AAA)=LoadGraph("Data/Image/Result_rank_AAA.png")
+		hdximg(iIcon_Rank_AA)=LoadGraph("Data/Image/Result_rank_AA.png")
+		hdximg(iIcon_Rank_A)=LoadGraph("Data/Image/Result_rank_A.png")
+		hdximg(iIcon_Rank_B)=LoadGraph("Data/Image/Result_rank_B.png")
+		hdximg(iIcon_Rank_C)=LoadGraph("Data/Image/Result_rank_C.png")
+		hdximg(iIcon_Rank_D)=LoadGraph("Data/Image/Result_rank_D.png")
+
 	//îzóÒâÊëúëfçﬁÇÃì«Ç›çûÇ›
 		dim hdxarr_Button_Yes,2
 		LoadDivGraph"Data/Image/Button_Yes.png",2,1,2,128,40,varptr(hdxarr_Button_Yes)

@@ -166,6 +166,15 @@
 #enum iLayer_Result_Info
 #enum iLayer_Result_Score
 #enum iTx_Result_Score
+#enum iIcon_Rank_SSS
+#enum iIcon_Rank_SS
+#enum iIcon_Rank_S
+#enum iIcon_Rank_AAA
+#enum iIcon_Rank_AA
+#enum iIcon_Rank_A
+#enum iIcon_Rank_B
+#enum iIcon_Rank_C
+#enum iIcon_Rank_D
 
 #enum iMax
 
@@ -246,6 +255,16 @@
 #define RANK_SCORE_B	5000000
 #define RANK_SCORE_C	2500000
 #define RANK_SCORE_D	1000000
+
+#enum RANK_ID_SSS		=	0
+#enum RANK_ID_SS
+#enum RANK_ID_S
+#enum RANK_ID_AAA
+#enum RANK_ID_AA
+#enum RANK_ID_A
+#enum RANK_ID_B
+#enum RANK_ID_C
+#enum RANK_ID_D
 
 //MusicSelect - DetailÇÃÉyÅ[ÉWID
 #enum ID_IR		=	0

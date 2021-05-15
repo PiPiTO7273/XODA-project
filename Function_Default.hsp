@@ -279,6 +279,18 @@ goto*Startup
 
 	return GetColor(200,200,200)
 
+#defcfunc GetJudgeColor int _judge
+
+	switch _judge
+		case JUDGE_RES_MISS:return GetColor(70,70,70):swbreak
+		case JUDGE_RES_BAD:return GetColor(145,0,255):swbreak
+		case JUDGE_RES_NICE:return GetColor(188,255,0):swbreak
+		case JUDGE_RES_GREAT:return GetColor(255,170,0):swbreak
+		case JUDGE_RES_EXCELLENT:return GetColor(255,0,161):swbreak
+	swend
+
+	return 0
+
 *ExportLog
 	notesel ConsoleLogBuf
 	notesave"Log.txt"

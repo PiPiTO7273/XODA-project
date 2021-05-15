@@ -8,6 +8,22 @@
 	//スコア数値の描画
 	if hdximg(iTx_Result_Score)!0 :DeleteGraph hdximg(iTx_Result_Score)
 	hdximg(iTx_Result_Score)=MakeScreen(256,64,TRUE)
+	SetDrawScreen hdximg(iTx_Result_Score)
+		ChangeFontType DX_FONTTYPE_ANTIALIASING_4X4
+		ChangeFont"Pier Sans":SetFontSize 50
+		SetFontThickness 2
+		DrawString 0,0,strf("%08d",curScore),GetColor(30,30,30)
+
+	//ランクの判別
+		dim ScoreRankID:ScoreRankID=RANK_ID_D
+		if curScore>=RANK_SCORE_C :ScoreRankID=RANK_ID_C
+		if curScore>=RANK_SCORE_B :ScoreRankID=RANK_ID_B
+		if curScore>=RANK_SCORE_A :ScoreRankID=RANK_ID_A
+		if curScore>=RANK_SCORE_AA :ScoreRankID=RANK_ID_AA
+		if curScore>=RANK_SCORE_AAA :ScoreRankID=RANK_ID_AAA
+		if curScore>=RANK_SCORE_S :ScoreRankID=RANK_ID_S
+		if curScore>=RANK_SCORE_SS :ScoreRankID=RANK_ID_SS
+		if curScore>=RANK_SCORE_SSS :ScoreRankID=RANK_ID_SSS
 
 	return
 
@@ -109,6 +125,66 @@
 
 		//右パネル
 			//スコア表示
+				setease 0,256,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-50,25)
+				setease 128,0,ease_cubic_out
+				DrawGraph 900+getease(SceneCount-50,25),190,hdximg(iTx_Result_Score),TRUE
+
+			//判定別表示
+				repeat 7
+					setease 0,256,ease_cubic_out
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-70-cnt*3,25)
+					setease 32,0,ease_cubic_out
+					EasePosX=getease(SceneCount-70-cnt*3,25)
+
+					switch cnt
+						case 0:DrawStringToHandle 939+EasePosX,301,strf("%04d",numExcellent),GetColor(10,10,10),hdxfont(fPier_m20):swbreak		//EXCELLENT
+						case 1:DrawStringToHandle 939+EasePosX,337,strf("%04d",numGreat),GetColor(10,10,10),hdxfont(fPier_m20):swbreak		//GREAT
+						case 2:DrawStringToHandle 939+EasePosX,373,strf("%04d",numNice),GetColor(10,10,10),hdxfont(fPier_m20):swbreak			//NICE
+						case 3:DrawStringToHandle 939+EasePosX,409,strf("%04d",numBad),GetColor(10,10,10),hdxfont(fPier_m20):swbreak			//BAD
+						case 4:DrawStringToHandle 939+EasePosX,445,strf("%04d",numMiss),GetColor(10,10,10),hdxfont(fPier_m20):swbreak			//MISS
+						case 5:DrawStringToHandle 914+EasePosX,501,strf("%04d",0),GetColor(10,10,10),hdxfont(fPier_m20):swbreak				//EARLY
+						case 6:DrawStringToHandle 914+EasePosX,537,strf("%04d",0),GetColor(10,10,10),hdxfont(fPier_m20):swbreak				//LATE
+					swend
+				loop
+
+			//判定別グラフ
+				dim JudgeGraphTmpPosY
+				ddim JudgeGraphPerc,5:dim JudgeGraphHeight,5
+				//各判定の割合を算出
+					JudgeGraphPerc(0)=double(numExcellent)/double(hitobjMax)
+					JudgeGraphPerc(1)=double(numGreat)/double(hitobjMax)
+					JudgeGraphPerc(2)=double(numNice)/double(hitobjMax)
+					JudgeGraphPerc(3)=double(numBad)/double(hitobjMax)
+					JudgeGraphPerc(4)=double(numMiss)/double(hitobjMax)
+				//各判定の割合からグラフの高さを算出
+					JudgeGraphTmpPosY=291
+					repeat 5
+						JudgeGraphHeight(cnt)=int(200.0*double(JudgeGraphPerc(cnt)))
+						DrawBox 1104,JudgeGraphTmpPosY,1104+20,JudgeGraphTmpPosY+JudgeGraphHeight(cnt),GetJudgeColor(5-cnt),TRUE
+						JudgeGraphTmpPosY+JudgeGraphHeight(cnt)
+					loop
+
+			//判定別割合の表示
+				repeat 5
+					setease 0,256,ease_cubic_out
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-80-cnt*3,25)
+					setease 32,0,ease_cubic_out
+					EasePosX=getease(SceneCount-80-cnt*3,25)
+
+					DrawStringToHandle 1014+EasePosX,305+36*cnt,strf("%3.1f",str(JudgeGraphPerc(cnt)*80.0))+"%",GetColor(10,10,10),hdxfont(fPier_r14)
+				loop
+
+			//ランクの表示
+				setease 1.5,1,ease_cubic_out
+					EaseWidth=int(300.0*geteasef(SceneCount-100,20))
+					EaseHeight=int(128.0*geteasef(SceneCount-100,20))
+					EasePosX=842+300/2-EaseWidth/2
+					EasePosY=32+128/2-EaseHeight/2
+				setease 0,256,ease_cubic_out
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-100,20)
+
+					DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iIcon_Rank_SSS+ScoreRankID),TRUE
 
 	//ガイド
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
