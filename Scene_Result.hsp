@@ -172,7 +172,7 @@
 					setease 32,0,ease_cubic_out
 					EasePosX=getease(SceneCount-80-cnt*3,25)
 
-					DrawStringToHandle 1014+EasePosX,305+36*cnt,strf("%3.1f",str(JudgeGraphPerc(cnt)*80.0))+"%",GetColor(10,10,10),hdxfont(fPier_r14)
+					DrawStringToHandle 1014+EasePosX,305+36*cnt,strf("%3.1f",str(JudgeGraphPerc(cnt)*100.0))+"%",GetColor(10,10,10),hdxfont(fPier_r14)
 				loop
 
 			//ƒ‰ƒ“ƒN‚Ì•\Ž¦
