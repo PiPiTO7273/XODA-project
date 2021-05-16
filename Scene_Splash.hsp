@@ -1,6 +1,26 @@
 
 *Scene_Splash
 
+	//オフラインモードの確認表示
+	if OfflineModeFlag==TRUE {
+		//背景
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
+		if decideFlag==FALSE {
+			//ダイアログ
+				setease 0,256,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,25)
+				if CheckHitKey(KEY_INPUT_RETURN)==TRUE :decideFlag==TRUE:SceneCount=-25
+		}
+		if decideFlag==TRUE&SceneCount<0 {
+			//ダイアログ
+				setease 256,0,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount+25,25)
+		}
+		DrawGraph DispWidth/2-640/2,DispHeight/2-320/2,hdximg(iDialog_OfflineMode),TRUE
+		if decideFlag==FALSE|SceneCount<0 :return
+	}
+
 	SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 
 	//背景

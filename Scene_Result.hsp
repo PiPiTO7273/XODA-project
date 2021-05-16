@@ -36,9 +36,9 @@
 	//ナビゲーション
 		if decideFlag==FALSE {
 			setease 0,256,ease_cubic_out
-			EaseAlpha=getease(SceneCount-10,20)
+			EaseAlpha=getease(SceneCount-30,20)
 			setease -32,0,ease_cubic_out
-			EasePosX=getease(SceneCount-10,20)
+			EasePosX=getease(SceneCount-30,20)
 		} else {
 			setease 256,0,ease_cubic_out
 			EaseAlpha=getease(decideFrameCount-20,10)
@@ -46,7 +46,7 @@
 			EasePosX=getease(decideFrameCount-20,10)
 		}
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
-		DrawGraph 32+EasePosX,16,hdximg(Nav_Result),TRUE
+		DrawGraph 32+EasePosX,16,hdximg(iNav_Result),TRUE
 
 	if SceneCount>10 {
 		//左パネル背景

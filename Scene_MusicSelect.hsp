@@ -110,7 +110,19 @@
 		loop
 	}
 
+	//オンラインランキング初期化
+		dim Libarr_IRrank,3,Libarr_Max,9
+		sdim Libarr_IRname,16,3,Libarr_Max,9
+		dim Libarr_IRscore,3,Libarr_Max,9
+		dim Libarr_MyIRrank,3,Libarr_Max
+		dim Libarr_MyIRscore,3,Libarr_Max
+		sdim TargetIRdata
+		sdim TargetIRchartID:sdim TargetIRrank
+		sdim TargetIRname:sdim TargetIRscore
+		sdim INIkey:sdim INIval
+
 	//HTTP接続
+	if OfflineModeFlag==FALSE {
 		AddDebugConsole STYLE_NORMAL,"HTTPリクエストを発行しました。 \""+SERVICE_HTTP+"svcsavedata/"+"\""
 		neturl SERVICE_HTTP+"svcsavedata/"
 		netdlname"Data/Cache/tmp_Savedata.dat"
@@ -128,16 +140,6 @@
 			sdim IRsavedatabuf,strsize
 			notesel IRsavedatabuf
 			noteload"Data/Cache/tmp_Savedata.dat"
-			dim Libarr_IRrank,3,Libarr_Max,9
-			sdim Libarr_IRname,16,3,Libarr_Max,9
-			dim Libarr_IRscore,3,Libarr_Max,9
-			dim Libarr_MyIRrank,3,Libarr_Max
-			dim Libarr_MyIRscore,3,Libarr_Max
-
-			sdim TargetIRdata
-			sdim TargetIRchartID:sdim TargetIRrank
-			sdim TargetIRname:sdim TargetIRscore
-			sdim INIkey:sdim INIval
 
 			repeat notemax
 				noteget NoteLine,cnt
@@ -175,6 +177,7 @@
 				}
 			loop
 		}
+	}
 
 	//変数初期化
 		dim CursorSelID			//項目ID

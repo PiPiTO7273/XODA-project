@@ -52,7 +52,7 @@
 //----- 起動開始 -----
 *Startup
 
-	#ifdef _debug
+	#if DebugConsoleWindow
 		gsel 0,-1
 		exist"Main.ax"
 		if strsize!-1 {
@@ -87,20 +87,29 @@
 	//DXライブラリ初期化
 	AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化開始"
 	SetOutApplicationLogValidFlag 0
-	screen 0,DispWidth,DispHeight,2,ginfo(20)/2-DispWidth/2,ginfo(21)/2-DispHeight/2
-	SetUserWindow hwnd
-	SetMainWindowText"XODA v"+BuildVersion_Major+"."+BuildVersion_Minor
-	ChangeWindowMode TRUE
-	SetGraphMode DispWidth,DispHeight,32
-	SetAlwaysRunFlag TRUE
-	SetWaitVSyncFlag TRUE
-	dxlib_Init
-	if stat==-1 {
-		AddDebugConsole STYLE_ERROR,"DXライブラリの初期化に失敗しました。"
-		goto*StopError
-	} else {
-		AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化完了"
-	}
+	screen 0,DispWidth,DispHeight,0,ginfo(20)/2-DispWidth/2,ginfo(21)/2-DispHeight/2
+
+	//初期画面
+		color:boxf
+		pos 0,0:picload"Data/Image/bg_Boot.png",1
+
+	//DXライブラリ初期設定
+		SetUserWindow hwnd
+		SetMainWindowText"XODA v"+BuildVersion_Major+"."+BuildVersion_Minor
+		ChangeWindowMode TRUE
+		SetGraphMode DispWidth,DispHeight,32
+		SetAlwaysRunFlag TRUE
+		SetWaitVSyncFlag TRUE
+		dxlib_Init
+		if stat==-1 {
+			AddDebugConsole STYLE_ERROR,"DXライブラリの初期化に失敗しました。"
+			goto*StopError
+		} else {
+			AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化完了"
+		}
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		LoadGraphScreen 0,0,"Data/Image/bg_Boot.png",TRUE
+		wait 10
 	onexit*Exit
 
 	//BASS初期化
@@ -112,6 +121,7 @@
 	}
 
 	//オンラインアップデート
+	dim OfflineModeFlag
 	gosub*CheckOnlineUpdate
 
 	//各種読み込み処理
@@ -168,8 +178,6 @@
 	if FrameCount\4==0 {
 		GetFPS:getdouble:curFPSval=refdval 
 	}
-	;SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-	;DrawStringToHandle DispWidth-256,16,"FPS "+strf("%.3f",curFPSval),GetColor(0,0,0),hdxfont(fSQ_16)
 
 	//カウンタ処理
 	SceneCount++

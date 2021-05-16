@@ -147,6 +147,7 @@
 		hdximg(iSplash)=LoadGraph("Data/Image/bg_Splash.png")
 		hdximg(iSplash_Phones)=LoadGraph("Data/Image/Splash_Phones.png")
 		hdximg(iSplash_Title)=LoadGraph("Data/Image/Splash_Title.png")
+		hdximg(iDialog_OfflineMode)=LoadGraph("Data/Image/Dialog_Offline.png")
 
 		hdximg(ibg_Signin)=LoadGraph("Data/Image/bg_Signin.png")
 		hdximg(iNav_Signin)=LoadGraph("Data/Image/Nav_Signin.png")

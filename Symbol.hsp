@@ -5,8 +5,8 @@
 #define CodeName			"MOCHI SLIME"
 #define BuildVersion_Major	0
 #define BuildVersion_Minor	2
-#define Usebitsadmin		0
-#define SplashTime			0
+#define SplashTime			1
+#define DebugConsoleWindow	0
 
 //フォントハンドル
 #enum fSystem		=	0
@@ -109,6 +109,7 @@
 #enum iSplash
 #enum iSplash_Phones
 #enum iSplash_Title
+#enum iDialog_OfflineMode
 
 #enum ibg_Signin
 #enum iNav_Signin
