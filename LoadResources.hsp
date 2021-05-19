@@ -1,12 +1,10 @@
 
 *CheckOnlineUpdate
 	//オンラインアップデートの確認
-	exist"Data/core_Resources.dat"
-	if strsize!-1 {
-		sdim updatepkg,strsize
+		sdim updatepkg,4096
 		sdim NoteLine
 		notesel updatepkg
-		noteload"Data/core_Resources.dat"
+		updatepkg=WebAPI_PostandGet(SERVICE_HTTP+"/API-GetUpdate.php?key="+APIkey_GetUpdate,1)
 		sdim updatepath
 		sdim updatelink
 		dim updateflag
@@ -31,7 +29,7 @@
 		if procjumpflag==TRUE {
 			gosub*OnlineUpdate
 		}
-	}
+
 	return
 
 *LoadSoundEffects

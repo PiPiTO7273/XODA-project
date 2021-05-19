@@ -79,9 +79,8 @@
 	AddDebugConsole STYLE_STATUS,"DISPLAY.WIDTH = "+DispWidth
 	AddDebugConsole STYLE_STATUS,"DISPLAY.HEIGHT = "+DispHeight
 	AddDebugConsole STYLE_STATUS,"BUILD.VERSION = "+BuildVersion_Major+"."+BuildVersion_Minor
-	AddDebugConsole STYLE_STATUS,"SERVICE.HOST = "+RepHiddenWords(str(SERVICE_HOST),"*")
-	AddDebugConsole STYLE_STATUS,"SERVICE.USERNAME = "+RepHiddenWords(str(SERVICE_USERNAME),"*")
-	AddDebugConsole STYLE_STATUS,"SERVICE.PASSWORD = "+RepHiddenWords(str(SERVICE_PASSWORD),"*")
+	AddDebugConsole STYLE_STATUS,"SERVICE.HOST = "+RepHiddenWords(str(SERVICE_HTTP),"*")
+	AddDebugConsole STYLE_STATUS,"SERVICE.KEY = "+RepHiddenWords(str(SERVICE_ENCKEY),"*")
 	AddDebugConsole STYLE_NORMAL,"起動設定の読み込み完了"
 
 	//DXライブラリ初期化
@@ -122,6 +121,8 @@
 
 	//オンラインアップデート
 	dim OfflineModeFlag
+	WebAPI_Init 1
+	netinit
 	gosub*CheckOnlineUpdate
 
 	//各種読み込み処理
@@ -189,12 +190,10 @@
 			//デバッグメニュー
 			DrawDebugString 0,16*0,"XODA ver"+BuildVersion_Major+"."+BuildVersion_Minor
 			DrawDebugString 0,16*1,"HD "+DispWidth+"x"+DispHeight+" ["+ginfo(20)+"x"+ginfo(21)+"]"
-			DrawDebugString 0,16*3,"PATH : "+SERVICE_HOST
-			DrawDebugString 0,16*4,"ID : "+RepHiddenWords(str(SERVICE_USERNAME),"*")
-			DrawDebugString 0,16*5,"KEY : "+RepHiddenWords(str(SERVICE_PASSWORD),"*")
-			DrawDebugString 0,16*7,"FPS : "+strf("%.3f",curFPSval)+" ["+strf("%.2f",1000.0/curFPSval)+"ms]"
-			DrawDebugString 0,16*8,"SCENE : ID["+curSceneID+"]"
-			DrawDebugString 0,16*9,"F:"+FrameCount+" , F(S):"+SceneCount
+			DrawDebugString 0,16*3,"FPS : "+strf("%.3f",curFPSval)+" ["+strf("%.2f",1000.0/curFPSval)+"ms]"
+			DrawDebugString 0,16*4,"SCENE : ID["+curSceneID+"]"
+			DrawDebugString 0,16*5,"F:"+FrameCount+" , F(S):"+SceneCount
+			DrawDebugString 0,16*6,"USERNAME : "+authUserName+" , PASSWORD : "+RepHiddenWords(str(authPassword),"*")
 
 			//ログ
 			sdim tmpstr

@@ -30,7 +30,7 @@ goto*Startup
 			if strmid(NoteLine,0,1)=="["&strmid(NoteLine,-1,1)=="]" {
 				curSection=NoteLine
 			}
-			if getpath(curSection,16)==("["+getpath(_section,16)+"]") {
+			if (getpath(curSection,16)==("["+getpath(_section,16)+"]"))|curSection=="" {
 				sdim INIprm:split NoteLine,"=",INIprm
 				if getpath(INIprm(0),16)==getpath(_key,16) {
 					resValue=INIprm(1)
@@ -291,6 +291,30 @@ goto*Startup
 
 	return 0
 
+#deffunc WebAPI_Init int _windowid
+	if HTTPhostWindow==1 :screen _windowid,640,480,0:else:screen _windowid,640,480,2
+	title"Portal WebAPI Control"
+	axobj IEobj,"Shell.Explorer.2",640,480
+	return
+#defcfunc WebAPI_PostandGet str _url,int _windowid
+	IEobj->"Navigate" _url
+	repeat:wait:if IEobj("Busy")=0 {break}:loop	//待機
+	IEmes=IEobj("Document")
+	IEmes=IEmes("body")
+	IErawdata=IEmes("innerHTML")
+	strrep IErawdata,"<BR>","\n"
+	return IErawdata
+#deffunc WebAPI_Post str _url,int _windowid
+	IEobj->"Navigate" _url
+	return
+#defcfunc WebAPI_Get
+	repeat:wait 10:if IEobj("Busy")=0 {break}:loop	//待機
+	IEmes=IEobj("Document")
+	IEmes=IEmes("body")
+	IErawdata=IEmes("innerHTML")
+	strrep IErawdata,"<BR>","\n"
+	return IErawdata
+
 *ExportLog
 	notesel ConsoleLogBuf
 	notesave"Log.txt"
@@ -340,45 +364,39 @@ goto*Startup
 		;sdim curFTPdir:ftpdir curFTPdir,"svcsavedata"
 
 		//HTTP接続
-		AddDebugConsole STYLE_NORMAL,"HTTPリクエストを発行しました。 \""+SERVICE_HTTP+"svcsavedata/"+"\""
-		neturl SERVICE_HTTP+"svcsavedata/"
-		netdlname"Data/Cache/tmp_Savedata.dat"
-		netrequest authUserName+".dat"
-			dim netres
-			repeat
-				netexec netres
-				if netres!0 :break
-				await
-			loop
-
-		//変数初期化
-			sdim aqName
-			sdim aqPassword
-			sdim aqBadge
-			sdim aqRate
-			dim aqLevel
-			sdim aqLastplay
-			dim aqNumClear
-			dim aqNumFullcombo
-			dim aqNumAllEx
-			dim aqNumTicket
-			sdim aqHistory
-
-		exist"Data/Cache/tmp_Savedata.dat"
-		if strsize==-1 {
-			AddDebugConsole STYLE_WARNING,"セーブデータの同期に失敗しました。ゲストユーザーで開始します。"
-			gosub*SetGuestSavedata
-		} else {
-			sdim saveInfobuf,strsize
+			sdim saveInfobuf
+			saveInfobuf=WebAPI_PostandGet(SERVICE_HTTP+"/API-GetProfile.php?key="+APIkey_GetProfile+"&decode="+SERVICE_ENCKEY+"&id="+authUserName+"&password="+authPassword,1)
 			notesel saveInfobuf
-			noteload"Data/Cache/tmp_Savedata.dat"
+			//エラー判別
+			dim onlineErrorFlag
+			switch saveInfobuf
+				case"ERROR_UNKNOWN_PRM"
+					AddDebugConsole STYLE_ERROR,"Portal WebAPI: 無効なパラメータが指定されました。"
+					onlineErrorFlag=TRUE
+				swbreak
+				case"ERROR_AUTH_PASSWORD"
+					AddDebugConsole STYLE_ERROR,"Portal WebAPI: パスワードの認証に失敗しました。"
+					onlineErrorFlag=TRUE
+				swbreak
+				case"ERROR_AUTH_APIKEY"
+					AddDebugConsole STYLE_ERROR,"Portal WebAPI: APIキーの認証に失敗しました。"
+					onlineErrorFlag=TRUE
+				swbreak
+			swend
 
-			//パスワード認証
-			sdim aqPassword,256
-			aqPassword=GetINIvalue(saveInfobuf,"SAVEDATA","PASSWORD")
-			b64decode aqPassword,aqPassword,64
-			rc4encode aqPassword,SERVICE_ENCKEY,64
-			if aqPassword==authPassword {
+		if onlineErrorFlag==FALSE {
+			//変数初期化
+				sdim aqName
+				sdim aqPassword
+				sdim aqBadge
+				sdim aqRate
+				dim aqLevel
+				sdim aqLastplay
+				dim aqNumClear
+				dim aqNumFullcombo
+				dim aqNumAllEx
+				dim aqNumTicket
+				sdim aqHistory
 
 				//初回登録
 				if instr(saveInfobuf,0,"XODA.RATE")==-1 :saveInfobuf+"XODA.RATE=0.0\n"
@@ -421,12 +439,11 @@ goto*Startup
 				//プレイ履歴
 					sdim tmpstr:tmpstr=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.HISTORY")
 					split tmpstr,"+",aqHistory
-
-			} else {
-				AddDebugConsole STYLE_WARNING,"パスワードの認証エラーが発生しました。ゲストユーザーで開始します。"
-				gosub*SetGuestSavedata
-			}
+		} else {
+			AddDebugConsole STYLE_WARNING,"オンライン認証に失敗しました。ゲストユーザーで開始します。"
+			gosub*SetGuestSavedata
 		}
+
 	}
 	AddDebugConsole STYLE_NORMAL,"Portalサービスにサインインしました。"
 	AddDebugConsole STYLE_STATUS,"USERNAME(ID) = "+authUserName

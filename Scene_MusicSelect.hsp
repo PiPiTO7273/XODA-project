@@ -120,64 +120,7 @@
 		sdim TargetIRchartID:sdim TargetIRrank
 		sdim TargetIRname:sdim TargetIRscore
 		sdim INIkey:sdim INIval
-
-	//HTTP接続
-	if OfflineModeFlag==FALSE {
-		AddDebugConsole STYLE_NORMAL,"HTTPリクエストを発行しました。 \""+SERVICE_HTTP+"svcsavedata/"+"\""
-		neturl SERVICE_HTTP+"svcsavedata/"
-		netdlname"Data/Cache/tmp_Savedata.dat"
-		netrequest"Shared.dat"
-			dim netres
-			repeat
-				netexec netres
-				if netres!0 :break
-				await
-			loop
-		exist"Data/Cache/tmp_Savedata.dat"
-		if strsize==-1 {
-			AddDebugConsole STYLE_WARNING,"オンラインランキングの取得に失敗しました。"
-		} else {
-			sdim IRsavedatabuf,strsize
-			notesel IRsavedatabuf
-			noteload"Data/Cache/tmp_Savedata.dat"
-
-			repeat notemax
-				noteget NoteLine,cnt
-				if cnt==0 :continue		//セクション行は無視
-
-				split NoteLine,"=",INIkey,INIval
-				split INIkey,".",TargetIRchartID,TargetIRrank
-				strrep TargetIRrank,"RANK#",""
-				split INIval,",",TargetIRname,TargetIRscore
-
-				dim TargetArrLevID:TargetArrLevID=-1
-				dim TargetArrSelID:TargetArrSelID=-1
-				dim CurArrID
-
-				repeat Libarr_Max
-					CurArrID=cnt
-					repeat 3
-						if TargetIRchartID==Libarr_ChartID(cnt,CurArrID) {
-							TargetArrLevID=cnt
-							TargetArrSelID=cnt
-						}
-					loop
-				loop
-				if TargetArrSelID==-1|TargetArrLevID==-1 {
-					AddDebugConsole STYLE_WARNING,"[SHARED] 無効なスコアデータです。"
-				} else {
-					TargetIRrank=int(TargetIRrank)-1
-					Libarr_IRrank(TargetArrLevID,TargetArrSelID,TargetIRrank)=int(TargetIRrank)
-					Libarr_IRname(TargetArrLevID,TargetArrSelID,TargetIRrank)=TargetIRname
-					Libarr_IRscore(TargetArrLevID,TargetArrSelID,TargetIRrank)=int(TargetIRscore)
-					if TargetIRname==aqName {
-						Libarr_MyIRrank(TargetArrLevID,TargetArrSelID)=int(TargetIRrank)
-						Libarr_MyIRscore(TargetArrLevID,TargetArrSelID)=int(TargetIRscore)
-					}
-				}
-			loop
-		}
-	}
+		dim IRsyncFlag:dim IRsyncFrame
 
 	//変数初期化
 		dim CursorSelID			//項目ID
@@ -197,9 +140,81 @@
 		dim DetailWindowChangeFlag	//詳細ウィンドウのページ切り替えフラグ
 		dim bfDetailWindowChangeFlag	//前フレームのページ切り替えフラグ
 
+	WebAPI_Post SERVICE_HTTP+"/API-GetGlobalRanking.php?key="+APIkey_GetGlobalRanking,1
+
 	return
 
 *Scene_MusicSelect
+
+	//HTTP接続
+	if OfflineModeFlag==FALSE&IRsyncFlag==FALSE {
+		if IEobj("Busy")==0 {
+			AddDebugConsole STYLE_NORMAL,"HTTPリクエストを取得しました。"
+			sdim IRsavedatabuf,4096
+			notesel IRsavedatabuf
+			IEmes=IEobj("Document")
+			IEmes=IEmes("body")
+			IErawdata=IEmes("innerHTML")
+			strrep IErawdata,"<BR>","\n"
+			IRsavedatabuf=IErawdata
+
+			//エラー判別
+			dim IRerrorFlag
+			switch IRsavedatabuf
+				case"ERROR_ACCESS_SHARED"
+					AddDebugConsole STYLE_WARNING,"Portal WebAPI: 共有セーブデータが見つかりませんでした。"
+					IRerrorFlag=TRUE
+				swbreak
+				case"ERROR_AUTH_APIKEY"
+					AddDebugConsole STYLE_ERROR,"Portal WebAPI: APIキーの認証に失敗しました。"
+					goto*StopError
+				swbreak
+			swend
+
+			if IRerrorFlag==FALSE {
+				repeat notemax
+					noteget NoteLine,cnt
+					if cnt==0 :continue		//セクション行は無視
+
+					split NoteLine,"=",INIkey,INIval
+					split INIkey,".",TargetIRchartID,TargetIRrank
+					strrep TargetIRrank,"RANK#",""
+					split INIval,",",TargetIRname,TargetIRscore
+
+					dim TargetArrLevID:TargetArrLevID=-1
+					dim TargetArrSelID:TargetArrSelID=-1
+					dim CurArrID
+
+					repeat Libarr_Max
+						CurArrID=cnt
+						repeat 3
+							if TargetIRchartID==Libarr_ChartID(cnt,CurArrID) {
+								TargetArrLevID=cnt
+								TargetArrSelID=CurArrID
+							}
+						loop
+					loop
+					if TargetArrSelID==-1|TargetArrLevID==-1 {
+						AddDebugConsole STYLE_WARNING,"[SHARED] 無効なスコアデータです。"
+					} else {
+						TargetIRrank=int(TargetIRrank)-1
+						Libarr_IRrank(TargetArrLevID,TargetArrSelID,TargetIRrank)=int(TargetIRrank)
+						Libarr_IRname(TargetArrLevID,TargetArrSelID,TargetIRrank)=TargetIRname
+						Libarr_IRscore(TargetArrLevID,TargetArrSelID,TargetIRrank)=int(TargetIRscore)
+						AddDebugConsole STYLE_NORMAL,"ランキングスコアを読み込みました。["+TargetArrLevID+","+TargetArrSelID+","+TargetIRrank+"]"
+						if TargetIRname==aqName {
+							Libarr_MyIRrank(TargetArrLevID,TargetArrSelID)=int(TargetIRrank)
+							Libarr_MyIRscore(TargetArrLevID,TargetArrSelID)=int(TargetIRscore)
+						}
+					}
+				loop
+			}
+
+			IRsyncFlag=TRUE
+		} else {
+			IRsyncFrame++
+		}
+	}
 
 	//キー判定
 		KeyFlag(0)=CheckHitKey(KEY_INPUT_LEFT)
@@ -373,15 +388,14 @@
 								if hdximg(iLayer_Detail_IR)!0 :DeleteGraph hdximg(iLayer_Detail_IR)
 								hdximg(iLayer_Detail_IR)=MakeScreen(400,330,TRUE)
 								SetDrawScreen hdximg(iLayer_Detail_IR)
-
-								SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-								DrawGraph 24,46+28*0,hdximg(iIcon_IR_1st),TRUE		//1st アイコン
-								DrawGraph 24,46+28*1,hdximg(iIcon_IR_2nd),TRUE		//2nd アイコン
-								DrawGraph 24,46+28*2,hdximg(iIcon_IR_3rd),TRUE		//3rd アイコン
-
 								//1-3
 								SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 								repeat 3
+									if Libarr_IRscore(CursorLevID,CursorSelID,cnt)==0 :continue
+									SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+									if cnt==0 :DrawGraph 24,46+28*0,hdximg(iIcon_IR_1st),TRUE		//1st アイコン
+									if cnt==1 :DrawGraph 24,46+28*1,hdximg(iIcon_IR_2nd),TRUE		//2nd アイコン
+									if cnt==2 :DrawGraph 24,46+28*2,hdximg(iIcon_IR_3rd),TRUE		//3rd アイコン
 									DrawStringToHandle 52,47+28*cnt,"#"+(Libarr_IRrank(CursorLevID,CursorSelID,cnt)+1),GetColor(240,240,240),hdxfont(fSQ_12)
 									DrawStringToHandle 84,47+28*cnt,Libarr_IRname(CursorLevID,CursorSelID,cnt),GetColor(240,240,240),hdxfont(fPier_m12)
 									DrawStringToHandle 204,42+28*cnt,strf("%08d",Libarr_IRscore(CursorLevID,CursorSelID,cnt)),GetColor(240,240,240),hdxfont(fPier_m20)
@@ -404,6 +418,7 @@
 										DrawStringToHandle 236,270,strf("%08d",Libarr_MyIRscore(CursorLevID,CursorSelID)),GetColor(240,240,240),hdxfont(fPier_m22)
 								}
 								repeat numIRlist
+									if Libarr_IRscore(CursorLevID,CursorSelID,3+cnt)==0 :continue
 									SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 									DrawGraph 24,46+28*(3+cnt),hdximg(iIcon_IR),TRUE
 
@@ -515,12 +530,12 @@
 
 	//プリローダ
 		setease 100,0,ease_cubic_out
-		EaseWidth=getease(SceneCount-10,20)
-		EaseHeight=getease(SceneCount-10,20)
+		EaseWidth=getease(SceneCount-10-IRsyncFrame,20)
+		EaseHeight=getease(SceneCount-10-IRsyncFrame,20)
 		EasePosX=DispWidth/2-EaseWidth/2
 		EasePosY=DispHeight/2-EaseHeight/2
 		setease 256,0,ease_cubic_out
-		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,20)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10-IRsyncFrame,20)
 		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdxarr_Blocks(FrameCount/2\20),TRUE
 
 	//ガイド

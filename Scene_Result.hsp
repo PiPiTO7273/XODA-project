@@ -25,6 +25,9 @@
 		if curScore>=RANK_SCORE_SS :ScoreRankID=RANK_ID_SS
 		if curScore>=RANK_SCORE_SSS :ScoreRankID=RANK_ID_SSS
 
+	//ƒ‰ƒ“ƒLƒ“ƒO
+		WebAPI_Post SERVICE_HTTP+"/API-SendGlobalRanking.php?key="+APIkey_SendGlobalRanking+"&id="+Libarr_ChartID(CursorLevID,CursorSelID)+"&name="+aqName+"&score="+curScore,1
+
 	return
 
 *Scene_Result

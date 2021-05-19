@@ -6,7 +6,8 @@
 #define BuildVersion_Major	0
 #define BuildVersion_Minor	2
 #define SplashTime			1
-#define DebugConsoleWindow	0
+#define DebugConsoleWindow	1
+#define HTTPhostWindow		1
 
 //フォントハンドル
 #enum fSystem		=	0
