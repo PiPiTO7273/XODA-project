@@ -7,8 +7,6 @@
 	dim decideFlag			//決定キーが押されたフラグ
 	dim decideFrameCount	//決定キーが押されてからの経過フレーム
 
-	gosub*Create_AQProfileBuf
-
 	return
 
 *Scene_Signin

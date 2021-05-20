@@ -1,4 +1,4 @@
-del "Data\Movie\background.ogv"
+del "Data\Movie\bg_Main.ogv"
 del "Data\Object\Hit\Charge.png"
 del "Data\Sound\bgm_Main.flac"
 del "Data\Movie\Start.ogv"

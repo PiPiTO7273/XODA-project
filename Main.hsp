@@ -144,6 +144,8 @@
 
 	//////debug
 	//“Ç‚İ‚Ş•ˆ–Êƒtƒ@ƒCƒ‹–¼
+	gsel 0
+	color 255,255,255:boxf
 	gosub*InitScene
 
 	gsel 0,1

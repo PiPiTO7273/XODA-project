@@ -73,7 +73,6 @@
 						if abs(NearNoteDif)<JUDGE_WIDTH_EXCELLENT :JudgeRes=JUDGE_RES_EXCELLENT
 
 						UpdateJudgeValue JudgeRes
-						if NearNoteID==hitobjMax-1 :stgClearEffFlag=TRUE
 
 					//ホールド判定
 						if hitobjType(NearNoteID)==HITOBJ_HOLDSTART {
@@ -397,7 +396,6 @@
 						if hitobjType(cnt)==HITOBJ_HOLDEND {
 							HoldFlag(hitobjLaneID(cnt))=FALSE
 						}
-						if cnt==hitobjMax-1 :stgClearEffFlag=TRUE
 					}
 				}
 			//見逃し判定
@@ -408,7 +406,6 @@
 						hitJudgeFlag(cnt+1)=TRUE
 						UpdateJudgeValue JUDGE_RES_MISS
 					}
-					if cnt==hitobjMax-1 :stgClearEffFlag=TRUE
 				}
 		loop
 
@@ -420,6 +417,12 @@
 				if cnt==0 :mxmScore+bonusScore
 				hitCountFlag(cnt)=TRUE
 			}
+		loop
+
+	//終了判定
+		stgClearEffFlag=TRUE
+		repeat hitobjmax
+			if hitJudgeFlag(cnt)==FALSE :stgClearEffFlag=FALSE
 		loop
 
 	//自機
@@ -545,6 +548,7 @@
 
 	//開始時のムービー
 		if SceneCount==20 {
+			SeekMovieToGraph hdximg(iMovie_Start),0
 			PlayMovieToGraph hdximg(iMovie_Start)
 			PlaySE hbasssnd(sndStart)
 			PlaySE hbasssnd(vocReady)
@@ -589,6 +593,7 @@
 
 			if stgClearEffCount==10 {
 				//クリア演出の動画再生開始
+				SeekMovieToGraph stgEffMovieHWND,0
 				PlayMovieToGraph stgEffMovieHWND
 
 				if stgClearType==ID_Failed {
@@ -677,6 +682,14 @@
 			BASS_ChannelPlay hplaybgm
 			BGMPlayFlag=TRUE
 		}
+
+	//グラフのキャプチャー
+		repeat 270
+			if SceneCount-60*5==int(double(chartCapturePt*cnt)/(1000.0/60.0)) {
+				chartCaptureVal(cnt)=int(curGaugeVal)
+				AddDebugConsole STYLE_NORMAL,"グラフをキャプチャーしました。[ID="+cnt+","+curGaugeVal+"]"
+			}
+		loop
 
 	//カウンタ(ms)
 		PlayCountMS=GetNowCount()-PlayStartMS-1000*5

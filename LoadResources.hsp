@@ -13,7 +13,6 @@
 		repeat notemax
 			noteget NoteLine,cnt
 			split NoteLine,"=",updatepath(cnt),updatelink(cnt)
-
 			exist updatepath(cnt)
 			if strsize==-1 {
 				updateflag(cnt)=TRUE

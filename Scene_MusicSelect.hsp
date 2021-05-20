@@ -141,6 +141,99 @@
 		dim bfDetailWindowChangeFlag	//前フレームのページ切り替えフラグ
 
 	WebAPI_Post SERVICE_HTTP+"/API-GetGlobalRanking.php?key="+APIkey_GetGlobalRanking,1
+	gosub*Create_AQProfileBuf
+
+	//詳細記録を解析
+		dim Libarr_Rec_Score,3,Libarr_Max			//自己ベストスコア
+		dim Libarr_Rec_NumExcellent,3,Libarr_Max	//Excellent判定数
+		dim Libarr_Rec_NumGreat,3,Libarr_Max		//Great判定数
+		dim Libarr_Rec_NumNice,3,Libarr_Max		//Nice判定数
+		dim Libarr_Rec_NumBad,3,Libarr_Max			//Bad判定数
+		dim Libarr_Rec_NumMiss,3,Libarr_Max		//Miss判定数
+		dim Libarr_Rec_NumEarly,3,Libarr_Max		//Early判定数
+		dim Libarr_Rec_NumLate,3,Libarr_Max		//Late判定数
+		dim Libarr_Rec_MaxCombo,3,Libarr_Max		//最大コンボ数
+		dim Libarr_Rec_Graph,3,Libarr_Max,270		//グラフキャプチャー値
+
+		sdim INIsection
+		dim TargetArrLevID	//代入先レベルID
+		dim TargetArrSelID	//代入先項目ID
+		TargetArrLevID=-1
+		TargetArrSelID=-1
+
+		notesel DetailRecordBuf
+		repeat notemax
+			noteget NoteLine,cnt
+			if strmid(NoteLine,0,1)=="["&strmid(NoteLine,-1,1)=="]" {
+				//セクション行を検出
+					INIsection=NoteLine
+					strrep INIsection,"[",""
+					strrep INIsection,"]",""
+
+				//該当する項目のレベルとIDを特定
+					TargetArrLevID=-1
+					TargetArrSelID=-1
+					dim CurArrID
+					repeat Libarr_Max
+						CurArrID=cnt
+						repeat 3
+							if INIsection==Libarr_ChartID(cnt,CurArrID) {
+								TargetArrLevID=cnt
+								TargetArrSelID=CurArrID
+							}
+						loop
+					loop
+			} else {
+
+				if TargetArrLevID!-1&TargetArrSelID!-1 {
+					split NoteLine,"=",INIkey,INIval
+					switch INIkey
+						case"Score"
+							Libarr_Rec_Score(TargetArrLevID,TargetArrSelID)=int(INIval)
+						swbreak
+						case"NumExcellent"
+							Libarr_Rec_NumExcellent(TargetArrLevID,TargetArrSelID)=int(INIval)
+						swbreak
+						case"NumGreat"
+							Libarr_Rec_NumGreat(TargetArrLevID,TargetArrSelID)=int(INIval)
+						swbreak
+						case"NumNice"
+							Libarr_Rec_NumNice(TargetArrLevID,TargetArrSelID)=int(INIval)
+						swbreak
+						case"NumBad"
+							Libarr_Rec_NumBad(TargetArrLevID,TargetArrSelID)=int(INIval)
+						swbreak
+						case"NumMiss"
+							Libarr_Rec_NumMiss(TargetArrLevID,TargetArrSelID)=int(INIval)
+						swbreak
+						case"NumEarly"
+							Libarr_Rec_NumEarly(TargetArrLevID,TargetArrSelID)=int(INIval)
+						swbreak
+						case"NumLate"
+							Libarr_Rec_NumLate(TargetArrLevID,TargetArrSelID)=int(INIval)
+						swbreak
+						case"MaxCombo"
+							Libarr_Rec_MaxCombo(TargetArrLevID,TargetArrSelID)=int(INIval)
+						swbreak
+						case"Graph"
+							sdim GraphBin,270
+							GraphBin=INIval
+							b64decode GraphBin,GraphBin
+							repeat 270
+								Libarr_Rec_Graph(TargetArrLevID,TargetArrSelID,cnt)=int(double(peek(GraphBin,cnt))*1.1)
+							loop
+						swbreak
+					swend
+				}
+
+			}
+		loop
+
+	if transEffFlag==TRUE {
+		BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.7)
+		BASS_ChannelSetPosition hbasssnd(bgmMain),0,0,0
+		BASS_ChannelPlay hbasssnd(bgmMain)
+	}
 
 	return
 
@@ -439,6 +532,48 @@
 					case ID_RECORD
 						SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 						DrawStringToHandle 20,278+12,"MY RECORD",GetColor(240,240,240),hdxfont(fPier_m16)
+
+						if DetailWindowCount==0 {
+							//バッファ生成
+								if hdximg(iLayer_Detail_Record)!0 :DeleteGraph hdximg(iLayer_Detail_Record)
+								hdximg(iLayer_Detail_Record)=MakeScreen(400,330,TRUE)
+								SetDrawScreen hdximg(iLayer_Detail_Record)
+								SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+
+							//タイトル
+								DrawStringToHandle 24,42,"自己ベスト",GetColor(240,240,240),hdxfont(fNoto_m12)
+								DrawStringToHandle 128,43,strf("%08d",Libarr_Rec_Score(CursorLevID,CursorSelID)),GetColor(240,240,240),hdxfont(fPier_r14)
+								DrawStringToHandle 24,188,"ゲージ推移",GetColor(240,240,240),hdxfont(fNoto_m12)
+
+							//判定別
+								DrawStringToHandle 42,68,"Excellent",GetJudgeColor(JUDGE_RES_EXCELLENT),hdxfont(fPier_r14)
+								DrawStringToHandle 42,89,"Great",GetJudgeColor(JUDGE_RES_GREAT),hdxfont(fPier_r14)
+								DrawStringToHandle 42,110,"Nice",GetJudgeColor(JUDGE_RES_NICE),hdxfont(fPier_r14)
+								DrawStringToHandle 42,131,"Bad",GetJudgeColor(JUDGE_RES_BAD),hdxfont(fPier_r14)
+								DrawStringToHandle 42,152,"Miss",GetJudgeColor(JUDGE_RES_MISS),hdxfont(fPier_r14)
+								DrawStringToHandle 210,68,"Early",GetColor(255,68,218),hdxfont(fPier_r14)
+								DrawStringToHandle 210,89,"Late",GetColor(74,206,255),hdxfont(fPier_r14)
+								DrawStringToHandle 210,110,"Max Combo",GetColor(230,230,230),hdxfont(fPier_r14)
+
+							//値
+								DrawStringToHandle 140,68,strf("%04d",Libarr_Rec_NumExcellent(CursorLevID,CursorSelID)),GetColor(230,230,230),hdxfont(fPier_r14)
+								DrawStringToHandle 140,89,strf("%04d",Libarr_Rec_NumGreat(CursorLevID,CursorSelID)),GetColor(230,230,230),hdxfont(fPier_r14)
+								DrawStringToHandle 140,110,strf("%04d",Libarr_Rec_NumNice(CursorLevID,CursorSelID)),GetColor(230,230,230),hdxfont(fPier_r14)
+								DrawStringToHandle 140,131,strf("%04d",Libarr_Rec_NumBad(CursorLevID,CursorSelID)),GetColor(230,230,230),hdxfont(fPier_r14)
+								DrawStringToHandle 140,152,strf("%04d",Libarr_Rec_NumMiss(CursorLevID,CursorSelID)),GetColor(230,230,230),hdxfont(fPier_r14)
+								DrawStringToHandle 308,68,strf("%04d",Libarr_Rec_NumEarly(CursorLevID,CursorSelID)),GetColor(230,230,230),hdxfont(fPier_r14)
+								DrawStringToHandle 308,89,strf("%04d",Libarr_Rec_NumLate(CursorLevID,CursorSelID)),GetColor(230,230,230),hdxfont(fPier_r14)
+								DrawStringToHandle 308,110,strf("%04d",Libarr_Rec_MaxCombo(CursorLevID,CursorSelID)),GetColor(230,230,230),hdxfont(fPier_r14)
+
+							//グラフ
+								repeat 270
+									DrawBox 108+cnt,188+110-Libarr_Rec_Graph(CursorLevID,CursorSelID,cnt),108+cnt+1,188+110,GetColor(255,255,255),TRUE
+								loop
+
+							SetDrawScreen hdximg(iLayer_Scene)
+						}
+						SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+						DrawGraph 0,278,hdximg(iLayer_Detail_Record),TRUE
 					swbreak
 
 				//歌詞
@@ -560,6 +695,45 @@
 		DrawStringXCenterToHandle 370,684,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
 		sdim tmpstr:tmpstr="←→ : 難易度変更"
 		DrawStringXCenterToHandle 760,684,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+
+	//リザルトからのトランジション
+		if SceneCount<50&transEffFlag==TRUE {
+			//若干暗転
+				setease 0,150,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(decideFrameCount,50)
+				DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
+
+			if SceneCount==1 {
+				BASS_ChannelPlay hbasssnd(sndUI_Trans_Out)
+			}
+			setease 0,-DispWidth,ease_cubic_in
+			EasePosX=getease(SceneCount,25)
+			setease 0,DispHeight,ease_cubic_in
+			EasePosY=getease(SceneCount,25)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph EasePosX,EasePosY,hdximg(iTrans_In_L),TRUE
+
+			setease 0,DispWidth,ease_cubic_in
+			EasePosX=getease(SceneCount,25)
+			setease 0,-DispHeight,ease_cubic_in
+			EasePosY=getease(SceneCount,25)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph EasePosX,EasePosY,hdximg(iTrans_In_R),TRUE
+
+			setease 0,-DispWidth,ease_cubic_in
+			EasePosX=getease(SceneCount,50)
+			setease 0,DispHeight,ease_cubic_in
+			EasePosY=getease(SceneCount,50)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph EasePosX,EasePosY,hdximg(iTrans_Out_L),TRUE
+
+			setease 0,DispWidth,ease_cubic_in
+			EasePosX=getease(SceneCount,50)
+			setease 0,-DispHeight,ease_cubic_in
+			EasePosY=getease(SceneCount,50)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph EasePosX,EasePosY,hdximg(iTrans_Out_R),TRUE
+		}
 
 	//カウンタ
 		CursorSelCount++

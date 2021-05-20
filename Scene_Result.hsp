@@ -3,6 +3,8 @@
 
 	//ムービーの再生開始
 	PlayMovieToGraph hdximg(ibg_Result),DX_PLAYTYPE_LOOP
+	BASS_ChannelSetAttribute hbasssnd(bgmResult),BASS_ATTRIB_VOL,tofloat(0.4)
+	BASS_ChannelSetPosition hbasssnd(bgmResult),0,0,0
 	BASS_ChannelPlay hbasssnd(bgmResult)
 
 	//スコア数値の描画
@@ -27,10 +29,48 @@
 
 	//ランキング
 		WebAPI_Post SERVICE_HTTP+"/API-SendGlobalRanking.php?key="+APIkey_SendGlobalRanking+"&id="+Libarr_ChartID(CursorLevID,CursorSelID)+"&name="+aqName+"&score="+curScore,1
+	
+	//スコア送信
+		//グラフデータの初期化
+			sdim tmpstr:sdim GraphBin,270
+			repeat 270
+				poke GraphBin,cnt,chartCaptureVal(cnt)+1	//NULL回避
+			loop
+			b64encode GraphBin,GraphBin
+		//URL作成&リクエスト発行
+			tmpstr=SERVICE_HTTP+"/API-SendNewRecord.php?key="+APIkey_SendNewRecord
+			tmpstr+"&id="+Libarr_ChartID(CursorLevID,CursorSelID)
+			tmpstr+"&name="+aqName
+			tmpstr+"&score="+curScore
+			tmpstr+"&j_ex="+numExcellent
+			tmpstr+"&j_gr="+numGreat
+			tmpstr+"&j_ni="+numNice
+			tmpstr+"&j_ba="+numBad
+			tmpstr+"&j_mi="+numMiss
+			tmpstr+"&j_ea="+numEarly
+			tmpstr+"&j_la="+numLate
+			tmpstr+"&maxcombo="+curMaxCombo
+			tmpstr+"&graph="+GraphBin
+			switch WebAPI_PostandGet(tmpstr,1)
+				case"ERROR_UNKNOWN_PRM"
+					AddDebugConsole STYLE_WARNING,"Portal WebAPI: 無効なパラメータが指定されました。"
+				swbreak
+				case"ERROR_AUTH_APIKEY"
+					AddDebugConsole STYLE_WARNING,"Portal WebAPI: APIキーの認証に失敗しました。"
+				swbreak
+			swend
+
+	//BGM停止
+	BASS_ChannelStop hplaybgm
 
 	return
 
 *Scene_Result
+
+	//決定キー判定
+	if CheckHitKey(KEY_INPUT_RETURN)==TRUE {
+		decideFlag=TRUE
+	}
 
 	//背景
 		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
@@ -234,5 +274,65 @@
 		EasePosY=getease(SceneCount,50)
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 		DrawGraph EasePosX,EasePosY,hdximg(iTrans_Out_R),TRUE
+	}
+
+	//トランジション
+	if decideFlag==TRUE {
+		//若干暗転
+		setease 0,150,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(decideFrameCount,50)
+		DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE
+
+		//音量調整
+		setease 0.4,0,ease_linear
+		BASS_ChannelSetAttribute hbasssnd(bgmResult),BASS_ATTRIB_VOL,tofloat(geteasef(decideFrameCount,15))
+		if decideFrameCount==0 {
+			PlaySE hbasssnd(sndUI_Trans_In)
+		}
+
+		setease -DispWidth,0,ease_cubic_out
+		EasePosX=getease(decideFrameCount,50)
+		setease DispHeight,0,ease_cubic_out
+		EasePosY=getease(decideFrameCount,50)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph EasePosX,EasePosY,hdximg(iTrans_In_L),TRUE
+
+		setease DispWidth,0,ease_cubic_out
+		EasePosX=getease(decideFrameCount,50)
+		setease -DispHeight,0,ease_cubic_out
+		EasePosY=getease(decideFrameCount,50)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph EasePosX,EasePosY,hdximg(iTrans_In_R),TRUE
+
+		setease -DispWidth,0,ease_cubic_out
+		EasePosX=getease(decideFrameCount,25)
+		setease DispHeight,0,ease_cubic_out
+		EasePosY=getease(decideFrameCount,25)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph EasePosX,EasePosY,hdximg(iTrans_Out_L),TRUE
+
+		setease DispWidth,0,ease_cubic_out
+		EasePosX=getease(decideFrameCount,25)
+		setease -DispHeight,0,ease_cubic_out
+		EasePosY=getease(decideFrameCount,25)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph EasePosX,EasePosY,hdximg(iTrans_Out_R),TRUE
+
+		decideFrameCount++
+	}
+
+	if decideFrameCount>50+1 {
+		//詳細記録読み込み
+			gosub*LoadDetailRecord
+
+		//シーン移行
+			curSceneID=ID_MusicSelect
+			gosub*InitScene
+			//変数初期化
+			dim decideFlag
+			dim decideFrameCount
+			dim transEffFlag
+			transEffFlag=TRUE
+			gosub*Scene_Init_MusicSelect
 	}
 	return

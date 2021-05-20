@@ -75,4 +75,7 @@
 	netinit
 	gosub*OnlineSignin
 
+	//Ú×‹L˜^“Ç‚İ‚İ
+	gosub*LoadDetailRecord
+
 	return

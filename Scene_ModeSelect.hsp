@@ -157,6 +157,7 @@
 			//•Ï”‰Šú‰»
 			dim decideFlag
 			dim decideFrameCount
+			dim transEffFlag
 			gosub*Scene_Init_MusicSelect
 		}
 		if SceneCount==1 {

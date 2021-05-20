@@ -310,7 +310,7 @@
 		alColor 50,50,50:alFont"Pier Sans",14
 		alDrawText chartDifficulty+" Lv."+chartLevel,45,104,360-45,150-104,0,0
 
-	if hdximg(iUI_tx_SongInfo)!0 :DeleteGraph hdximg(iUI_tx_Profile)
+	if hdximg(iUI_tx_SongInfo)!0 :DeleteGraph hdximg(iUI_tx_SongInfo)
 	hdximg(iUI_tx_SongInfo)=MakeScreen(360,150,TRUE)
 	alCopyImageToDXBuf i2D_SongInfo,hdximg(iUI_tx_SongInfo)
 
@@ -384,6 +384,13 @@
 
 	//外部スクリプト読み込み
 	ExScript_Init"Data/Background.dat",chartBackground
+
+	//グラフのキャプチャー地点を算出
+	dim chartLength		//曲の長さ
+	dim chartCapturePt		//キャプチャー地点の間隔
+	dim chartCaptureVal		//キャプチャー地点の値
+	chartLength=hitobjTiming(hitobjMax-1)
+	chartCapturePt=int(double(chartLength)/270.0)
 
 	return 0
 

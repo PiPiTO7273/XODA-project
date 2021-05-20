@@ -292,9 +292,19 @@ goto*Startup
 	return 0
 
 #deffunc WebAPI_Init int _windowid
+	WebAPIControl_WindowID=_windowid
 	if HTTPhostWindow==1 :screen _windowid,640,480,0:else:screen _windowid,640,480,2
 	title"Portal WebAPI Control"
-	axobj IEobj,"Shell.Explorer.2",640,480
+	font"Meiryo UI",14:objmode 2
+	objsize 50,25
+	pos 0,0:button gosub"<-",*WebAPIControl_Back
+	pos 50,0:button gosub"->",*WebAPIControl_Forward
+	objsize 60,25
+	pos 580,0:button gosub"Run",*WebAPIControl_Run
+	sdim WebAPIControl_InputURL
+	pos 100,0:input WebAPIControl_InputURL,480,25,0
+	pos 0,25:axobj IEobj,"Shell.Explorer.2",640,465
+	comevent IEevent,IEobj,"{34A715A0-6587-11D0-924A-0020AFC7AC4D}",*WebAPIControl_OnEvent
 	return
 #defcfunc WebAPI_PostandGet str _url,int _windowid
 	IEobj->"Navigate" _url
@@ -314,6 +324,26 @@ goto*Startup
 	IErawdata=IEmes("innerHTML")
 	strrep IErawdata,"<BR>","\n"
 	return IErawdata
+
+*WebAPIControl_Back
+	IEobj->"GoBack"
+	return
+*WebAPIControl_Forward
+	IEobj->"GoForward"
+	return
+*WebAPIControl_Run
+	IEobj->"Navigate" WebAPIControl_InputURL
+	return
+*WebAPIControl_OnEvent
+	if comevdisp(IEevent)==259 {
+		comevarg WebAPIControl_InputURL,IEevent,1
+		//オブジェクト反映
+			defActiveWindowID=ginfo(3)
+			gsel WebAPIControl_WindowID
+			objprm 3,WebAPIControl_InputURL
+			gsel defActiveWindowID
+	}
+	return
 
 *ExportLog
 	notesel ConsoleLogBuf
@@ -554,6 +584,7 @@ goto*Startup
 	hdximg(iUI_tx_Profile)=MakeScreen(300,120,TRUE)
 	alCopyImageToDXBuf i2D_Profile,hdximg(iUI_tx_Profile)
 	*/
+
 	if hdximg(iUI_tx_Profile)!0 :DeleteGraph hdximg(iUI_tx_Profile)
 	hdximg(iUI_tx_Profile)=MakeScreen(300,120,TRUE)
 		SetDrawScreen hdximg(iUI_tx_Profile)
@@ -569,4 +600,17 @@ goto*Startup
 	AddDebugConsole STYLE_STATUS,"NAME = "+aqName
 	AddDebugConsole STYLE_STATUS,"RATE = "+aqRate
 	AddDebugConsole STYLE_STATUS,"BADGE = "+aqBadge
+	AddDebugConsole STYLE_STATUS,"HANDLE = "+hdximg(iUI_tx_Profile)
+	return
+
+*LoadDetailRecord
+
+	//詳細記録を読み込み
+	sdim DetailRecordBuf
+		//URL生成
+		sdim tmpstr
+		tmpstr=SERVICE_HTTP+"/API-GetRecord.php?key="+APIkey_GetRecord
+		tmpstr+"&name="+aqName
+		strrep tmpstr," ","%20"
+	DetailRecordBuf=WebAPI_PostandGet(tmpstr)
 	return
