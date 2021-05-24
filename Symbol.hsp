@@ -6,8 +6,8 @@
 #define BuildVersion_Major	0
 #define BuildVersion_Minor	2
 #define SplashTime			1
-#define DebugConsoleWindow	1
-#define HTTPhostWindow		1
+#define DebugConsoleWindow	0
+#define HTTPhostWindow		0
 
 //フォントハンドル
 #enum fSystem		=	0
@@ -66,6 +66,7 @@
 #enum ID_Signin
 #enum ID_ModeSelect
 #enum ID_MusicSelect
+#enum ID_MusicSelect_Option
 #enum ID_Play
 #enum ID_Result
 
@@ -151,6 +152,11 @@
 #enum iLayer_Detail_Lyrics
 #enum iLayer_Detail_Terminal
 #enum iMovie_Decide
+
+#enum ibg_Option_Preview
+#enum ibg_Option_Window
+#enum ibg_Option_SongInfo
+#enum iCursor_Option
 
 #enum iMovie_stg_Clear
 #enum iMovie_stg_Fullcombo

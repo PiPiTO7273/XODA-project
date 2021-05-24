@@ -128,8 +128,6 @@
 		dim CursorSelCount			//カーソル待機カウンタ
 		dim KeyFlag,4				//キーフラグ
 		dim bfKeyFlag,4			//前フレームのキーフラグ
-		dim decideFlag				//決定キーフラグ
-		dim decideFrameCount		//決定キーが押されてからのカウンタ
 		dim KeyPushCount,2			//キー押下時間
 		dim CursorOffsetEase		//カーソル移動のオフセット値
 		dim DrawColumnID			//描画する項目ID
@@ -139,6 +137,8 @@
 		dim DetailWindowPageID		//詳細ウィンドウのページID
 		dim DetailWindowChangeFlag	//詳細ウィンドウのページ切り替えフラグ
 		dim bfDetailWindowChangeFlag	//前フレームのページ切り替えフラグ
+		dim JumpSceneFlag			//他シーンへのジャンプフラグ
+		dim JumpSceneCount			//他シーンへのジャンプを行うカウンタ
 
 	WebAPI_Post SERVICE_HTTP+"/API-GetGlobalRanking.php?key="+APIkey_GetGlobalRanking,1
 	gosub*Create_AQProfileBuf
@@ -239,75 +239,8 @@
 
 *Scene_MusicSelect
 
-	//HTTP接続
-	if OfflineModeFlag==FALSE&IRsyncFlag==FALSE {
-		if IEobj("Busy")==0 {
-			AddDebugConsole STYLE_NORMAL,"HTTPリクエストを取得しました。"
-			sdim IRsavedatabuf,4096
-			notesel IRsavedatabuf
-			IEmes=IEobj("Document")
-			IEmes=IEmes("body")
-			IErawdata=IEmes("innerHTML")
-			strrep IErawdata,"<BR>","\n"
-			IRsavedatabuf=IErawdata
-
-			//エラー判別
-			dim IRerrorFlag
-			switch IRsavedatabuf
-				case"ERROR_ACCESS_SHARED"
-					AddDebugConsole STYLE_WARNING,"Portal WebAPI: 共有セーブデータが見つかりませんでした。"
-					IRerrorFlag=TRUE
-				swbreak
-				case"ERROR_AUTH_APIKEY"
-					AddDebugConsole STYLE_ERROR,"Portal WebAPI: APIキーの認証に失敗しました。"
-					goto*StopError
-				swbreak
-			swend
-
-			if IRerrorFlag==FALSE {
-				repeat notemax
-					noteget NoteLine,cnt
-					if cnt==0 :continue		//セクション行は無視
-
-					split NoteLine,"=",INIkey,INIval
-					split INIkey,".",TargetIRchartID,TargetIRrank
-					strrep TargetIRrank,"RANK#",""
-					split INIval,",",TargetIRname,TargetIRscore
-
-					dim TargetArrLevID:TargetArrLevID=-1
-					dim TargetArrSelID:TargetArrSelID=-1
-					dim CurArrID
-
-					repeat Libarr_Max
-						CurArrID=cnt
-						repeat 3
-							if TargetIRchartID==Libarr_ChartID(cnt,CurArrID) {
-								TargetArrLevID=cnt
-								TargetArrSelID=CurArrID
-							}
-						loop
-					loop
-					if TargetArrSelID==-1|TargetArrLevID==-1 {
-						AddDebugConsole STYLE_WARNING,"[SHARED] 無効なスコアデータです。"
-					} else {
-						TargetIRrank=int(TargetIRrank)-1
-						Libarr_IRrank(TargetArrLevID,TargetArrSelID,TargetIRrank)=int(TargetIRrank)
-						Libarr_IRname(TargetArrLevID,TargetArrSelID,TargetIRrank)=TargetIRname
-						Libarr_IRscore(TargetArrLevID,TargetArrSelID,TargetIRrank)=int(TargetIRscore)
-						AddDebugConsole STYLE_NORMAL,"ランキングスコアを読み込みました。["+TargetArrLevID+","+TargetArrSelID+","+TargetIRrank+"]"
-						if TargetIRname==aqName {
-							Libarr_MyIRrank(TargetArrLevID,TargetArrSelID)=int(TargetIRrank)
-							Libarr_MyIRscore(TargetArrLevID,TargetArrSelID)=int(TargetIRscore)
-						}
-					}
-				loop
-			}
-
-			IRsyncFlag=TRUE
-		} else {
-			IRsyncFrame++
-		}
-	}
+	//IR接続
+	if transEffFlag==FALSE :gosub*SyncIR
 
 	//キー判定
 		KeyFlag(0)=CheckHitKey(KEY_INPUT_LEFT)
@@ -371,32 +304,41 @@
 				bfKeyFlag(cnt)=KeyFlag(cnt)
 			loop
 
+		//オプション
+			if CheckHitKey(KEY_INPUT_D)==TRUE {
+				JumpSceneCount=0
+				JumpSceneFlag=TRUE
+				PlaySE hbasssnd(sndUI_Decide)
+			}
+
 	//背景
 		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
 		DrawGraph 0,0,hdximg(iBackground),FALSE
 
-	//ナビゲーション
-		if decideFlag==FALSE {
-			setease 0,256,ease_cubic_out
-			EaseAlpha=getease(SceneCount,10)
-			setease -32,0,ease_cubic_out
-			EasePosX=getease(SceneCount,10)
-		} else {
-			setease 256,0,ease_cubic_out
-			EaseAlpha=getease(decideFrameCount-10,10)
-			setease 0,-32,ease_cubic_out
-			EasePosX=getease(decideFrameCount-10,10)
+		if JumpSceneFlag==FALSE {
+			//ナビゲーション
+				if decideFlag==FALSE {
+					setease 0,256,ease_cubic_out
+					EaseAlpha=getease(SceneCount,10)
+					setease -32,0,ease_cubic_out
+					EasePosX=getease(SceneCount,10)
+				} else {
+					setease 256,0,ease_cubic_out
+					EaseAlpha=getease(decideFrameCount-10,10)
+					setease 0,-32,ease_cubic_out
+					EasePosX=getease(decideFrameCount-10,10)
+				}
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+				DrawGraph 32+EasePosX,16,hdximg(iNav_MusicSelect),TRUE
+
+			//案内文字列（背景）
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 32,67,hdximg(ibg_Nav),TRUE
+
+			//案内文字列
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringToHandle 48,72,"プレーする楽曲を選択してください。",GetColor(230,230,230),hdxfont(fNoto_b12)
 		}
-		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
-		DrawGraph 32+EasePosX,16,hdximg(iNav_MusicSelect),TRUE
-
-	//案内文字列（背景）
-		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-		DrawGraph 32,67,hdximg(ibg_Nav),TRUE
-
-	//案内文字列
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-		DrawStringToHandle 48,72,"プレーする楽曲を選択してください。",GetColor(230,230,230),hdxfont(fNoto_b12)
 
 	//----- 以下、シーン別レイヤー -----
 		SetDrawScreen hdximg(iLayer_Scene)
@@ -481,17 +423,25 @@
 								if hdximg(iLayer_Detail_IR)!0 :DeleteGraph hdximg(iLayer_Detail_IR)
 								hdximg(iLayer_Detail_IR)=MakeScreen(400,330,TRUE)
 								SetDrawScreen hdximg(iLayer_Detail_IR)
+
+								SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+								DrawGraph 24,46+28*0,hdximg(iIcon_IR_1st),TRUE		//1st アイコン
+								DrawGraph 24,46+28*1,hdximg(iIcon_IR_2nd),TRUE		//2nd アイコン
+								DrawGraph 24,46+28*2,hdximg(iIcon_IR_3rd),TRUE		//3rd アイコン
 								//1-3
 								SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 								repeat 3
-									if Libarr_IRscore(CursorLevID,CursorSelID,cnt)==0 :continue
-									SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-									if cnt==0 :DrawGraph 24,46+28*0,hdximg(iIcon_IR_1st),TRUE		//1st アイコン
-									if cnt==1 :DrawGraph 24,46+28*1,hdximg(iIcon_IR_2nd),TRUE		//2nd アイコン
-									if cnt==2 :DrawGraph 24,46+28*2,hdximg(iIcon_IR_3rd),TRUE		//3rd アイコン
-									DrawStringToHandle 52,47+28*cnt,"#"+(Libarr_IRrank(CursorLevID,CursorSelID,cnt)+1),GetColor(240,240,240),hdxfont(fSQ_12)
-									DrawStringToHandle 84,47+28*cnt,Libarr_IRname(CursorLevID,CursorSelID,cnt),GetColor(240,240,240),hdxfont(fPier_m12)
-									DrawStringToHandle 204,42+28*cnt,strf("%08d",Libarr_IRscore(CursorLevID,CursorSelID,cnt)),GetColor(240,240,240),hdxfont(fPier_m20)
+									if Libarr_IRscore(CursorLevID,CursorSelID,cnt)!0 {
+										//値あり
+										DrawStringToHandle 52,47+28*cnt,"#"+(Libarr_IRrank(CursorLevID,CursorSelID,cnt)+1),GetColor(240,240,240),hdxfont(fSQ_12)
+										DrawStringToHandle 84,47+28*cnt,Libarr_IRname(CursorLevID,CursorSelID,cnt),GetColor(240,240,240),hdxfont(fPier_m12)
+										DrawStringToHandle 204,42+28*cnt,strf("%08d",Libarr_IRscore(CursorLevID,CursorSelID,cnt)),GetColor(240,240,240),hdxfont(fPier_m20)
+									} else {
+										//値なし
+										DrawStringToHandle 84,47+28*cnt,"-",GetColor(240,240,240),hdxfont(fPier_m12)
+										DrawStringToHandle 52,47+28*cnt,"#-",GetColor(240,240,240),hdxfont(fSQ_12)
+										DrawStringToHandle 204,42+28*cnt,"--------",GetColor(240,240,240),hdxfont(fPier_m20)
+									}
 								loop
 
 								//4-
@@ -511,15 +461,21 @@
 										DrawStringToHandle 236,270,strf("%08d",Libarr_MyIRscore(CursorLevID,CursorSelID)),GetColor(240,240,240),hdxfont(fPier_m22)
 								}
 								repeat numIRlist
-									if Libarr_IRscore(CursorLevID,CursorSelID,3+cnt)==0 :continue
 									SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 									DrawGraph 24,46+28*(3+cnt),hdximg(iIcon_IR),TRUE
 
 									SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-									DrawStringToHandle 84,47+28*(3+cnt),Libarr_IRname(CursorLevID,CursorSelID,3+cnt),GetColor(240,240,240),hdxfont(fPier_m12)
-									DrawStringToHandle 52,47+28*(3+cnt),"#"+(Libarr_IRrank(CursorLevID,CursorSelID,3+cnt)+1),GetColor(240,240,240),hdxfont(fSQ_12)
-									DrawStringToHandle 84,47+28*(3+cnt),Libarr_IRname(CursorLevID,CursorSelID,3+cnt),GetColor(240,240,240),hdxfont(fPier_m12)
-									DrawStringToHandle 204,42+28*(3+cnt),strf("%08d",Libarr_IRscore(CursorLevID,CursorSelID,3+cnt)),GetColor(240,240,240),hdxfont(fPier_m20)
+									if Libarr_IRscore(CursorLevID,CursorSelID,3+cnt)!0 {
+										//値あり
+										DrawStringToHandle 84,47+28*(3+cnt),Libarr_IRname(CursorLevID,CursorSelID,3+cnt),GetColor(240,240,240),hdxfont(fPier_m12)
+										DrawStringToHandle 52,47+28*(3+cnt),"#"+(Libarr_IRrank(CursorLevID,CursorSelID,3+cnt)+1),GetColor(240,240,240),hdxfont(fSQ_12)
+										DrawStringToHandle 204,42+28*(3+cnt),strf("%08d",Libarr_IRscore(CursorLevID,CursorSelID,3+cnt)),GetColor(240,240,240),hdxfont(fPier_m20)
+									} else {
+										//値なし
+										DrawStringToHandle 84,47+28*(3+cnt),"-",GetColor(240,240,240),hdxfont(fPier_m12)
+										DrawStringToHandle 52,47+28*(3+cnt),"#-",GetColor(240,240,240),hdxfont(fSQ_12)
+										DrawStringToHandle 204,42+28*(3+cnt),"--------",GetColor(240,240,240),hdxfont(fPier_m20)
+									}
 								loop
 
 								SetDrawScreen hdximg(iLayer_Scene)
@@ -566,8 +522,11 @@
 								DrawStringToHandle 308,110,strf("%04d",Libarr_Rec_MaxCombo(CursorLevID,CursorSelID)),GetColor(230,230,230),hdxfont(fPier_r14)
 
 							//グラフ
-								repeat 270
-									DrawBox 108+cnt,188+110-Libarr_Rec_Graph(CursorLevID,CursorSelID,cnt),108+cnt+1,188+110,GetColor(255,255,255),TRUE
+								SetDrawBlendMode DX_BLENDMODE_ALPHA,50
+								DrawBox 108,188,108+270,188+110,GetColor(255,255,255),FALSE
+								SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+								repeat 270-1
+									DrawLine 108+cnt,188+110-Libarr_Rec_Graph(CursorLevID,CursorSelID,cnt),108+cnt+1,188+110-Libarr_Rec_Graph(CursorLevID,CursorSelID,cnt+1),GetColor(255,255,255),TRUE
 								loop
 
 							SetDrawScreen hdximg(iLayer_Scene)
@@ -648,6 +607,7 @@
 
 		//シーン別レイヤー
 			SetDrawScreen DX_SCREEN_BACK
+			if JumpSceneFlag==FALSE {
 				setease 1.2,1,ease_cubic_out
 				EaseWidth=int(double(DispWidth)*geteasef(SceneCount,20))
 				EaseHeight=int(double(DispHeight)*geteasef(SceneCount,20))
@@ -656,6 +616,26 @@
 				setease 0,256,ease_cubic_out
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,20)
 				DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iLayer_Scene),TRUE
+			} else {
+				setease 1,1.2,ease_cubic_out
+				EaseWidth=int(double(DispWidth)*geteasef(JumpSceneCount,20))
+				EaseHeight=int(double(DispHeight)*geteasef(JumpSceneCount,20))
+				EasePosX=DispWidth/2-EaseWidth/2
+				EasePosY=DispHeight/2-EaseHeight/2
+				setease 256,0,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(JumpSceneCount,20)
+				DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iLayer_Scene),TRUE
+
+				//プリローダー
+				setease 0,100,ease_cubic_out
+				EaseWidth=getease(JumpSceneCount,20)
+				EaseHeight=getease(JumpSceneCount,20)
+				EasePosX=DispWidth/2-EaseWidth/2
+				EasePosY=DispHeight/2-EaseHeight/2
+				setease 0,256,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(JumpSceneCount,20)
+				DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdxarr_Blocks(FrameCount/2\20),TRUE
+			}
 
 		//選曲カーソルの移動アニメーション
 			if CursorSelCount<35 {
@@ -804,4 +784,11 @@
 			PlayStartMS=GetNowCount()
 		}
 		if SceneCount==10 :PlaySE hbasssnd(vocMusicSel)
+		if JumpSceneFlag==TRUE :JumpSceneCount++
+		if JumpSceneCount>20 {
+			gosub*Scene_Init_MusicSelect_Option
+			curSceneID=ID_MusicSelect_Option
+			gosub*InitScene
+		}
+
 	return

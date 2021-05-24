@@ -46,6 +46,7 @@
 #include"Scene_Signin.hsp"			//サインイン
 #include"Scene_ModeSelect.hsp"		//モード選択
 #include"Scene_MusicSelect.hsp"		//楽曲選択
+#include"Scene_MusicSelect_Option.hsp"	//楽曲選択のオプション
 #include"Scene_Play.hsp"				//ゲームプレイ
 #include"Scene_Result.hsp"			//リザルト
 
@@ -129,6 +130,7 @@
 	gosub*LoadSoundEffects
 	gosub*LoadFontData
 	gosub*LoadImages
+	gosub*SetItemTable
 
 	//シーンID
 	dim curSceneID
@@ -157,22 +159,25 @@
 
 	//シーン別描画
 	switch curSceneID
-		case ID_Splash		//スプラッシュ
+		case ID_Splash				//スプラッシュ
 			gosub*Scene_Splash
 		swbreak
-		case ID_Signin		//サインイン
+		case ID_Signin				//サインイン
 			gosub*Scene_Signin
 		swbreak
-		case ID_ModeSelect	//モード選択
+		case ID_ModeSelect			//モード選択
 			gosub*Scene_ModeSelect
 		swbreak
-		case ID_MusicSelect	//曲選択
+		case ID_MusicSelect			//曲選択
 			gosub*Scene_MusicSelect
 		swbreak
-		case ID_Play		//プレイ
+		case ID_MusicSelect_Option	//曲選択のオプション
+			gosub*Scene_MusicSelect_Option
+		swbreak
+		case ID_Play				//プレイ
 			gosub*Scene_Play
 		swbreak
-		case ID_Result		//リザルト
+		case ID_Result				//リザルト
 			gosub*Scene_Result
 		swbreak
 	swend

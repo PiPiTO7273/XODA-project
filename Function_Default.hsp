@@ -305,24 +305,31 @@ goto*Startup
 	pos 100,0:input WebAPIControl_InputURL,480,25,0
 	pos 0,25:axobj IEobj,"Shell.Explorer.2",640,465
 	comevent IEevent,IEobj,"{34A715A0-6587-11D0-924A-0020AFC7AC4D}",*WebAPIControl_OnEvent
+	AddDebugConsole STYLE_NORMAL,"WebAPIの実行環境を初期化しました。"
 	return
 #defcfunc WebAPI_PostandGet str _url,int _windowid
+	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを発行しました \""+_url+"\""
 	IEobj->"Navigate" _url
+	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを待機中... \""+_url+"\""
 	repeat:wait:if IEobj("Busy")=0 {break}:loop	//待機
+	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを受信しました \""+_url+"\""
 	IEmes=IEobj("Document")
 	IEmes=IEmes("body")
 	IErawdata=IEmes("innerHTML")
 	strrep IErawdata,"<BR>","\n"
 	return IErawdata
 #deffunc WebAPI_Post str _url,int _windowid
+	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを発行しました \""+_url+"\""
 	IEobj->"Navigate" _url
 	return
 #defcfunc WebAPI_Get
+	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを待機中... \""+_url+"\""
 	repeat:wait 10:if IEobj("Busy")=0 {break}:loop	//待機
 	IEmes=IEobj("Document")
 	IEmes=IEmes("body")
 	IErawdata=IEmes("innerHTML")
 	strrep IErawdata,"<BR>","\n"
+	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを受信しました \""+_url+"\""
 	return IErawdata
 
 *WebAPIControl_Back
@@ -428,6 +435,9 @@ goto*Startup
 				dim aqNumTicket
 				sdim aqHistory
 
+				//プレイオプション
+				dim aqPlayOption,9
+
 				//初回登録
 				if instr(saveInfobuf,0,"XODA.RATE")==-1 :saveInfobuf+"XODA.RATE=0.0\n"
 				if instr(saveInfobuf,0,"XODA.LEVEL")==-1 :saveInfobuf+"XODA.LEVEL=0\n"
@@ -440,6 +450,10 @@ goto*Startup
 				if instr(saveInfobuf,0,"XODA.HISTORY")==-1 :saveInfobuf+"XODA.HISTORY=++++\n"
 				if instr(saveInfobuf,0,"XODA.PARTNER.SELECT")==-1 :saveInfobuf+"XODA.PARTNER.SELECT={empty}\n"
 
+				repeat 9
+					if instr(saveInfobuf,0,"XODA.PLAYOPTION."+cnt)==-1 :saveInfobuf+"XODA.PLAYOPTION."+cnt+"="+Item_DefaultOptionValue(cnt)+"\n"
+				loop
+
 				aqName=GetINIvalue(saveInfobuf,"SAVEDATA","USERNAME")						//ユーザー名
 				aqRate=double(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.RATE"))				//レート
 				aqLevel=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.LEVEL"))				//レベル
@@ -449,6 +463,10 @@ goto*Startup
 				aqNumFullcombo=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMFULLCOMBO"))	//フルコンボ数
 				aqNumAllEx=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMALLEX"))			//ALLEX数
 				aqNumTicket=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMTICKET"))			//チケットの数
+
+				repeat 9
+					aqPlayOption(cnt)=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.PLAYOPTION."+cnt))
+				loop
 
 				//パートナー情報
 					sdim pnCurSelect:dim pnCurID
@@ -613,4 +631,77 @@ goto*Startup
 		tmpstr+"&name="+aqName
 		strrep tmpstr," ","%20"
 	DetailRecordBuf=WebAPI_PostandGet(tmpstr)
+	return
+
+*SyncIR
+
+	if OfflineModeFlag==FALSE&IRsyncFlag==FALSE {
+		if IEobj("Busy")==0 {
+			AddDebugConsole STYLE_NORMAL,"HTTPリクエストを取得しました。"
+			sdim IRsavedatabuf,4096
+			notesel IRsavedatabuf
+			IEmes=IEobj("Document")
+			IEmes=IEmes("body")
+			IErawdata=IEmes("innerHTML")
+			strrep IErawdata,"<BR>","\n"
+			IRsavedatabuf=IErawdata
+
+			//エラー判別
+			dim IRerrorFlag
+			switch IRsavedatabuf
+				case"ERROR_ACCESS_SHARED"
+					AddDebugConsole STYLE_WARNING,"Portal WebAPI: 共有セーブデータが見つかりませんでした。"
+					IRerrorFlag=TRUE
+				swbreak
+				case"ERROR_AUTH_APIKEY"
+					AddDebugConsole STYLE_ERROR,"Portal WebAPI: APIキーの認証に失敗しました。"
+					goto*StopError
+				swbreak
+			swend
+
+			if IRerrorFlag==FALSE {
+				repeat notemax
+					noteget NoteLine,cnt
+					if cnt==0 :continue		//セクション行は無視
+
+					split NoteLine,"=",INIkey,INIval
+					split INIkey,".",TargetIRchartID,TargetIRrank
+					strrep TargetIRrank,"RANK#",""
+					split INIval,",",TargetIRname,TargetIRscore
+
+					dim TargetArrLevID:TargetArrLevID=-1
+					dim TargetArrSelID:TargetArrSelID=-1
+					dim CurArrID
+
+					repeat Libarr_Max
+						CurArrID=cnt
+						repeat 3
+							if TargetIRchartID==Libarr_ChartID(cnt,CurArrID) {
+								TargetArrLevID=cnt
+								TargetArrSelID=CurArrID
+							}
+						loop
+					loop
+					if TargetArrSelID==-1|TargetArrLevID==-1 {
+						AddDebugConsole STYLE_WARNING,"[SHARED] 無効なスコアデータです。"
+					} else {
+						TargetIRrank=int(TargetIRrank)-1
+						Libarr_IRrank(TargetArrLevID,TargetArrSelID,TargetIRrank)=int(TargetIRrank)
+						Libarr_IRname(TargetArrLevID,TargetArrSelID,TargetIRrank)=TargetIRname
+						Libarr_IRscore(TargetArrLevID,TargetArrSelID,TargetIRrank)=int(TargetIRscore)
+						AddDebugConsole STYLE_NORMAL,"ランキングスコアを読み込みました。["+TargetArrLevID+","+TargetArrSelID+","+TargetIRrank+"]"
+						if TargetIRname==aqName {
+							Libarr_MyIRrank(TargetArrLevID,TargetArrSelID)=int(TargetIRrank)
+							Libarr_MyIRscore(TargetArrLevID,TargetArrSelID)=int(TargetIRscore)
+						}
+					}
+				loop
+			}
+
+			IRsyncFlag=TRUE
+		} else {
+			IRsyncFrame++
+		}
+	}
+
 	return

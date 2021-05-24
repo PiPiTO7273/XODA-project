@@ -687,7 +687,6 @@
 		repeat 270
 			if SceneCount-60*5==int(double(chartCapturePt*cnt)/(1000.0/60.0)) {
 				chartCaptureVal(cnt)=int(curGaugeVal)
-				AddDebugConsole STYLE_NORMAL,"グラフをキャプチャーしました。[ID="+cnt+","+curGaugeVal+"]"
 			}
 		loop
 

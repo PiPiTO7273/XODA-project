@@ -28,8 +28,16 @@
 		if curScore>=RANK_SCORE_SSS :ScoreRankID=RANK_ID_SSS
 
 	//ランキング
-		WebAPI_Post SERVICE_HTTP+"/API-SendGlobalRanking.php?key="+APIkey_SendGlobalRanking+"&id="+Libarr_ChartID(CursorLevID,CursorSelID)+"&name="+aqName+"&score="+curScore,1
-	
+		sdim tmpstr
+		tmpstr=SERVICE_HTTP+"/API-SendGlobalRanking.php?key="+APIkey_SendGlobalRanking+"&id="+Libarr_ChartID(CursorLevID,CursorSelID)+"&name="+aqName+"&score="+curScore
+		switch WebAPI_PostandGet(tmpstr,1)
+			case"ERROR_UNKNOWN_PRM"
+				AddDebugConsole STYLE_WARNING,"Portal WebAPI: 無効なパラメータが指定されました。"
+			swbreak
+			case"ERROR_AUTH_APIKEY"
+				AddDebugConsole STYLE_WARNING,"Portal WebAPI: APIキーの認証に失敗しました。"
+			swbreak
+		swend
 	//スコア送信
 		//グラフデータの初期化
 			sdim tmpstr:sdim GraphBin,270
@@ -321,18 +329,24 @@
 		decideFrameCount++
 	}
 
-	if decideFrameCount>50+1 {
+	if decideFrameCount==50+1 {
 		//詳細記録読み込み
 			gosub*LoadDetailRecord
-
 		//シーン移行
-			curSceneID=ID_MusicSelect
-			gosub*InitScene
-			//変数初期化
-			dim decideFlag
-			dim decideFrameCount
-			dim transEffFlag
-			transEffFlag=TRUE
 			gosub*Scene_Init_MusicSelect
+	}
+	if decideFrameCount>50+1 {
+		//IR接続
+		gosub*SyncIR
+	}
+	if decideFrameCount>50+1+60*3 {
+		//シーン移行
+		curSceneID=ID_MusicSelect
+		gosub*InitScene
+		//変数初期化
+		dim decideFlag
+		dim decideFrameCount
+		dim transEffFlag
+		transEffFlag=TRUE
 	}
 	return
