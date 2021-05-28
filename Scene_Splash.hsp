@@ -65,17 +65,5 @@
 		PlayMovieToGraph hdximg(iBackground),DX_PLAYTYPE_LOOP
 		BASS_ChannelPlay hbasssnd(bgmMain)
 	}
-	if SceneCount==30+1 :gosub*Scene_Splash_SyncLoad
-
-	return
-
-*Scene_Splash_SyncLoad
-
-	//ƒIƒ“ƒ‰ƒCƒ“Ú‘±
-	netinit
-	gosub*OnlineSignin
-
-	//Ú×‹L˜^“Ç‚İ‚İ
-	gosub*LoadDetailRecord
 
 	return

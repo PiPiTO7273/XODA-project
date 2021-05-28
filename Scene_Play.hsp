@@ -359,23 +359,42 @@
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			hitobjPosition(cnt)+(1000.0/60.0*curBPM/1000.0)
 			hitobjDrawPos(cnt)=200-(hitobjPosition(cnt)*AddSpeed)
-			dim DrawobjPosX:dim DrawobjPosY
+			dim DrawobjPosX:dim DrawobjPosY:dim hitobjSize
+			hitobjSize=int(48.0*(double(aqPlayOption(ID_ObjSize)*10+10)/100.0))
 			DrawobjPosX=hitobjDrawPos(cnt)
-			DrawobjPosY=DispHeight/2-48/2-48+48*hitobjLaneID(cnt)
+			DrawobjPosY=DispHeight/2-hitobjSize/2-hitobjSize+hitobjSize*hitobjLaneID(cnt)
+			
+			//オブジェクト画像準備
+			dim hObjImgArr
+			switch aqPlayOption(ID_ObjSkin)
+				case ID_OBJ_SIMPLE
+					hObjImgArr(HITOBJ_NORMAL)=hdxarr_Char_Simple(hitobjLaneID(cnt))
+					hObjImgArr(HITOBJ_HOLDSTART)=hdxarr_Char_Simple_Hold(3*hitobjLaneID(cnt))
+					hObjImgArr(HITOBJ_HOLDEND)=hdxarr_Char_Simple_Hold(3*hitobjLaneID(cnt)+2)
+					hObjImgArr(HITOBJ_HOLDEND+1)=hdxarr_Char_Simple_Hold(3*hitobjLaneID(cnt)+1)
+				swbreak
+				case ID_OBJ_SLIME
+					hObjImgArr(HITOBJ_NORMAL)=hdxarr_Char_Slime((SceneCount/4)\9+hitobjLaneID(cnt)*9)
+					hObjImgArr(HITOBJ_HOLDSTART)=hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3)
+					hObjImgArr(HITOBJ_HOLDEND)=hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3+2)
+					hObjImgArr(HITOBJ_HOLDEND+1)=hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3+1)
+				swbreak
+			swend
 
+			//オブジェクト描画
 			switch hitobjType(cnt)
 				//通常
 					case HITOBJ_NORMAL
-						DrawGraph DrawobjPosX,DrawobjPosY,hdxarr_Char_Slime((SceneCount/4)\9+hitobjLaneID(cnt)*9),TRUE
+						DrawExtendGraph DrawobjPosX,DrawobjPosY,DrawobjPosX+hitobjSize,DrawobjPosY+hitobjSize,hObjImgArr(HITOBJ_NORMAL),TRUE
 					swbreak
 				//ホールド開始
 					case HITOBJ_HOLDSTART
-						DrawGraph DrawobjPosX,DrawobjPosY,hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3),TRUE
+						DrawExtendGraph DrawobjPosX,DrawobjPosY,DrawobjPosX+hitobjSize,DrawobjPosY+hitobjSize,hObjImgArr(HITOBJ_HOLDSTART),TRUE
 					swbreak
 				//ホールド終了
 					case HITOBJ_HOLDEND
-						DrawGraph DrawobjPosX,DrawobjPosY,hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3+2),TRUE
-						DrawExtendGraph hitobjDrawPos(cnt-1)+48,DrawobjPosY,DrawobjPosX,DrawobjPosY+48,hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3+1),TRUE
+						DrawExtendGraph DrawobjPosX,DrawobjPosY,DrawobjPosX+hitobjSize,DrawobjPosY+hitobjSize,hObjImgArr(HITOBJ_HOLDEND),TRUE
+						DrawExtendGraph hitobjDrawPos(cnt-1)+48,DrawobjPosY,DrawobjPosX,DrawobjPosY+hitobjSize,hObjImgArr(HITOBJ_HOLDEND+1),TRUE
 					swbreak
 			swend
 
@@ -430,7 +449,14 @@
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			setease -64,100,ease_cubic_out
 			EasePosX=getease(SceneCount-25,60)
-			DrawGraph EasePosX,DispHeight/2-64/2,hdximg(iChar_Player),TRUE
+
+			dim hCursorGraph:hCursorGraph=-1
+			switch aqPlayOption(ID_CursorSkin)
+				case ID_CURSOR_SHUTTLE:hCursorGraph=hdximg(iCursor_Shuttle):swbreak
+			swend
+			if hCursorGraph!-1 {
+				DrawGraph EasePosX,DispHeight/2-64/2,hCursorGraph,TRUE
+			}
 		}
 
 	//判定文字
@@ -691,7 +717,7 @@
 		loop
 
 	//カウンタ(ms)
-		PlayCountMS=GetNowCount()-PlayStartMS-1000*5
+		PlayCountMS=GetNowCount()-PlayStartMS-1000*5+JudgeOffsetMS
 		;PlayCountMS=int(double(SceneCount)*1000.0/60.0)-1000*5
 		JudgeResCount++
 		comboBurstCount++

@@ -316,7 +316,7 @@ goto*Startup
 	IEmes=IEobj("Document")
 	IEmes=IEmes("body")
 	IErawdata=IEmes("innerHTML")
-	strrep IErawdata,"<BR>","\n"
+	ConvBR IErawdata
 	return IErawdata
 #deffunc WebAPI_Post str _url,int _windowid
 	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを発行しました \""+_url+"\""
@@ -328,9 +328,15 @@ goto*Startup
 	IEmes=IEobj("Document")
 	IEmes=IEmes("body")
 	IErawdata=IEmes("innerHTML")
-	strrep IErawdata,"<BR>","\n"
+	ConvBR IErawdata
 	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを受信しました \""+_url+"\""
 	return IErawdata
+
+#deffunc ConvBR var _raw
+	strrep _raw,"<BR>","\n"
+	strrep _raw,"<br>","\n"
+	strrep _raw,"</br>","\n"
+	return
 
 *WebAPIControl_Back
 	IEobj->"GoBack"
@@ -377,6 +383,9 @@ goto*Startup
 
 *OnlineSignin
 
+	//各種設定項目の初期化
+	gosub*SetItemTable
+
 	//オンライン認証
 	sdim authUserName
 	sdim authPassword
@@ -402,13 +411,13 @@ goto*Startup
 
 		//HTTP接続
 			sdim saveInfobuf
-			saveInfobuf=WebAPI_PostandGet(SERVICE_HTTP+"/API-GetProfile.php?key="+APIkey_GetProfile+"&decode="+SERVICE_ENCKEY+"&id="+authUserName+"&password="+authPassword,1)
+			saveInfobuf=WebAPI_PostandGet(SERVICE_HTTP+"/API-GetProfile.php?key="+APIkey_GetProfile+"&decode="+SERVICE_ENCKEY+"&id="+authUserName+"&password="+authPassword,sWebAPI)
 			notesel saveInfobuf
 			//エラー判別
 			dim onlineErrorFlag
 			switch saveInfobuf
-				case"ERROR_UNKNOWN_PRM"
-					AddDebugConsole STYLE_ERROR,"Portal WebAPI: 無効なパラメータが指定されました。"
+				case"ERROR_UNKNOWN_ID"
+					AddDebugConsole STYLE_ERROR,"Portal WebAPI: 無効なユーザーIDが指定されました。"
 					onlineErrorFlag=TRUE
 				swbreak
 				case"ERROR_AUTH_PASSWORD"
@@ -472,7 +481,6 @@ goto*Startup
 					sdim pnCurSelect:dim pnCurID
 					pnCurSelect="{empty}"
 					pnCurSelect=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.PARTNER.SELECT")
-					gosub*LoadSkillData
 					repeat pnMax
 						sdim tmpstr
 						tmpstr=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.PARTNER."+pnID(cnt))
@@ -515,20 +523,13 @@ goto*Startup
 	pnCurSelect="{empty}"
 	pnCurID=0
 
-	gosub*LoadSkillData
-
 	return
 
 *OnlineUpdate
 
 	AddDebugConsole STYLE_NORMAL,"オンラインアップデートを実行します。"
-	gsel 0,1
 
 	//開始
-		dim htmpFont
-		htmpFont(0)=CreateFontToHandle("Meiryo UI",20,-1,DX_FONTTYPE_ANTIALIASING_4X4)
-		htmpFont(1)=CreateFontToHandle("Meiryo UI",16,-1,DX_FONTTYPE_ANTIALIASING_4X4)
-
 		dim updateID:dim updateres:dim updatesize:dim updatelength:dim updatesuc
 
 		netinit
@@ -539,33 +540,11 @@ goto*Startup
 		CreateUpdateRequest updateID
 		if stat==-1 :OfflineModeFlag=TRUE
 		repeat
-
 			//オフラインモードの確認
 			if OfflineModeFlag==TRUE :break
-
 				exist updatepath(updateID)
 				updatesize=strsize
-
-				SetDrawScreen DX_SCREEN_BACK
-				ClearDrawScreen
-
-				//画面初期化
-				DrawBox 0,0,DispWidth,DispHeight,GetColor(255,255,255),TRUE
-				DrawBox 0,0,DispWidth,128,GetColor(245,245,245),TRUE
-				DrawLine 0,128,DispWidth,128,GetColor(200,200,200)
-
-				DrawStringToHandle 64,80,"オンラインアップデート",GetColor(25,25,25),htmpFont(0)
-				DrawStringToHandle 1130,85,"Ver "+BuildVersion_Major+"."+BuildVersion_Minor,GetColor(50,50,50),htmpFont(1)
-
-				DrawStringXCenterToHandle 0,240,"アップデートに必要なファイルをダウンロード中です。\nしばらくお待ち下さい...",DispWidth,GetColor(40,40,40),htmpFont(1)
-
-				DrawStringToHandle 265,360,updatepath(updateID),GetColor(50,50,50),htmpFont(1)
-				DrawStringXAlignRightToHandle 265,360,""+(updatesuc+1)+"/"+updatemax+"件のダウンロード",750,GetColor(50,50,50),htmpFont(1)
-				DrawBox 265,400,265+750,400+20,GetColor(150,150,150),FALSE
-				DrawBox 265,400,265+int(750.0*(double(updatesize)/double(updatelength))),400+20,GetColor(184,255,41),TRUE
-				DrawBox 265,400,265+int(750.0*(double(updatesize)/double(updatelength))),400+20,GetColor(150,150,150),FALSE
-
-				ScreenFlip
+				UpdateLauncherLog"アップデート中　["+(updatesuc+1)+"/"+updatemax+"件]　"+updatepath(updateID)+" - "+int(double(updatesize)/double(updatelength)*100.0)+"%"
 
 			netexec updateres
 			if updateres!0 {
@@ -581,9 +560,6 @@ goto*Startup
 			}
 			await
 		loop
-
-		DeleteFontToHandle htmpFont(0)
-		DeleteFontToHandle htmpFont(1)
 	return
 
 *Create_AQProfileBuf
@@ -630,7 +606,7 @@ goto*Startup
 		tmpstr=SERVICE_HTTP+"/API-GetRecord.php?key="+APIkey_GetRecord
 		tmpstr+"&name="+aqName
 		strrep tmpstr," ","%20"
-	DetailRecordBuf=WebAPI_PostandGet(tmpstr)
+	DetailRecordBuf=WebAPI_PostandGet(tmpstr,sWebAPI)
 	return
 
 *SyncIR
@@ -643,7 +619,7 @@ goto*Startup
 			IEmes=IEobj("Document")
 			IEmes=IEmes("body")
 			IErawdata=IEmes("innerHTML")
-			strrep IErawdata,"<BR>","\n"
+			ConvBR IErawdata
 			IRsavedatabuf=IErawdata
 
 			//エラー判別

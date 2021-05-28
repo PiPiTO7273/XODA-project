@@ -4,7 +4,7 @@
 		sdim updatepkg,4096
 		sdim NoteLine
 		notesel updatepkg
-		updatepkg=WebAPI_PostandGet(SERVICE_HTTP+"/API-GetUpdate.php?key="+APIkey_GetUpdate,1)
+		updatepkg=WebAPI_PostandGet(SERVICE_HTTP+"/API-GetUpdate.php?key="+APIkey_GetUpdate,sWebAPI)
 		sdim updatepath
 		sdim updatelink
 		dim updateflag
@@ -122,7 +122,6 @@
 		hdximg(iUI_bg_Score)=LoadGraph("Data/Image/bg_Score.png")
 		hdximg(iUI_bg_Gauge)=LoadGraph("Data/Image/bg_Gauge.png")
 		hdximg(iUI_tx_Combo)=LoadGraph("Data/Image/tx_Combo.png")
-		hdximg(iChar_Player)=LoadGraph("Data/Image/Player.png")
 		hdximg(iMovie_Start)=LoadGraph("Data/Movie/Start.ogv")
 		hdximg(iHitCircle)=LoadGraph("Data/Object/Hit/Circle.png")
 		hdximg(iParticle_Line_256_White)=LoadGraph("Data/Object/Particle/White_256.png")
@@ -212,14 +211,21 @@
 		hdximg(iIcon_Rank_C)=LoadGraph("Data/Image/Result_rank_C.png")
 		hdximg(iIcon_Rank_D)=LoadGraph("Data/Image/Result_rank_D.png")
 
+		hdximg(iCursor_Shuttle)=LoadGraph("Data/Object/Cursor/Char_Shuttle.png")
+
 	//配列画像素材の読み込み
 		dim hdxarr_Button_Yes,2
 		LoadDivGraph"Data/Image/Button_Yes.png",2,1,2,128,40,varptr(hdxarr_Button_Yes)
 		dim hdxarr_Button_No,2
 		LoadDivGraph"Data/Image/Button_No.png",2,1,2,128,40,varptr(hdxarr_Button_No)
 
-		dim hdxarr_Char_Slime,9*3
-		dim hdxarr_Char_Slime_Hold,3*3*3
+		dim hdxarr_Char_Simple,1*3	//1 frame * 3 char
+		dim hdxarr_Char_Simple_Hold,1*3*3	//1 frame * 3 chip * 3 char
+		LoadDivGraph"Data/Object/Hit/Char_Simple.png",1*3,1,3,48,48,varptr(hdxarr_Char_Simple)
+		LoadDivGraph"Data/Object/Hit/Char_Simple_Hold.png",1*3*3,3,3,48,48,varptr(hdxarr_Char_Simple_Hold)
+
+		dim hdxarr_Char_Slime,9*3	//9 frame * 3 char
+		dim hdxarr_Char_Slime_Hold,3*3*3	//3 frame * 3 chip * 3 char
 		LoadDivGraph"Data/Object/Hit/Char_Slime.png",9*3,9,3,48,48,varptr(hdxarr_Char_Slime)
 		LoadDivGraph"Data/Object/Hit/Char_Slime_Hold.png",3*3*3,3,3*3,48,48,varptr(hdxarr_Char_Slime_Hold)
 
@@ -257,143 +263,143 @@
 
 	//設定項目名
 	sdim Item_OptionName,32
-	Item_OptionName(0)="譜面の配置"
-	Item_OptionName(1)="オブジェクトのSPEED値"
-	Item_OptionName(2)="オブジェクトの大きさ"
-	Item_OptionName(3)="ゲージの難易度"
-	Item_OptionName(4)="判定タイミングの調整"
-	Item_OptionName(5)="キーサウンドの音量"
-	Item_OptionName(6)="ゴーストスコアの表示位置"
-	Item_OptionName(7)="カーソルのカスタマイズ"
-	Item_OptionName(8)="オブジェクトのカスタマイズ"
+	Item_OptionName(ID_ObjPlacement)="譜面の配置"
+	Item_OptionName(ID_ObjSpeed)="オブジェクトのSPEED値"
+	Item_OptionName(ID_ObjSize)="オブジェクトの大きさ"
+	Item_OptionName(ID_GaugeLevel)="ゲージの難易度"
+	Item_OptionName(ID_JudgeOffset)="判定タイミングの調整"
+	Item_OptionName(ID_KeySndVolume)="キーサウンドの音量"
+	Item_OptionName(ID_GhostPosition)="ゴーストスコアの表示位置"
+	Item_OptionName(ID_CursorSkin)="カーソルのカスタマイズ"
+	Item_OptionName(ID_ObjSkin)="オブジェクトのカスタマイズ"
 
 	//設定値
 	sdim Item_OptionValue,32,9,101
 		//譜面の配置
-			Item_OptionValue(0,0)="NORMAL"
-			Item_OptionValue(0,1)="MIRROR"
-			Item_OptionValue(0,2)="RANDOM"
-			Item_OptionValue(0,3)="ALL-RANDOM"
+			Item_OptionValue(ID_ObjPlacement,0)="NORMAL"
+			Item_OptionValue(ID_ObjPlacement,1)="MIRROR"
+			Item_OptionValue(ID_ObjPlacement,2)="RANDOM"
+			Item_OptionValue(ID_ObjPlacement,3)="ALL-RANDOM"
 		//オブジェクトのSPEED値
 			//(x0.5～x10.0) / 0.1間隔
 			repeat 96
-				Item_OptionValue(1,cnt)="x"+strf("%.2f",(0.5+double(cnt)*0.1))
+				Item_OptionValue(ID_ObjSpeed,cnt)="x"+strf("%.2f",(0.5+double(cnt)*0.1))
 			loop
 		//オブジェクトの大きさ
 			//10%～200% / 10%間隔
 			repeat 20
-				Item_OptionValue(2,cnt)=strf("%d",10+10*cnt)+"%"
+				Item_OptionValue(ID_ObjSize,cnt)=strf("%d",10+10*cnt)+"%"
 			loop
 		//ゲージの難易度
-			Item_OptionValue(3,0)="ASSIST"
-			Item_OptionValue(3,1)="NORMAL"
-			Item_OptionValue(3,2)="HARD"
-			Item_OptionValue(3,3)="MADNESS"
+			Item_OptionValue(ID_GaugeLevel,0)="ASSIST"
+			Item_OptionValue(ID_GaugeLevel,1)="NORMAL"
+			Item_OptionValue(ID_GaugeLevel,2)="HARD"
+			Item_OptionValue(ID_GaugeLevel,3)="MADNESS"
 		//判定タイミングの調整
 			repeat 101
-				Item_OptionValue(4,cnt)=str(-50+cnt)
+				Item_OptionValue(ID_JudgeOffset,cnt)=str(-50+cnt)
 			loop
 		//キーサウンドの音量
 			repeat 11
-				Item_OptionValue(5,cnt)=str(10*cnt)+"%"
+				Item_OptionValue(ID_KeySndVolume,cnt)=str(10*cnt)+"%"
 			loop
 		//ゴーストスコアの表示位置
-			Item_OptionValue(6,0)="表示しない"
-			Item_OptionValue(6,1)="TYPE A"
-			Item_OptionValue(6,2)="TYPE B"
-			Item_OptionValue(6,3)="TYPE C"
+			Item_OptionValue(ID_GhostPosition,0)="表示しない"
+			Item_OptionValue(ID_GhostPosition,1)="TYPE A"
+			Item_OptionValue(ID_GhostPosition,2)="TYPE B"
+			Item_OptionValue(ID_GhostPosition,3)="TYPE C"
 		//カーソルのカスタマイズ
-			Item_OptionValue(7,0)="表示しない"
-			Item_OptionValue(7,1)="シャトル"
-			Item_OptionValue(7,2)="--未実装--"
-			Item_OptionValue(7,3)="--未実装--"
-			Item_OptionValue(7,4)="--未実装--"
+			Item_OptionValue(ID_CursorSkin,0)="表示しない"
+			Item_OptionValue(ID_CursorSkin,1)="シャトル"
+			Item_OptionValue(ID_CursorSkin,2)="--未実装--"
+			Item_OptionValue(ID_CursorSkin,3)="--未実装--"
+			Item_OptionValue(ID_CursorSkin,4)="--未実装--"
 		//オブジェクトのカスタマイズ
-			Item_OptionValue(8,0)="通常"
-			Item_OptionValue(8,1)="スライム"
-			Item_OptionValue(8,2)="--未実装--"
-			Item_OptionValue(8,3)="--未実装--"
-			Item_OptionValue(8,4)="--未実装--"
+			Item_OptionValue(ID_ObjSkin,0)="通常"
+			Item_OptionValue(ID_ObjSkin,1)="スライム"
+			Item_OptionValue(ID_ObjSkin,2)="--未実装--"
+			Item_OptionValue(ID_ObjSkin,3)="--未実装--"
+			Item_OptionValue(ID_ObjSkin,4)="--未実装--"
 
 	//設定項目の説明文
 	sdim Item_OptionDescription,64,9,101
 		//譜面の配置
-			Item_OptionDescription(0,0)="譜面の配置を変更しません。"
-			Item_OptionDescription(0,1)="譜面の配置を上下反転します。"
-			Item_OptionDescription(0,2)="レーンをランダムに入れ替えます。"
-			Item_OptionDescription(0,3)="ノーツ単位でレーンをランダムに入れ替えます。"
+			Item_OptionDescription(ID_ObjPlacement,0)="譜面の配置を変更しません。"
+			Item_OptionDescription(ID_ObjPlacement,1)="譜面の配置を上下反転します。"
+			Item_OptionDescription(ID_ObjPlacement,2)="レーンをランダムに入れ替えます。"
+			Item_OptionDescription(ID_ObjPlacement,3)="ノーツ単位でレーンをランダムに入れ替えます。"
 		//オブジェクトのSPEED値
 			//(x0.5～x10.0) / 0.1間隔
 			repeat 96
-				Item_OptionDescription(1,cnt)="通常のx"+strf("%.2f",(0.5+double(cnt)*0.1))+"倍の速さでオブジェクトが移動します。"
+				Item_OptionDescription(ID_ObjSpeed,cnt)="通常のx"+strf("%.2f",(0.5+double(cnt)*0.1))+"倍の速さでオブジェクトが移動します。"
 			loop
 		//オブジェクトの大きさ
 			//10%～200% / 10%間隔
 			repeat 20
-				Item_OptionDescription(2,cnt)="オブジェクトの大きさを"+strf("%d",10+10*cnt)+"%に変更します。"
+				Item_OptionDescription(ID_ObjSize,cnt)="オブジェクトの大きさを"+strf("%d",10+10*cnt)+"%に変更します。"
 			loop
 		//ゲージの難易度
-			Item_OptionDescription(3,0)="ゲージが減りにくくなり、増えやすくなります。"
-			Item_OptionDescription(3,1)="通常のゲージです。"
-			Item_OptionDescription(3,2)="ゲージが減りやすくなり、ゲージがなくなるとプレイが終了します。"
-			Item_OptionDescription(3,3)="ゲージがとても減りやすくなり、ゲージがなくなるとプレイが終了します。"
+			Item_OptionDescription(ID_GaugeLevel,0)="ゲージが減りにくくなり、増えやすくなります。"
+			Item_OptionDescription(ID_GaugeLevel,1)="通常のゲージです。"
+			Item_OptionDescription(ID_GaugeLevel,2)="ゲージが減りやすくなり、ゲージがなくなるとプレイが終了します。"
+			Item_OptionDescription(ID_GaugeLevel,3)="ゲージがとても減りやすくなり、ゲージがなくなるとプレイが終了します。"
 		//判定タイミングの調整
 			repeat 101
 				if cnt<50 {
-					Item_OptionDescription(4,cnt)="判定を"+str(abs(-50+cnt))+"フレーム早くします。"
+					Item_OptionDescription(ID_JudgeOffset,cnt)="判定を"+str(abs(-50+cnt))+"フレーム早くします。"
 				}
 				if cnt==50 {
-					Item_OptionDescription(4,cnt)="通常の判定タイミングです。"
+					Item_OptionDescription(ID_JudgeOffset,cnt)="通常の判定タイミングです。"
 				}
 				if cnt>50 {
-					Item_OptionDescription(4,cnt)="判定を"+str(abs(-50+cnt))+"フレーム遅くします。"
+					Item_OptionDescription(ID_JudgeOffset,cnt)="判定を"+str(abs(-50+cnt))+"フレーム遅くします。"
 				}
 			loop
 		//キーサウンドの音量
 			repeat 11
-				Item_OptionDescription(5,cnt)="キーサウンドの音量を"+(10*cnt)+"%にします。"
+				Item_OptionDescription(ID_KeySndVolume,cnt)="キーサウンドの音量を"+(10*cnt)+"%にします。"
 			loop
 		//ゴーストスコアの表示位置
-			Item_OptionDescription(6,0)="ゴーストスコアを表示しません。"
-			Item_OptionDescription(6,1)="ゴーストスコアをTYPE Aの位置に表示します。"
-			Item_OptionDescription(6,2)="ゴーストスコアをTYPE Bの位置に表示します。"
-			Item_OptionDescription(6,3)="ゴーストスコアをTYPE Cの位置に表示します。"
+			Item_OptionDescription(ID_GhostPosition,0)="ゴーストスコアを表示しません。"
+			Item_OptionDescription(ID_GhostPosition,1)="ゴーストスコアをTYPE Aの位置に表示します。"
+			Item_OptionDescription(ID_GhostPosition,2)="ゴーストスコアをTYPE Bの位置に表示します。"
+			Item_OptionDescription(ID_GhostPosition,3)="ゴーストスコアをTYPE Cの位置に表示します。"
 		//カーソルのカスタマイズ
-			Item_OptionDescription(7,0)="カーソルを表示しません。"
-			Item_OptionDescription(7,1)="カーソルをシャトルに変更します。"
-			Item_OptionDescription(7,2)="--未実装--"
-			Item_OptionDescription(7,3)="--未実装--"
-			Item_OptionDescription(7,4)="--未実装--"
+			Item_OptionDescription(ID_CursorSkin,0)="カーソルを表示しません。"
+			Item_OptionDescription(ID_CursorSkin,1)="カーソルをシャトルに変更します。"
+			Item_OptionDescription(ID_CursorSkin,2)="--未実装--"
+			Item_OptionDescription(ID_CursorSkin,3)="--未実装--"
+			Item_OptionDescription(ID_CursorSkin,4)="--未実装--"
 		//オブジェクトのカスタマイズ
-			Item_OptionDescription(8,0)="通常のオブジェクトを表示します。"
-			Item_OptionDescription(8,1)="オブジェクトをスライムに変更します。"
-			Item_OptionDescription(8,2)="--未実装--"
-			Item_OptionDescription(8,3)="--未実装--"
-			Item_OptionDescription(8,4)="--未実装--"
+			Item_OptionDescription(ID_ObjSkin,0)="通常のオブジェクトを表示します。"
+			Item_OptionDescription(ID_ObjSkin,1)="オブジェクトをスライムに変更します。"
+			Item_OptionDescription(ID_ObjSkin,2)="--未実装--"
+			Item_OptionDescription(ID_ObjSkin,3)="--未実装--"
+			Item_OptionDescription(ID_ObjSkin,4)="--未実装--"
 
 	//設定値の数
 		dim Item_NumOptionValue
-		Item_NumOptionValue(0)=4
-		Item_NumOptionValue(1)=96
-		Item_NumOptionValue(2)=20
-		Item_NumOptionValue(3)=4
-		Item_NumOptionValue(4)=101
-		Item_NumOptionValue(5)=10
-		Item_NumOptionValue(6)=4
-		Item_NumOptionValue(7)=5
-		Item_NumOptionValue(8)=5
+		Item_NumOptionValue(ID_ObjPlacement)=4
+		Item_NumOptionValue(ID_ObjSpeed)=96
+		Item_NumOptionValue(ID_ObjSize)=20
+		Item_NumOptionValue(ID_GaugeLevel)=4
+		Item_NumOptionValue(ID_JudgeOffset)=101
+		Item_NumOptionValue(ID_KeySndVolume)=11
+		Item_NumOptionValue(ID_GhostPosition)=4
+		Item_NumOptionValue(ID_CursorSkin)=5
+		Item_NumOptionValue(ID_ObjSkin)=5
 
 	//デフォルト設定値
 		dim Item_DefaultOptionValue
-		Item_DefaultOptionValue(0)=0
-		Item_DefaultOptionValue(1)=5
-		Item_DefaultOptionValue(2)=9
-		Item_DefaultOptionValue(3)=1
-		Item_DefaultOptionValue(4)=50
-		Item_DefaultOptionValue(5)=9
-		Item_DefaultOptionValue(6)=0
-		Item_DefaultOptionValue(7)=1
-		Item_DefaultOptionValue(8)=1
+		Item_DefaultOptionValue(ID_ObjPlacement)=0
+		Item_DefaultOptionValue(ID_ObjSpeed)=5
+		Item_DefaultOptionValue(ID_ObjSize)=9
+		Item_DefaultOptionValue(ID_GaugeLevel)=1
+		Item_DefaultOptionValue(ID_JudgeOffset)=50
+		Item_DefaultOptionValue(ID_KeySndVolume)=10
+		Item_DefaultOptionValue(ID_GhostPosition)=0
+		Item_DefaultOptionValue(ID_CursorSkin)=1
+		Item_DefaultOptionValue(ID_ObjSkin)=1
 
 	return
 

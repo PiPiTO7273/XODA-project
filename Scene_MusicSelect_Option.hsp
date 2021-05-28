@@ -33,7 +33,7 @@
 			if ItemCursorPos>8 :ItemCursorPos=0
 		}
 
-		if CheckHitKey(KEY_INPUT_RETURN)==TRUE|CheckHitKey(KEY_INPUT_D)==TRUE {
+		if (CheckHitKey(KEY_INPUT_RETURN)==TRUE|CheckHitKey(KEY_INPUT_D)==TRUE)&decideFlag==FALSE {
 			decideFlag=TRUE
 			decideFrameCount=0
 		}

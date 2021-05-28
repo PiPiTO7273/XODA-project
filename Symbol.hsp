@@ -83,7 +83,6 @@
 #enum iUI_bg_Profile
 #enum iUI_bg_Score
 #enum iUI_bg_Gauge
-#enum iChar_Player
 #enum iUI_tx_SongInfo
 #enum iUI_tx_Profile
 #enum iUI_tx_Score
@@ -183,6 +182,8 @@
 #enum iIcon_Rank_B
 #enum iIcon_Rank_C
 #enum iIcon_Rank_D
+
+#enum iCursor_Shuttle
 
 #enum iMax
 
@@ -285,3 +286,42 @@
 #enum ID_Clear
 #enum ID_Fullcombo
 #enum ID_Allex
+
+//プレイオプション
+#enum ID_ObjPlacement	= 	0
+#enum ID_ObjSpeed
+#enum ID_ObjSize
+#enum ID_GaugeLevel
+#enum ID_JudgeOffset
+#enum ID_KeySndVolume
+#enum ID_GhostPosition
+#enum ID_CursorSkin
+#enum ID_ObjSkin
+
+//カスタマイズパーツ
+#enum ID_CURSOR_DISABLE		=	0
+#enum ID_CURSOR_SHUTTLE
+#enum ID_CURSOR_UNKNOWN1
+#enum ID_CURSOR_UNKNOWN2
+#enum ID_CURSOR_UNKNOWN3
+
+#enum ID_OBJ_SIMPLE			=	0
+#enum ID_OBJ_SLIME
+#enum ID_OBJ_UNKNOWN1
+#enum ID_OBJ_UNKNOWN2
+#enum ID_OBJ_UNKNOWN3
+
+//ランチャー
+#enum sMain			=	0
+#enum sWebAPI
+#enum sLauncher
+#enum sSigninForm
+#enum sButton_Launcher
+
+#enum aLauncher		=	0
+#enum aButton_Boot
+#enum aButton_OpenConfig
+#enum aButton_Signout
+#enum aButton_Close
+#enum aLauncher_Log_bg
+#enum aLauncher_Log

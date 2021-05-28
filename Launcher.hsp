@@ -1,0 +1,155 @@
+
+#deffunc UpdateLauncherLog str _string
+	alSelectImage aLauncher_Log
+	alErase
+	alCopyModeAlpha 1.0
+	alCopyImageToImage aLauncher_Log_bg,aLauncher_Log
+	alColor 230,230,230:alFont"Noto Sans CJK JP Regular",16
+	alDrawText _string,0,0,700,41,1,1
+
+	alCopyImageToScreen aLauncher,sLauncher
+	if _string!"" :alCopyImageToScreen aLauncher_Log,sLauncher,150,380
+	redraw 1
+
+	return
+
+*Launcher_Ready
+	bgscr sLauncher,1000,600,2,ginfo(20)/2-1000/2,ginfo(21)/2-600/2-40
+	title"XODA Launcher"
+
+	if authUserName=="" {
+		gsel sLauncher,-1
+		screen sSigninForm,1000,600
+		title"XODA Launcher | Portalにサインイン"
+		axobj IEobj,"Shell.Explorer.2",ginfo(12),ginfo(13)
+		IEobj->"Navigate" SERVICE_HTTP+"/signin.php"
+		comevent IEevent,IEobj,"{34A715A0-6587-11D0-924A-0020AFC7AC4D}",*LauncherAuth_OnEvent
+		repeat
+			if authUserName!""&authPassword!"" {
+				sdim tmpstr
+				tmpstr="[ONLINEAUTH]\nID="+authUserName+"\nKEY="+authPassword
+				notesel tmpstr
+				notesave"Data/core_OnlineAuth.dat"
+				break
+			}
+			wait 100
+		loop
+
+		gsel sSigninForm,-1
+	}
+	gsel sLauncher,1
+
+	alCreateImageByFile aButton_Boot,"Data/Image/Button_Boot.png"
+	alCreateImageByFile aButton_OpenConfig,"Data/Image/Button_OpenConfig.png"
+	alCreateImageByFile aButton_Signout,"Data/Image/Button_Signout.png"
+	alCreateImageByFile aButton_Close,"Data/Image/Button_Close.png"
+	alCreateImageByFile aLauncher_Log_bg,"Data/Image/bg_Launcher_Log.png"
+
+	alCreateImage aLauncher,1000,600
+		alCopyModeAlpha 1.0
+		//背景
+		alLoadFile"Data/Image/bg_Launcher.png",0,0
+
+		//著作権表示・ビルド表示
+		alFont"Pier Sans",16:alColor 230,230,230
+		alDrawText"(c) 2019-"+gettime(0)+" PiPiTO Software. All rights reserved.",0,213,460,32,2,0
+		alFont"Pier Sans",14:alColor 200,200,200
+		alDrawText"Ver "+BuildVersion_Major+"."+BuildVersion_Minor+" / Official Build",0,244,460,32,2,0
+
+		//アカウント表示
+		alFont"Noto Sans CJK JP Medium",18:alColor 230,230,230
+		alDrawText str(authUserName),400,306,1000,32,0,0
+
+		//お知らせ
+		alFont"Noto Sans CJK JP Medium",18:alColor 230,230,230
+		alDrawText"- なし",570,173,1000,600,0,0
+
+		//仮のボタン
+		alCopyModeAlpha 0.2
+		alCopyImageToImage aButton_Boot,aLauncher,510,470
+		alCopyImageToImage aButton_OpenConfig,aLauncher,234,470
+		alCopyImageToImage aButton_Signout,aLauncher,605,300
+
+		alCopyModeAlpha 1.0
+	alCopyImageToScreen aLauncher,sLauncher
+	redraw 1
+
+	buffer sButton_Launcher,256*3,64*2+40+18
+		repeat 3
+			pos 256*cnt,0:gcopy sLauncher,234,470,256,64
+			pos 256*cnt,64:gcopy sLauncher,510,470,256,64
+			pos 150*cnt,128:gcopy sLauncher,605,300,150,40
+			pos 18*cnt,168:gcopy sLauncher,952,12,18,18
+			alCopyModeAlpha 1.0-0.2*double(cnt)
+			alCopyImageToScreen aButton_OpenConfig,sButton_Launcher,256*cnt,0,256,64
+			alCopyImageToScreen aButton_Boot,sButton_Launcher,256*cnt,64,256,64
+			alCopyImageToScreen aButton_Signout,sButton_Launcher,150*cnt,128,150,40
+			alCopyImageToScreen aButton_Close,sButton_Launcher,18*cnt,168,18,18
+		loop
+	gsel sLauncher
+
+	alCreateImage aLauncher_Log,700,41
+
+	objsize 18,18
+	objimage sButton_Launcher,18*0,168,18*2,168,18*1,168
+	pos 952,12:button goto"",*Launcher_Close
+
+	onclick gosub*Launcher_ClickCheck
+
+	//オンラインアップデート
+	UpdateLauncherLog"オンラインアップデートの確認中"
+	dim OfflineModeFlag
+	WebAPI_Init sWebAPI
+	netinit
+	gosub*CheckOnlineUpdate
+
+	gosub*OnlineSignin
+	if onlineErrorFlag==TRUE {
+		UpdateLauncherLog"サインインに失敗しました。オフラインモード、ゲストモードで開始します。"
+		OfflineModeFlag=TRUE
+	}
+	gosub*LoadDetailRecord
+
+	UpdateLauncherLog""
+
+	objsize 256,64
+	objimage sButton_Launcher,256*0,0,256*2,0,256*1,0
+	pos 234,470:button goto"",*Launcher_OpenConfig
+	objimage sButton_Launcher,256*0,64,256*2,64,256*1,64
+	pos 510,470:button goto"",*Launcher_GameStart
+	objsize 150,40
+	objimage sButton_Launcher,150*0,128,150*2,128,150*1,128
+	pos 605,300:button goto"",*Launcher_Signout
+
+	stop
+
+*LauncherAuth_OnEvent
+	if comevdisp(IEevent)==259 {
+		comevarg WebAPIControl_InputURL,IEevent,1
+		//オブジェクト反映
+			if instr(WebAPIControl_InputURL,0,"transfer.php")!-1 {
+				sdim tmpstr:sdim urlpart
+				split WebAPIControl_InputURL,"transfer.php?",tmpstr
+				split tmpstr(1),"&",authUserName,authPassword
+				strrep authUserName,"id=",""
+				strrep authPassword,"pass=",""
+			}
+	}
+	return
+
+*Launcher_ClickCheck
+	if mousey<40 :sendmsg hwnd,$00A1,2,0
+	return
+
+*Launcher_OpenConfig
+	end
+
+*Launcher_Signout
+	exist"Data/core_OnlineAuth.dat"
+	if strsize!-1 :delete"Data/core_OnlineAuth.dat"
+	authUserName=""
+	authPassword=""
+	goto*Launcher_Ready
+
+*Launcher_Close
+	end

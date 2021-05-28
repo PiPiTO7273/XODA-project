@@ -42,6 +42,7 @@
 #include"Function_MusicSelect.hsp"		//楽曲選択画面の命令・関数
 #include"Function_Play.hsp"			//ゲームプレイ画面の命令・関数
 #include"LoadResources.hsp"			//リソース処理関連のサブルーチン
+#include"Launcher.hsp"				//ランチャー
 #include"Scene_Splash.hsp"			//スプラッシュ（起動時の待機画面）
 #include"Scene_Signin.hsp"			//サインイン
 #include"Scene_ModeSelect.hsp"		//モード選択
@@ -53,8 +54,8 @@
 //----- 起動開始 -----
 *Startup
 
+	gsel sMain,-1
 	#if DebugConsoleWindow
-		gsel 0,-1
 		exist"Main.ax"
 		if strsize!-1 {
 			delete"Main.ax"
@@ -82,7 +83,24 @@
 	AddDebugConsole STYLE_STATUS,"BUILD.VERSION = "+BuildVersion_Major+"."+BuildVersion_Minor
 	AddDebugConsole STYLE_STATUS,"SERVICE.HOST = "+RepHiddenWords(str(SERVICE_HTTP),"*")
 	AddDebugConsole STYLE_STATUS,"SERVICE.KEY = "+RepHiddenWords(str(SERVICE_ENCKEY),"*")
+
+	sdim authUserName
+	sdim authPassword
+	exist"Data/core_OnlineAuth.dat"
+	if strsize!-1 {
+		sdim authInfobuf,strsize
+		notesel authInfobuf
+		noteload"Data/core_OnlineAuth.dat"
+		authUserName=GetINIvalue(authInfobuf,"ONLINEAUTH","ID")
+		authPassword=GetINIvalue(authInfobuf,"ONLINEAUTH","KEY")
+	}
 	AddDebugConsole STYLE_NORMAL,"起動設定の読み込み完了"
+
+	goto*Launcher_Ready
+
+*Launcher_GameStart
+
+	gsel sLauncher,-1
 
 	//DXライブラリ初期化
 	AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化開始"
@@ -120,17 +138,11 @@
 		AddDebugConsole STYLE_NORMAL,"BASS Audio Libraryの初期化完了"
 	}
 
-	//オンラインアップデート
-	dim OfflineModeFlag
-	WebAPI_Init 1
-	netinit
-	gosub*CheckOnlineUpdate
-
 	//各種読み込み処理
 	gosub*LoadSoundEffects
 	gosub*LoadFontData
 	gosub*LoadImages
-	gosub*SetItemTable
+	gosub*LoadSkillData
 
 	//シーンID
 	dim curSceneID

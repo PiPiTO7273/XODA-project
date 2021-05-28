@@ -140,7 +140,7 @@
 		dim JumpSceneFlag			//他シーンへのジャンプフラグ
 		dim JumpSceneCount			//他シーンへのジャンプを行うカウンタ
 
-	WebAPI_Post SERVICE_HTTP+"/API-GetGlobalRanking.php?key="+APIkey_GetGlobalRanking,1
+	WebAPI_Post SERVICE_HTTP+"/API-GetGlobalRanking.php?key="+APIkey_GetGlobalRanking,sWebAPI
 	gosub*Create_AQProfileBuf
 
 	//詳細記録を解析
@@ -305,7 +305,7 @@
 			loop
 
 		//オプション
-			if CheckHitKey(KEY_INPUT_D)==TRUE {
+			if CheckHitKey(KEY_INPUT_D)==TRUE&JumpSceneFlag==FALSE {
 				JumpSceneCount=0
 				JumpSceneFlag=TRUE
 				PlaySE hbasssnd(sndUI_Decide)

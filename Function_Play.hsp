@@ -330,12 +330,40 @@
 	//ゲージ関係
 	ddim tmpGaugeTotal,1:ddim gaugeAmount,6
 	tmpGaugeTotal=7.605*double(hitobjMax)/(0.01*double(hitobjMax)+6.5)
-	gaugeAmount(JUDGE_RES_EMPTY)=0.0
-	gaugeAmount(JUDGE_RES_EXCELLENT)=tmpGaugeTotal/double(hitobjMax)
-	gaugeAmount(JUDGE_RES_GREAT)=gaugeAmount(JUDGE_RES_EXCELLENT)*0.5
-	gaugeAmount(JUDGE_RES_NICE)=0.0
-	gaugeAmount(JUDGE_RES_BAD)=-1.0
-	gaugeAmount(JUDGE_RES_MISS)=-2.0
+	switch aqPlayOption(ID_GaugeLevel)
+		case GAUGE_ASSIST
+			gaugeAmount(JUDGE_RES_EMPTY)=0.0
+			gaugeAmount(JUDGE_RES_EXCELLENT)=tmpGaugeTotal/double(hitobjMax)*1.5
+			gaugeAmount(JUDGE_RES_GREAT)=gaugeAmount(JUDGE_RES_EXCELLENT)*0.5
+			gaugeAmount(JUDGE_RES_NICE)=gaugeAmount(JUDGE_RES_EXCELLENT)*0.1
+			gaugeAmount(JUDGE_RES_BAD)=-1.0
+			gaugeAmount(JUDGE_RES_MISS)=-1.5
+		swbreak
+		case GAUGE_NORMAL
+			gaugeAmount(JUDGE_RES_EMPTY)=0.0
+			gaugeAmount(JUDGE_RES_EXCELLENT)=tmpGaugeTotal/double(hitobjMax)
+			gaugeAmount(JUDGE_RES_GREAT)=gaugeAmount(JUDGE_RES_EXCELLENT)*0.5
+			gaugeAmount(JUDGE_RES_NICE)=0.0
+			gaugeAmount(JUDGE_RES_BAD)=-1.5
+			gaugeAmount(JUDGE_RES_MISS)=-3.0
+		swbreak
+		case GAUGE_HARD
+			gaugeAmount(JUDGE_RES_EMPTY)=0.0
+			gaugeAmount(JUDGE_RES_EXCELLENT)=tmpGaugeTotal/double(hitobjMax)
+			gaugeAmount(JUDGE_RES_GREAT)=gaugeAmount(JUDGE_RES_EXCELLENT)*0.5
+			gaugeAmount(JUDGE_RES_NICE)=0.0
+			gaugeAmount(JUDGE_RES_BAD)=-2.5
+			gaugeAmount(JUDGE_RES_MISS)=-5.0
+		swbreak
+		case GAUGE_MADNESS
+			gaugeAmount(JUDGE_RES_EMPTY)=0.0
+			gaugeAmount(JUDGE_RES_EXCELLENT)=tmpGaugeTotal/double(hitobjMax)
+			gaugeAmount(JUDGE_RES_GREAT)=gaugeAmount(JUDGE_RES_EXCELLENT)*0.5
+			gaugeAmount(JUDGE_RES_NICE)=0.0
+			gaugeAmount(JUDGE_RES_BAD)=-5.0
+			gaugeAmount(JUDGE_RES_MISS)=-10.0
+		swbreak
+	swend
 
 	//BPM情報解析
 	dim ProgObjID
@@ -445,7 +473,8 @@
 
 	//ユーザー指定スピード値
 	ddim AddSpeed,1
-	AddSpeed=5.0
+	AddSpeed=0.5+double(aqPlayOption(ID_ObjSpeed))*0.1
+	AddSpeed=AddSpeed*2.0	//補正
 
 	//判定するフラグ
 	dim JudgeFlag,3
@@ -495,6 +524,19 @@
 	dim stgClearEffFlag
 	dim stgClearEffCount
 	stgClearEffFlag=FALSE
+
+	//オフセット秒数(ms)
+	dim JudgeOffsetMS
+	JudgeOffsetMS=int(double(-50+aqPlayOption(ID_JudgeOffset))*(1000.0/60.0))
+
+	//オフセット適用
+	repeat hitobjmax
+		hitobjTiming(cnt)-JudgeOffsetMS
+	loop
+
+	//キーサウンド音量
+	BASS_ChannelSetAttribute hbasssnd(sndHitobj),BASS_ATTRIB_VOL,tofloat(double(aqPlayOption(ID_KeySndVolume))/10.0)
+	BASS_ChannelSetAttribute hbasssnd(sndHitempty),BASS_ATTRIB_VOL,tofloat(double(aqPlayOption(ID_KeySndVolume))/10.0)
 
 	AddDebugConsole STYLE_NORMAL,"プレイ画面の初期化完了"
 	return
