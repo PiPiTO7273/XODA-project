@@ -61,8 +61,14 @@
 		alDrawText str(authUserName),400,306,1000,32,0,0
 
 		//お知らせ
-		alFont"Noto Sans CJK JP Medium",18:alColor 230,230,230
-		alDrawText"- なし",570,173,1000,600,0,0
+		alFont"Noto Sans CJK JP Regular",16:alColor 230,230,230
+		exist"Data/core_Info.dat"
+		if strsize!-1 {
+			sdim tmpstr:notesel tmpstr:noteload"Data/core_Info.dat"
+			alDrawText tmpstr,570,170,1000,600,0,0
+		} else {
+			alDrawText"- オンラインアップデートが行われました。\nお知らせは再起動後に閲覧できます。",570,170,1000,600,0,0
+		}
 
 		//仮のボタン
 		alCopyModeAlpha 0.2

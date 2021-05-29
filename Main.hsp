@@ -96,28 +96,16 @@
 	}
 	AddDebugConsole STYLE_NORMAL,"起動設定の読み込み完了"
 
-	goto*Launcher_Ready
-
-*Launcher_GameStart
-
-	gsel sLauncher,-1
-
-	//DXライブラリ初期化
-	AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化開始"
-	SetOutApplicationLogValidFlag 0
-	screen 0,DispWidth,DispHeight,0,ginfo(20)/2-DispWidth/2,ginfo(21)/2-DispHeight/2
-
-	//初期画面
-		color:boxf
-		pos 0,0:picload"Data/Image/bg_Boot.png",1
-
 	//DXライブラリ初期設定
-		SetUserWindow hwnd
-		SetMainWindowText"XODA v"+BuildVersion_Major+"."+BuildVersion_Minor
+		AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化開始"
+		SetOutApplicationLogValidFlag 0
 		ChangeWindowMode TRUE
 		SetGraphMode DispWidth,DispHeight,32
 		SetAlwaysRunFlag TRUE
 		SetWaitVSyncFlag TRUE
+		screen 0,DispWidth,DispHeight,2,ginfo(20)/2-DispWidth/2,ginfo(21)/2-DispHeight/2
+		SetUserWindow hwnd
+		SetMainWindowText"XODA v"+BuildVersion_Major+"."+BuildVersion_Minor
 		dxlib_Init
 		if stat==-1 {
 			AddDebugConsole STYLE_ERROR,"DXライブラリの初期化に失敗しました。"
@@ -125,10 +113,20 @@
 		} else {
 			AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化完了"
 		}
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-		LoadGraphScreen 0,0,"Data/Image/bg_Boot.png",TRUE
-		wait 10
-	onexit*Exit
+
+		onexit*Exit
+
+	goto*Launcher_Ready
+
+*Launcher_GameStart
+
+	gsel sLauncher
+	UpdateLauncherLog"起動中・・・"
+	clrobj
+
+	//DXライブラリ初期化
+	InitFontToHandle
+	InitGraph
 
 	//BASS初期化
 	BASS_Init -1,44100,0,hwnd,0
@@ -155,14 +153,15 @@
 	dim SecViewFlag
 	//デバッグメニューのログのスクロール値
 	dim DebugLogScr
+	//リセットを行うフラグ
+	dim onResetFlag
 
 	//////debug
 	//読み込む譜面ファイル名
-	gsel 0
-	color 255,255,255:boxf
 	gosub*InitScene
 
-	gsel 0,1
+	gsel sLauncher,-1
+	gsel sMain,1
 
 *MainLoop
 
@@ -236,6 +235,11 @@
 
 	await
 
+	if onResetFlag==TRUE {
+		gosub*ExitProg
+		goto*Launcher_Ready
+	}
+
 	goto*MainLoop
 
 *StopError
@@ -247,7 +251,7 @@
 	stop
 
 *ExitProg
-	dxlib_End
+	gsel sMain,-1
 	BASS_Free
 	AddDebugConsole STYLE_NORMAL,"全ての処理を正常に終了しました。"
 	AddDebugConsole STYLE_STATUS,"終了待機中"
@@ -258,4 +262,5 @@
 
 *Exit
 	gosub*ExitProg
+	dxlib_End
 	end

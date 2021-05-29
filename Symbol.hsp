@@ -5,7 +5,7 @@
 #define CodeName			"MOCHI SLIME"
 #define BuildVersion_Major	0
 #define BuildVersion_Minor	2
-#define SplashTime			1
+#define SplashTime			3
 #define DebugConsoleWindow	0
 #define HTTPhostWindow		0
 

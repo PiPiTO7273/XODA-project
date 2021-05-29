@@ -31,11 +31,14 @@
 
 		if CheckHitKey(KEY_INPUT_RETURN)==TRUE :decideFlag=TRUE
 		if decideFlag==TRUE&decideFrameCount==0 {
-			if curButtonPos==1 :goto*Exit
-			//‰‰ñˆ—
-			PlaySE hbasssnd(sndUI_Decide)
-			gosub*Scene_Init_ModeSelect
-			SetDrawScreen DX_SCREEN_BACK
+			if curButtonPos==1 {
+				onResetFlag=TRUE
+			} else {
+				//‰‰ñˆ—
+				PlaySE hbasssnd(sndUI_Decide)
+				gosub*Scene_Init_ModeSelect
+				SetDrawScreen DX_SCREEN_BACK
+			}
 		}
 
 	//”wŒi
