@@ -126,8 +126,6 @@
 		dim CursorSelID			//項目ID
 		dim CursorLevID			//難易度ID
 		dim CursorSelCount			//カーソル待機カウンタ
-		dim KeyFlag,4				//キーフラグ
-		dim bfKeyFlag,4			//前フレームのキーフラグ
 		dim KeyPushCount,2			//キー押下時間
 		dim CursorOffsetEase		//カーソル移動のオフセット値
 		dim DrawColumnID			//描画する項目ID
@@ -153,7 +151,9 @@
 		dim Libarr_Rec_NumEarly,3,Libarr_Max		//Early判定数
 		dim Libarr_Rec_NumLate,3,Libarr_Max		//Late判定数
 		dim Libarr_Rec_MaxCombo,3,Libarr_Max		//最大コンボ数
+		sdim Libarr_Rec_ClearType,16,3,Libarr_Max	//クリアの種類
 		dim Libarr_Rec_Graph,3,Libarr_Max,270		//グラフキャプチャー値
+		dim Libarr_Rec_ScoreRank,3,Libarr_Max		//スコアのランク
 
 		sdim INIsection
 		dim TargetArrLevID	//代入先レベルID
@@ -190,6 +190,15 @@
 					switch INIkey
 						case"Score"
 							Libarr_Rec_Score(TargetArrLevID,TargetArrSelID)=int(INIval)
+							Libarr_Rec_ScoreRank(TargetArrLevID,TargetArrSelID)=RANK_ID_D
+							if Libarr_Rec_Score(TargetArrLevID,TargetArrSelID)>=RANK_SCORE_C :Libarr_Rec_ScoreRank(TargetArrLevID,TargetArrSelID)=RANK_ID_C
+							if Libarr_Rec_Score(TargetArrLevID,TargetArrSelID)>=RANK_SCORE_B :Libarr_Rec_ScoreRank(TargetArrLevID,TargetArrSelID)=RANK_ID_B
+							if Libarr_Rec_Score(TargetArrLevID,TargetArrSelID)>=RANK_SCORE_A :Libarr_Rec_ScoreRank(TargetArrLevID,TargetArrSelID)=RANK_ID_A
+							if Libarr_Rec_Score(TargetArrLevID,TargetArrSelID)>=RANK_SCORE_AA :Libarr_Rec_ScoreRank(TargetArrLevID,TargetArrSelID)=RANK_ID_AA
+							if Libarr_Rec_Score(TargetArrLevID,TargetArrSelID)>=RANK_SCORE_AAA :Libarr_Rec_ScoreRank(TargetArrLevID,TargetArrSelID)=RANK_ID_AAA
+							if Libarr_Rec_Score(TargetArrLevID,TargetArrSelID)>=RANK_SCORE_S :Libarr_Rec_ScoreRank(TargetArrLevID,TargetArrSelID)=RANK_ID_S
+							if Libarr_Rec_Score(TargetArrLevID,TargetArrSelID)>=RANK_SCORE_SS :Libarr_Rec_ScoreRank(TargetArrLevID,TargetArrSelID)=RANK_ID_SS
+							if Libarr_Rec_Score(TargetArrLevID,TargetArrSelID)>=RANK_SCORE_SSS :Libarr_Rec_ScoreRank(TargetArrLevID,TargetArrSelID)=RANK_ID_SSS
 						swbreak
 						case"NumExcellent"
 							Libarr_Rec_NumExcellent(TargetArrLevID,TargetArrSelID)=int(INIval)
@@ -215,6 +224,9 @@
 						case"MaxCombo"
 							Libarr_Rec_MaxCombo(TargetArrLevID,TargetArrSelID)=int(INIval)
 						swbreak
+						case"Type"
+							Libarr_Rec_ClearType(TargetArrLevID,TargetArrSelID)=INIval
+						swbreak
 						case"Graph"
 							sdim GraphBin,270
 							GraphBin=INIval
@@ -228,6 +240,20 @@
 
 			}
 		loop
+
+	//プレビューBGM読み込み
+	repeat length(hBGMpreview)
+		if hBGMpreview(cnt)!0 {
+			BASS_StreamFree hBGMpreview
+		}
+	loop
+	repeat Libarr_Max
+		TargetArrSelID=cnt
+		repeat 3
+			TargetArrLevID=cnt
+			hBGMpreview(3*TargetArrSelID+TargetArrLevID)=BASS_StreamCreateFile(FALSE,"Data/Package/"+Libarr_ChartID(TargetArrLevID,TargetArrSelID)+"/preview.wav")
+		loop
+	loop
 
 	if transEffFlag==TRUE {
 		BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.7)
@@ -243,19 +269,14 @@
 	if transEffFlag==FALSE :gosub*SyncIR
 
 	//キー判定
-		KeyFlag(0)=CheckHitKey(KEY_INPUT_LEFT)
-		KeyFlag(1)=CheckHitKey(KEY_INPUT_RIGHT)
-		KeyFlag(2)=CheckHitKey(KEY_INPUT_UP)
-		KeyFlag(3)=CheckHitKey(KEY_INPUT_DOWN)
-
 		//左右（難易度変更）
-			if bfKeyFlag(0)==0&KeyFlag(0)==1 {		//←
+			if bfKeyFlag(KEY_INPUT_LEFT)==0&KeyFlag(KEY_INPUT_LEFT)==1 {		//←
 				CursorOffsetEase=0
 				CursorSelCount=0
 				CursorLevID--
 				PlaySE hbasssnd(sndUI_ChangeDifficulty)
 			}
-			if bfKeyFlag(1)==0&KeyFlag(1)==1 {		//→
+			if bfKeyFlag(KEY_INPUT_RIGHT)==0&KeyFlag(KEY_INPUT_RIGHT)==1 {		//→
 				CursorOffsetEase=0
 				CursorSelCount=0
 				CursorLevID++
@@ -265,20 +286,20 @@
 			if CursorLevID>2 :CursorLevID=0
 
 		//上下（カーソル移動）
-			if bfKeyFlag(2)==1&KeyFlag(2)==1 {		//↑
+			if bfKeyFlag(KEY_INPUT_UP)==1&KeyFlag(KEY_INPUT_UP)==1 {		//↑
 				KeyPushCount(0)++
 			} else :KeyPushCount(0)=0
-			if (bfKeyFlag(2)==0&KeyFlag(2)==1)|(KeyPushCount(0)>16&SceneCount\2==0) {	//連続↑
+			if (bfKeyFlag(KEY_INPUT_UP)==0&KeyFlag(KEY_INPUT_UP)==1)|(KeyPushCount(0)>16&SceneCount\2==0) {	//連続↑
 				CursorSelCount=0
 				CursorSelID--
 				if CursorSelID<0 :CursorSelID=Libarr_Max-1
 				CursorOffsetEase=-40
 				PlaySE hbasssnd(sndUI_Cursor)
 			}
-			if bfKeyFlag(3)==1&KeyFlag(3)==1 {		//↓
+			if bfKeyFlag(KEY_INPUT_DOWN)==1&KeyFlag(KEY_INPUT_DOWN)==1 {		//↓
 				KeyPushCount(1)++
 			} else :KeyPushCount(1)=0
-			if (bfKeyFlag(3)==0&KeyFlag(3)==1)|(KeyPushCount(1)>16&SceneCount\2==0) {	//連続↓
+			if (bfKeyFlag(KEY_INPUT_DOWN)==0&KeyFlag(KEY_INPUT_DOWN)==1)|(KeyPushCount(1)>16&SceneCount\2==0) {	//連続↓
 				CursorSelCount=0
 				CursorSelID++
 				if CursorSelID>=Libarr_Max :CursorSelID=0
@@ -287,29 +308,71 @@
 			}
 
 		//決定キー判定
-			if CheckHitKey(KEY_INPUT_RETURN)==TRUE {
+			if KeyFlag(KEY_INPUT_RETURN)==TRUE {
+				repeat 3*Libarr_Max
+					BASS_ChannelStop hBGMpreview(cnt)
+				loop
+				BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.7)
 				decideFlag=TRUE
 			}
 
 		//ページ切り替えキー判定
-			DetailWindowChangeFlag=CheckHitKey(KEY_INPUT_J)
+			DetailWindowChangeFlag=KeyFlag(KEY_INPUT_J)
 			if bfDetailWindowChangeFlag==0&DetailWindowChangeFlag==1 {
 				DetailWindowPageID++
 				if DetailWindowPageID>3 :DetailWindowPageID=0
 			}
 			bfDetailWindowChangeFlag=DetailWindowChangeFlag
 
-		//前フレーム
-			repeat 4
-				bfKeyFlag(cnt)=KeyFlag(cnt)
-			loop
-
 		//オプション
-			if CheckHitKey(KEY_INPUT_D)==TRUE&JumpSceneFlag==FALSE {
+			if KeyFlag(KEY_INPUT_D)==TRUE&JumpSceneFlag==FALSE {
+				repeat 3*Libarr_Max
+					BASS_ChannelStop hBGMpreview(cnt)
+				loop
+				BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.7)
 				JumpSceneCount=0
 				JumpSceneFlag=TRUE
 				PlaySE hbasssnd(sndUI_Decide)
 			}
+
+	//BGM関係
+		if CursorSelCount==15 {
+			BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.0)
+			BASS_ChannelSetAttribute hBGMpreview(3*CursorSelID+CursorLevID),BASS_ATTRIB_VOL,tofloat(0.7)
+			BASS_ChannelSetPosition hBGMpreview(3*CursorSelID+CursorLevID),0,0,0
+			BASS_ChannelPlay hBGMpreview(3*CursorSelID+CursorLevID)
+		}
+		if CursorSelCount<15 {
+			repeat 3*Libarr_Max
+				BASS_ChannelStop hBGMpreview(cnt)
+			loop
+			BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.7)
+		}
+		if CursorSelCount>15+60*9 {
+			setease 0.7,0.0,ease_linear
+			BASS_ChannelSetAttribute hBGMpreview(3*CursorSelID+CursorLevID),BASS_ATTRIB_VOL,tofloat(geteasef(CursorSelCount-15-60*9,20))
+		}
+		if CursorSelCount>15+60*9+20 {
+			setease 0.0,0.7,ease_linear
+			BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(geteasef(CursorSelCount-15-60*9-20,20))
+		}
+
+		//プレビュー中のビジュアライザー
+			SetDrawScreen hdximg(iPlay_Visualizer)
+				ClearDrawScreen
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				dim bgmFFTbuf,4096:dim bgmFFTline
+				BASS_ChannelGetData hBGMpreview(3*CursorSelID+CursorLevID),varptr(bgmFFTbuf),BASS_DATA_FFT8192
+
+				setease 0,191,ease_linear+ease_loop
+				hsvcolor getease(SceneCount,200),100,240
+
+				repeat 32
+					bgmFFTline=int(todouble(bgmFFTbuf(128/32*cnt))*2500)
+					if bgmFFTline<100 :bgmFFTline*4
+					DrawBox cnt*(1024/32),512-bgmFFTline,(cnt+1)*(1024/32)-2,512,GetColor(ginfo_r,ginfo_g,ginfo_b),TRUE
+				loop
+			SetDrawScreen DX_SCREEN_BACK
 
 	//背景
 		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
@@ -355,15 +418,8 @@
 						setease 0,-32,ease_cubic_out
 						EasePosX=getease(CursorSelCount,12)
 					} else :EasePosX=0
-					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-					DrawGraph 784+EasePosX,EasePosY,hdximg(ibg_MusicSelect_Item),TRUE	//背景
 
-					SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-					DrawStringToHandle 880+EasePosX,EasePosY+8,Libarr_Title(CursorLevID,DrawColumnID),GetColor(255,255,255),hdxfont(fNoto_m16)	//タイトル
-
-					LevColorCode=GetDifficultyColor(Libarr_Difficulty(CursorLevID,DrawColumnID))
-					tmpstr=str(Libarr_Level(CursorLevID,DrawColumnID))
-					DrawStringXCenterToHandle 784+EasePosX,EasePosY+10,tmpstr,80,LevColorCode,hdxfont(fSQ_20)	//難易度
+					gosub*DrawColumnGraph
 
 					DrawColumnPos+40
 					if EasePosY>DispHeight :break
@@ -373,20 +429,11 @@
 			//基準より上
 				DrawColumnID=CursorSelID
 				DrawColumnPos=314
+				EasePosX=0
 				repeat
 					setease CursorOffsetEase,0,ease_cubic_out
 					EasePosY=DrawColumnPos+getease(CursorSelCount,12)
-					if cnt!0 {
-						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-						DrawGraph 784,EasePosY,hdximg(ibg_MusicSelect_Item),TRUE	//背景
-
-						SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-						DrawStringToHandle 880,EasePosY+8,Libarr_Title(CursorLevID,DrawColumnID),GetColor(255,255,255),hdxfont(fNoto_m16)	//タイトル
-
-						LevColorCode=GetDifficultyColor(Libarr_Difficulty(CursorLevID,DrawColumnID))
-						tmpstr=str(Libarr_Level(CursorLevID,DrawColumnID))
-						DrawStringXCenterToHandle 784+EasePosX,EasePosY+10,tmpstr,80,LevColorCode,hdxfont(fSQ_20)	//難易度
-					}
+					if cnt!0 :gosub*DrawColumnGraph
 					DrawColumnPos-40
 					if EasePosY<-40 :break
 					DrawColumnID--
@@ -420,9 +467,8 @@
 						DrawStringToHandle 20,278+12,"ONLINE",GetColor(240,240,240),hdxfont(fPier_m16)
 						if DetailWindowCount==0 {
 							//バッファ生成
-								if hdximg(iLayer_Detail_IR)!0 :DeleteGraph hdximg(iLayer_Detail_IR)
-								hdximg(iLayer_Detail_IR)=MakeScreen(400,330,TRUE)
 								SetDrawScreen hdximg(iLayer_Detail_IR)
+								ClearDrawScreen
 
 								SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 								DrawGraph 24,46+28*0,hdximg(iIcon_IR_1st),TRUE		//1st アイコン
@@ -657,6 +703,13 @@
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 		DrawGraph 0,DispHeight-128,hdximg(ibg_GuidePanel),TRUE
 
+		//ビジュアライザー
+			if CursorSelCount>15 {
+				setease 128,0,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(CursorSelCount-15-60*9,25)
+				DrawModiGraph 350,500,DispWidth-350,500,DispWidth-180,DispHeight,180,DispHeight,hdximg(iPlay_Visualizer),TRUE
+			}
+
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 		DrawGraph 540,650,hdximg(iGuide_Large),TRUE
 		DrawGraph 370,640,hdximg(iGuide_Small),TRUE
@@ -723,7 +776,7 @@
 			SeekMovieToGraph hdximg(iMovie_Decide),0
 			PlayMovieToGraph hdximg(iMovie_Decide)
 			PlaySE hbasssnd(sndUI_Decide)
-			repeat 60*5
+			repeat 60*DecideWaitTime
 				ProcessMessage
 				SetDrawScreen DX_SCREEN_BACK
 				ClearDrawScreen
@@ -758,7 +811,7 @@
 							DrawStringXCenterToHandle 128-tmpease,428,tmpstr,DispWidth,GetDifficultyColor(Libarr_Difficulty(CursorLevID,CursorSelID)),hdxfont(fGood_14)
 
 					//暗転
-						if cnt>60*5-20 {
+						if cnt>60*DecideWaitTime-20 {
 							setease 0,256,ease_linear
 							SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(cnt-(60*5-20),20-1)
 							DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),TRUE

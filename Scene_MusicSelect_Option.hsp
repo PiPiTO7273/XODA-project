@@ -2,46 +2,43 @@
 *Scene_Init_MusicSelect_Option
 
 	//変数初期化
-	dim ItemCursorPos	//カーソル位置
-	dim KeyFlag,4		//キーフラグ
-	dim bfKeyFlag,4	//前フレームのキーフラグ
+	dim ItemCursorPos		//カーソル位置
+	dim ChangeItemFlag,9	//値を変更したフラグ
 
 	return
 
 *Scene_MusicSelect_Option
 
 	//キー判定
-		KeyFlag(0)=CheckHitKey(KEY_INPUT_LEFT)
-		KeyFlag(1)=CheckHitKey(KEY_INPUT_RIGHT)
-		KeyFlag(2)=CheckHitKey(KEY_INPUT_UP)
-		KeyFlag(3)=CheckHitKey(KEY_INPUT_DOWN)
 
-		if KeyFlag(0)==TRUE&bfKeyFlag(0)==FALSE {
+		if KeyFlag(KEY_INPUT_LEFT)==TRUE&bfKeyFlag(KEY_INPUT_LEFT)==FALSE {
 			aqPlayOption(ItemCursorPos)--
 			if aqPlayOption(ItemCursorPos)<0 :aqPlayOption(ItemCursorPos)=Item_NumOptionValue(ItemCursorPos)-1
+			ChangeItemFlag(ItemCursorPos)=TRUE
+			PlaySE hbasssnd(sndUI_Cursor)
 		}
-		if KeyFlag(1)==TRUE&bfKeyFlag(1)==FALSE {
+		if KeyFlag(KEY_INPUT_RIGHT)==TRUE&bfKeyFlag(KEY_INPUT_RIGHT)==FALSE {
 			aqPlayOption(ItemCursorPos)++
 			if aqPlayOption(ItemCursorPos)>Item_NumOptionValue(ItemCursorPos)-1 :aqPlayOption(ItemCursorPos)=0
+			ChangeItemFlag(ItemCursorPos)=TRUE
+			PlaySE hbasssnd(sndUI_Cursor)
 		}
-		if KeyFlag(2)==TRUE&bfKeyFlag(2)==FALSE {
+		if KeyFlag(KEY_INPUT_UP)==TRUE&bfKeyFlag(KEY_INPUT_UP)==FALSE {
 			ItemCursorPos--
 			if ItemCursorPos<0 :ItemCursorPos=8
+			PlaySE hbasssnd(sndUI_Cursor)
 		}
-		if KeyFlag(3)==TRUE&bfKeyFlag(3)==FALSE {
+		if KeyFlag(KEY_INPUT_DOWN)==TRUE&bfKeyFlag(KEY_INPUT_DOWN)==FALSE {
 			ItemCursorPos++
 			if ItemCursorPos>8 :ItemCursorPos=0
+			PlaySE hbasssnd(sndUI_Cursor)
 		}
 
-		if (CheckHitKey(KEY_INPUT_RETURN)==TRUE|CheckHitKey(KEY_INPUT_D)==TRUE)&decideFlag==FALSE {
+		if (KeyFlag(KEY_INPUT_RETURN)==TRUE|KeyFlag(KEY_INPUT_D)==TRUE)&decideFlag==FALSE {
 			decideFlag=TRUE
 			decideFrameCount=0
+			PlaySE hbasssnd(sndUI_Decide)
 		}
-
-		//前フレーム
-		repeat 4
-			bfKeyFlag(cnt)=KeyFlag(cnt)
-		loop
 
 	//背景
 		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
@@ -103,6 +100,54 @@
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 		DrawGraph EasePosX,180,hdximg(ibg_Option_SongInfo),TRUE
 
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		//曲名
+			DrawStringToHandle EasePosX+820-780,225,Libarr_Title(CursorLevID,CursorSelID),GetColor(40,40,40),hdxfont(fNoto_m24)
+		//アーティスト名
+			DrawStringToHandle EasePosX+820-780,269,Libarr_Artist(CursorLevID,CursorSelID),GetColor(40,40,40),hdxfont(fNoto_m16)
+
+		//BPM
+			DrawStringToHandle EasePosX+858-780,312,strf("%.1f",str(Libarr_DefBPM(CursorLevID,CursorSelID))),GetColor(40,40,40),hdxfont(fNoto_m16)
+		//SPEED値
+			DrawStringToHandle EasePosX+923-780,312,strf("%.1f",str(0.5+double(aqPlayOption(ID_ObjSpeed))*0.1)),GetColor(40,40,40),hdxfont(fNoto_m16)
+		//速度値
+			DrawStringToHandle EasePosX+990-780,312,strf("%.2f",str((0.5+double(aqPlayOption(ID_ObjSpeed))*0.1)*Libarr_DefBPM(CursorLevID,CursorSelID))),GetColor(8,181,151),hdxfont(fNoto_m16)
+
+	//プレビュー
+		if decideFlag==FALSE {
+			//カーソル
+				dim hCursorGraph:hCursorGraph=GetCursorHandle()
+				if hCursorGraph!-1 {
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+					setease -64,100,ease_cubic_out
+					DrawGraph getease(SceneCount-25,25),55,hCursorGraph,TRUE
+				}
+			//オブジェクト
+				if SceneCount>25 {
+					dim hObjImgArr
+					SetObjImgArr hObjImgArr,1
+
+					//ユーザー指定のスピード値
+					ddim AddSpeed,1
+					AddSpeed=0.5+double(aqPlayOption(ID_ObjSpeed))*0.1
+					AddSpeed=AddSpeed*2.0	//補正
+					repeat
+						setease 0,256,ease_linear
+						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-25,20)
+						hitobjPosition=-100*cnt+(1000.0/60.0*Libarr_DefBPM(CursorLevID,CursorSelID)/1000.0)*(SceneCount-25)
+						dim DrawobjPosX:dim DrawobjPosY:dim hitobjSize
+						hitobjSize=int(48.0*(double(aqPlayOption(ID_ObjSize)*10+10)/100.0))
+						DrawobjPosX=200-(double(hitobjPosition)*AddSpeed)+DispWidth
+						DrawobjPosY=91-hitobjSize/2-hitobjSize+hitobjSize*1
+
+						if DrawobjPosX<(-hitobjSize) :continue
+						if DrawobjPosX>DispWidth :break
+
+						DrawExtendGraph DrawobjPosX,DrawobjPosY,DrawobjPosX+hitobjSize,DrawobjPosY+hitobjSize,hObjImgArr(HITOBJ_NORMAL),TRUE
+					loop
+				}
+		}
+
 	//プリローダー
 		setease 100,0,ease_cubic_out
 		EaseWidth=getease(SceneCount-20,20)
@@ -142,6 +187,15 @@
 		DrawStringXCenterToHandle 760,668,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
 
 	if decideFlag==TRUE :decideFrameCount++
+	if decideFrameCount==10 {
+		//設定を保存
+		repeat 9
+			if ChangeItemFlag(cnt)==TRUE {
+				AddDebugConsole STYLE_NORMAL,"プレイオプションを保存しました。[XODA.PLAYOPTION."+(cnt)+"]"
+				SendProfile"XODA.PLAYOPTION."+(cnt),str(aqPlayOption(cnt))
+			}
+		loop
+	}
 	if decideFrameCount>30 {
 		curSceneID=ID_MusicSelect
 		gosub*InitScene

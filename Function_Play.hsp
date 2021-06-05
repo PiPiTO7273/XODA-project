@@ -47,6 +47,8 @@
 		case JUDGE_RES_EXCELLENT
 			numExcellent++
 			curCombo++
+			if hitCount==0 :curScore+bonusScore
+			hitCount++
 		swbreak
 	swend
 
@@ -62,8 +64,6 @@
 	//スコア加算
 		ScoreEaseA=curScore
 		curScore+hitScore(_id)
-		if hitCount==0 :curScore+bonusScore
-		hitCount++
 		ScoreEaseB=curScore
 
 	JudgeRes=_id
@@ -380,6 +380,15 @@
 		loop
 	loop
 
+	//オフセット秒数(ms)
+	dim JudgeOffsetMS
+	JudgeOffsetMS=int(double(-50+aqPlayOption(ID_JudgeOffset))*(1000.0/60.0))
+
+	//オフセット適用
+	repeat hitobjmax
+		hitobjTiming(cnt)+JudgeOffsetMS
+	loop
+
 	//ヒット位置設定
 	ddim hitobjPosition,hitobjMax
 	ddim tmpobjPosition,hitobjMax
@@ -416,9 +425,74 @@
 	//グラフのキャプチャー地点を算出
 	dim chartLength		//曲の長さ
 	dim chartCapturePt		//キャプチャー地点の間隔
-	dim chartCaptureVal		//キャプチャー地点の値
+	dim chartCaptureVal,270	//キャプチャー地点の値
 	chartLength=hitobjTiming(hitobjMax-1)
 	chartCapturePt=int(double(chartLength)/270.0)
+
+	//オブジェクトの配置変更
+	if aqPlayOption(ID_ObjPlacement)==1 {	//MIRROR
+		repeat hitobjMax
+			switch hitobjLaneID(cnt)
+				case 0:hitobjLaneID(cnt)=2:swbreak
+				case 2:hitobjLaneID(cnt)=0:swbreak
+			swend
+		loop
+	}
+	if aqPlayOption(ID_ObjPlacement)==2 {	//RANDOM
+		//012 (NORMAL)
+		//021
+		//120
+		//102
+		//201
+		//210 (MIRROR)
+		dim rndLaneID,4,3
+		rndLaneID(0,0)=0:rndLaneID(0,1)=2:rndLaneID(0,2)=1
+		rndLaneID(1,0)=1:rndLaneID(1,1)=2:rndLaneID(1,2)=0
+		rndLaneID(2,0)=1:rndLaneID(2,1)=0:rndLaneID(2,2)=2
+		rndLaneID(3,0)=2:rndLaneID(3,1)=0:rndLaneID(3,2)=1
+		dim rndTable:rndTable=rnd(4)
+		repeat hitobjMax
+			hitobjLaneID(cnt)=rndLaneID(rndTable,hitobjLaneID(cnt))
+		loop
+	}
+	if aqPlayOption(ID_ObjPlacement)==3 {	//ALL-RANDOM
+		dim objcurCount
+		dim longcurCount
+		dim resetobjFlag
+		dim objLongStartms:dim objLongEndms:dim objLongLaneID:dim objLongCount
+		objLongStartms=-1:objLongEndms=-1
+		repeat
+			resetobjFlag=FALSE
+			hitobjLaneID(objcurCount)=rnd(3)
+			if hitobjType(objcurCount)==HITOBJ_HOLDEND {
+				hitobjLaneID(objcurCount)=hitobjLaneID(objcurCount-1)
+			} else {
+				//ロング被り
+					repeat hitobjMax
+						if cnt==objcurCount :continue		//自分自身は除外
+						if hitobjType(cnt)==HITOBJ_HOLDSTART {
+							if hitobjTiming(objcurCount)>=hitobjTiming(cnt)&hitobjTiming(objcurCount)<=hitobjTiming(cnt)+hitobjLength(cnt) {
+								if hitobjLaneID(cnt)==hitobjLaneID(objcurCount) {
+									resetobjFlag=TRUE
+								}
+							}
+						}
+					loop
+				//タイミング被り
+					repeat hitobjMax
+						if cnt==objcurCount :continue		//自分自身は除外
+						if hitobjTiming(cnt)==hitobjTiming(objcurCount) {
+							if hitobjLaneID(cnt)==hitobjLaneID(objcurCount) {
+								resetobjFlag=TRUE
+							}
+						}
+					loop
+				if resetobjFlag==TRUE :continue
+			}
+			objcurCount++
+			if objcurCount==hitobjMax :break
+		loop
+	}
 
 	return 0
 
@@ -428,9 +502,16 @@
 
 	//ゲージの種類
 	dim GaugeType
+	GaugeType=aqPlayOption(ID_GaugeLevel)
 	//現在のゲージ数値
 	ddim curGaugeVal,1
 	curGaugeVal=0.0
+		switch GaugeType
+			case GAUGE_ASSIST:curGaugeVal=20.0:swbreak
+			case GAUGE_NORMAL:curGaugeVal=0.0:swbreak
+			case GAUGE_HARD:curGaugeVal=100.0:swbreak
+			case GAUGE_MADNESS:curGaugeVal=100.0:swbreak
+		swend
 	//現在のBPM値
 	ddim curBPM,1
 	//最大コンボ
@@ -463,10 +544,6 @@
 	dim PlayCountMS
 	PlayCountMS=-1000*5
 
-	//ビジュアライザー用スクリーン
-	if hdximg(iPlay_Visualizer)!0 :DeleteGraph hdximg(iPlay_Visualizer)
-	hdximg(iPlay_Visualizer)=MakeScreen(1024,512,TRUE)
-
 	//歌詞表示フラグ
 	sdim bframeLyrics
 	dim updateLyricsCount
@@ -478,8 +555,8 @@
 
 	//判定するフラグ
 	dim JudgeFlag,3
-	dim KeyFlag,4
-	dim bfKeyFlag,4
+	dim JudgeKeyFlag,4
+	dim JudgebfKeyFlag,4
 	dim LaneEffCount,3
 	dim HoldFlag,3
 	dim HoldNoteID,3
@@ -494,6 +571,8 @@
 	dim numNice
 	dim numGreat
 	dim numExcellent
+	dim numEarly
+	dim numLate
 	dim JudgeRes
 	dim JudgeResCount
 	dim BombCount,3
@@ -524,15 +603,6 @@
 	dim stgClearEffFlag
 	dim stgClearEffCount
 	stgClearEffFlag=FALSE
-
-	//オフセット秒数(ms)
-	dim JudgeOffsetMS
-	JudgeOffsetMS=int(double(-50+aqPlayOption(ID_JudgeOffset))*(1000.0/60.0))
-
-	//オフセット適用
-	repeat hitobjmax
-		hitobjTiming(cnt)-JudgeOffsetMS
-	loop
 
 	//キーサウンド音量
 	BASS_ChannelSetAttribute hbasssnd(sndHitobj),BASS_ATTRIB_VOL,tofloat(double(aqPlayOption(ID_KeySndVolume))/10.0)

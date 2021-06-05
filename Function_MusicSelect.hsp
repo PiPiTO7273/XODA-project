@@ -1,0 +1,43 @@
+
+*DrawColumnGraph
+	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+	DrawGraph 784+EasePosX,EasePosY,hdximg(ibg_MusicSelect_Item),TRUE	//背景
+
+	SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+	DrawStringToHandle 880+EasePosX,EasePosY+8,Libarr_Title(CursorLevID,DrawColumnID),GetColor(255,255,255),hdxfont(fNoto_m16)	//タイトル
+
+	LevColorCode=GetDifficultyColor(Libarr_Difficulty(CursorLevID,DrawColumnID))
+	tmpstr=str(Libarr_Level(CursorLevID,DrawColumnID))
+	DrawStringXCenterToHandle 784+EasePosX,EasePosY+10,tmpstr,80,LevColorCode,hdxfont(fSQ_20)	//難易度
+
+	//クリアの種類
+	dim hBadge_ClearType
+	switch Libarr_Rec_ClearType(CursorLevID,DrawColumnID)
+		case"ALL EXCELLENT":hBadge_ClearType=hdximg(iBadge_AllEx):swbreak
+		case"FULL COMBO":hBadge_ClearType=hdximg(iBadge_FullCombo):swbreak
+		case"MADNESS":hBadge_ClearType=hdximg(iBadge_Madness):swbreak
+		case"HARD":hBadge_ClearType=hdximg(iBadge_Hard):swbreak
+		case"CLEAR":hBadge_ClearType=hdximg(iBadge_Clear):swbreak
+		case"ASSIST":hBadge_ClearType=hdximg(iBadge_Assist):swbreak
+		case"FAILED":hBadge_ClearType=hdximg(iBadge_Failed):swbreak
+		default:hBadge_ClearType=hdximg(iBadge_NoData):swbreak
+	swend
+	DrawGraph 784+323+EasePosX,EasePosY+8,hBadge_ClearType,TRUE
+
+	//スコアランク
+	dim hBadge_Rank
+	switch Libarr_Rec_ScoreRank(CursorLevID,DrawColumnID)
+		case RANK_ID_SSS:hBadge_Rank=hdximg(iBadge_SSS):swbreak
+		case RANK_ID_SS:hBadge_Rank=hdximg(iBadge_SS):swbreak
+		case RANK_ID_S:hBadge_Rank=hdximg(iBadge_S):swbreak
+		case RANK_ID_AAA:hBadge_Rank=hdximg(iBadge_AAA):swbreak
+		case RANK_ID_AA:hBadge_Rank=hdximg(iBadge_AA):swbreak
+		case RANK_ID_A:hBadge_Rank=hdximg(iBadge_A):swbreak
+		case RANK_ID_B:hBadge_Rank=hdximg(iBadge_B):swbreak
+		case RANK_ID_C:hBadge_Rank=hdximg(iBadge_C):swbreak
+		case RANK_ID_D:hBadge_Rank=hdximg(iBadge_D):swbreak
+	swend
+	if Libarr_Rec_Score(CursorLevID,DrawColumnID)==0 :hBadge_Rank=-1	//スコアが0の場合は除外
+	if hBadge_Rank!-1 :DrawGraph 784+408+EasePosX,EasePosY+10,hBadge_Rank,TRUE
+
+	return

@@ -27,6 +27,20 @@
 		if curScore>=RANK_SCORE_SS :ScoreRankID=RANK_ID_SS
 		if curScore>=RANK_SCORE_SSS :ScoreRankID=RANK_ID_SSS
 
+	//クリアの種類の判別
+		sdim stgClearTypeString
+		if stgClearType==ID_Failed :stgClearTypeString="FAILED"
+		if stgClearType==ID_Clear {
+			switch GaugeType
+				case Gauge_Assist:stgClearTypeString="ASSIST":swbreak
+				case Gauge_Normal:stgClearTypeString="NORMAL":swbreak
+				case Gauge_Hard:stgClearTypeString="HARD":swbreak
+				case Gauge_Madness:stgClearTypeString="MADNESS":swbreak
+			swend
+		}
+		if stgClearType==ID_Fullcombo :stgClearTypeString="FULL COMBO"
+		if stgClearType==ID_Allex :stgClearTypeString="ALL EXCELLENT"
+
 	//ランキング
 		sdim tmpstr
 		tmpstr=SERVICE_HTTP+"/API-SendGlobalRanking.php?key="+APIkey_SendGlobalRanking+"&id="+Libarr_ChartID(CursorLevID,CursorSelID)+"&name="+aqName+"&score="+curScore
@@ -39,34 +53,37 @@
 			swbreak
 		swend
 	//スコア送信
-		//グラフデータの初期化
-			sdim tmpstr:sdim GraphBin,270
-			repeat 270
-				poke GraphBin,cnt,chartCaptureVal(cnt)+1	//NULL回避
-			loop
-			b64encode GraphBin,GraphBin
-		//URL作成&リクエスト発行
-			tmpstr=SERVICE_HTTP+"/API-SendNewRecord.php?key="+APIkey_SendNewRecord
-			tmpstr+"&id="+Libarr_ChartID(CursorLevID,CursorSelID)
-			tmpstr+"&name="+aqName
-			tmpstr+"&score="+curScore
-			tmpstr+"&j_ex="+numExcellent
-			tmpstr+"&j_gr="+numGreat
-			tmpstr+"&j_ni="+numNice
-			tmpstr+"&j_ba="+numBad
-			tmpstr+"&j_mi="+numMiss
-			tmpstr+"&j_ea="+numEarly
-			tmpstr+"&j_la="+numLate
-			tmpstr+"&maxcombo="+curMaxCombo
-			tmpstr+"&graph="+GraphBin
-			switch WebAPI_PostandGet(tmpstr,sWebAPI)
-				case"ERROR_UNKNOWN_PRM"
-					AddDebugConsole STYLE_WARNING,"Portal WebAPI: 無効なパラメータが指定されました。"
-				swbreak
-				case"ERROR_AUTH_APIKEY"
-					AddDebugConsole STYLE_WARNING,"Portal WebAPI: APIキーの認証に失敗しました。"
-				swbreak
-			swend
+		if Libarr_MyIRscore(CursorLevID,CursorSelID)<curScore {
+			//グラフデータの初期化
+				sdim tmpstr:sdim GraphBin,270
+				repeat 270
+					poke GraphBin,cnt,chartCaptureVal(cnt)+1	//NULL回避
+				loop
+				b64encode GraphBin,GraphBin
+			//URL作成&リクエスト発行
+				tmpstr=SERVICE_HTTP+"/API-SendNewRecord.php?key="+APIkey_SendNewRecord
+				tmpstr+"&id="+Libarr_ChartID(CursorLevID,CursorSelID)
+				tmpstr+"&name="+aqName
+				tmpstr+"&score="+curScore
+				tmpstr+"&j_ex="+numExcellent
+				tmpstr+"&j_gr="+numGreat
+				tmpstr+"&j_ni="+numNice
+				tmpstr+"&j_ba="+numBad
+				tmpstr+"&j_mi="+numMiss
+				tmpstr+"&j_ea="+numEarly
+				tmpstr+"&j_la="+numLate
+				tmpstr+"&maxcombo="+curMaxCombo
+				tmpstr+"&type="+stgClearTypeString
+				tmpstr+"&graph="+GraphBin
+				switch WebAPI_PostandGet(tmpstr,sWebAPI)
+					case"ERROR_UNKNOWN_PRM"
+						AddDebugConsole STYLE_WARNING,"Portal WebAPI: 無効なパラメータが指定されました。"
+					swbreak
+					case"ERROR_AUTH_APIKEY"
+						AddDebugConsole STYLE_WARNING,"Portal WebAPI: APIキーの認証に失敗しました。"
+					swbreak
+				swend
+		}
 
 	//BGM停止
 	BASS_ChannelStop hplaybgm
@@ -76,7 +93,7 @@
 *Scene_Result
 
 	//決定キー判定
-	if CheckHitKey(KEY_INPUT_RETURN)==TRUE {
+	if KeyFlag(KEY_INPUT_RETURN)==TRUE {
 		decideFlag=TRUE
 	}
 
@@ -156,19 +173,7 @@
 					DrawStringToHandle 182+EasePosX,345,strf("%04d - %04d",str(Libarr_MinBPM(CursorLevID,CursorSelID)),str(Libarr_MaxBPM(CursorLevID,CursorSelID))),GetColor(50,50,50),hdxfont(fPier_r14)
 				}
 			//クリアの種類
-				sdim tmpstr
-				if stgClearType==ID_Failed :tmpstr="FAILED"
-				if stgClearType==ID_Clear {
-					switch GaugeType
-						case Gauge_Assist:tmpstr="EASY":swbreak
-						case Gauge_Normal:tmpstr="NORMAL":swbreak
-						case Gauge_Hard:tmpstr="HARD":swbreak
-						case Gauge_Madness:tmpstr="MADNESS":swbreak
-					swend
-				}
-				if stgClearType==ID_Fullcombo :tmpstr="FULL COMBO"
-				if stgClearType==ID_Allex :tmpstr="ALL EXCELLENT"
-				DrawStringToHandle 182+EasePosX,376,tmpstr,GetColor(30,30,30),hdxfont(fPier_m16)
+				DrawStringToHandle 182+EasePosX,376,stgClearTypeString,GetColor(30,30,30),hdxfont(fPier_m16)
 			//最大コンボ
 				setease 0,curMaxCombo,ease_cubic_out
 				DrawStringToHandle 182+EasePosX,401,str(getease(SceneCount-60,25)),GetColor(30,30,30),hdxfont(fPier_m20)
@@ -194,8 +199,8 @@
 						case 2:DrawStringToHandle 939+EasePosX,373,strf("%04d",numNice),GetColor(10,10,10),hdxfont(fPier_m20):swbreak			//NICE
 						case 3:DrawStringToHandle 939+EasePosX,409,strf("%04d",numBad),GetColor(10,10,10),hdxfont(fPier_m20):swbreak			//BAD
 						case 4:DrawStringToHandle 939+EasePosX,445,strf("%04d",numMiss),GetColor(10,10,10),hdxfont(fPier_m20):swbreak			//MISS
-						case 5:DrawStringToHandle 914+EasePosX,501,strf("%04d",0),GetColor(10,10,10),hdxfont(fPier_m20):swbreak				//EARLY
-						case 6:DrawStringToHandle 914+EasePosX,537,strf("%04d",0),GetColor(10,10,10),hdxfont(fPier_m20):swbreak				//LATE
+						case 5:DrawStringToHandle 914+EasePosX,501,strf("%04d",numEarly),GetColor(10,10,10),hdxfont(fPier_m20):swbreak				//EARLY
+						case 6:DrawStringToHandle 914+EasePosX,537,strf("%04d",numLate),GetColor(10,10,10),hdxfont(fPier_m20):swbreak				//LATE
 					swend
 				loop
 
@@ -341,7 +346,7 @@
 		//IR接続
 		gosub*SyncIR
 	}
-	if decideFrameCount>50+1+60*3 {
+	if decideFrameCount>50+1+10 {
 		//シーン移行
 		curSceneID=ID_MusicSelect
 		gosub*InitScene

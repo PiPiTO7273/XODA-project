@@ -25,16 +25,13 @@
 *Scene_ModeSelect
 
 	//ÉLÅ[îªíË
-		KeyFlag(0)=CheckHitKey(KEY_INPUT_LEFT)
-		KeyFlag(1)=CheckHitKey(KEY_INPUT_RIGHT)
-
-		if bfKeyFlag(0)==0&KeyFlag(0)==1 {
+		if bfKeyFlag(KEY_INPUT_LEFT)==0&KeyFlag(KEY_INPUT_LEFT)==1 {
 			bfSelItemID=SelItemID
 			SelItemID--
 			SelItemCount=0
 			PlaySE hbasssnd(sndUI_Cursor)
 		}
-		if bfKeyFlag(1)==0&KeyFlag(1)==1 {
+		if bfKeyFlag(KEY_INPUT_RIGHT)==0&KeyFlag(KEY_INPUT_RIGHT)==1 {
 			bfSelItemID=SelItemID
 			SelItemID++
 			SelItemCount=0
@@ -42,11 +39,8 @@
 		}
 		if SelItemID<0 :SelItemID=3
 		if SelItemID>3 :SelItemID=0
-
-		bfKeyFlag(0)=KeyFlag(0)
-		bfKeyFlag(1)=KeyFlag(1)
 		
-		if CheckHitKey(KEY_INPUT_RETURN)==TRUE :decideFlag=TRUE
+		if KeyFlag(KEY_INPUT_RETURN)==TRUE :decideFlag=TRUE
 			if decideFlag==TRUE&decideFrameCount==0 {
 				//èââÒèàóù
 				PlaySE hbasssnd(sndUI_Decide)

@@ -96,33 +96,46 @@
 	}
 	AddDebugConsole STYLE_NORMAL,"起動設定の読み込み完了"
 
-	//DXライブラリ初期設定
-		AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化開始"
-		SetOutApplicationLogValidFlag 0
-		ChangeWindowMode TRUE
-		SetGraphMode DispWidth,DispHeight,32
-		SetAlwaysRunFlag TRUE
-		SetWaitVSyncFlag TRUE
-		screen 0,DispWidth,DispHeight,2,ginfo(20)/2-DispWidth/2,ginfo(21)/2-DispHeight/2
-		SetUserWindow hwnd
-		SetMainWindowText"XODA v"+BuildVersion_Major+"."+BuildVersion_Minor
-		dxlib_Init
-		if stat==-1 {
-			AddDebugConsole STYLE_ERROR,"DXライブラリの初期化に失敗しました。"
-			goto*StopError
-		} else {
-			AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化完了"
-		}
-
-		onexit*Exit
-
 	goto*Launcher_Ready
 
 *Launcher_GameStart
 
 	gsel sLauncher
-	UpdateLauncherLog"起動中・・・"
 	clrobj
+
+	//DXライブラリ初期設定
+	UpdateLauncherLog"しばらくお待ち下さい・・・"
+	AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化開始"
+	SetOutApplicationLogValidFlag 0
+	ChangeWindowMode TRUE
+	SetGraphMode DispWidth,DispHeight,32
+	SetAlwaysRunFlag TRUE
+	SetWaitVSyncFlag TRUE
+	if FullScreen==TRUE {
+		chgdisp 1,DispWidth,DispHeight
+		bgscr sMain,DispWidth,DispHeight,2,0,0
+		mouse -1
+	} else {
+		screen sMain,DispWidth,DispHeight,2,ginfo(20)/2-DispWidth/2,ginfo(21)/2-DispHeight/2
+	}
+	SetUserWindow hwnd
+	SetMainWindowText"XODA v"+BuildVersion_Major+"."+BuildVersion_Minor
+	dxlib_Init
+	if stat==-1 {
+		AddDebugConsole STYLE_ERROR,"DXライブラリの初期化に失敗しました。"
+		goto*StopError
+	} else {
+		AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化完了"
+	}
+
+	onexit*Exit
+
+	//オンラインアップデート
+	UpdateLauncherLog"オンラインアップデートの確認中"
+	dim OfflineModeFlag
+	WebAPI_Init sWebAPI
+	netinit
+	gosub*CheckOnlineUpdate
 
 	//DXライブラリ初期化
 	InitFontToHandle
@@ -135,12 +148,18 @@
 	} else {
 		AddDebugConsole STYLE_NORMAL,"BASS Audio Libraryの初期化完了"
 	}
+	dim hBGMpreview,256
 
 	//各種読み込み処理
+	UpdateLauncherLog"起動中・・・"
 	gosub*LoadSoundEffects
 	gosub*LoadFontData
 	gosub*LoadImages
-	gosub*LoadSkillData
+
+	UpdateLauncherLog"しばらくお待ち下さい・・・"
+	gosub*OnlineSignin
+	if onlineErrorFlag==TRUE :OfflineModeFlag=TRUE
+	gosub*LoadDetailRecord
 
 	//シーンID
 	dim curSceneID
@@ -155,6 +174,9 @@
 	dim DebugLogScr
 	//リセットを行うフラグ
 	dim onResetFlag
+	//キーフラグ
+	dim KeyFlag,256
+	dim bfKeyFlag,256
 
 	//////debug
 	//読み込む譜面ファイル名
@@ -167,6 +189,9 @@
 
 	SetDrawScreen DX_SCREEN_BACK
 	ClearDrawScreen
+
+	//キー判定
+	repeat 256:KeyFlag(cnt)=CheckHitKey(cnt):loop
 
 	//シーン別描画
 	switch curSceneID
@@ -193,6 +218,8 @@
 		swbreak
 	swend
 
+	repeat 256:bfKeyFlag(cnt)=KeyFlag(cnt):loop
+
 	//FPS表示
 	if FrameCount\4==0 {
 		GetFPS:getdouble:curFPSval=refdval 
@@ -203,15 +230,16 @@
 	FrameCount++
 
 	//デバッグ用遅延処理
-		if CheckHitKey(KEY_INPUT_TAB)==TRUE :WaitVSync 4
-		if CheckHitKey(KEY_INPUT_F1)==TRUE {
+		if bfKeyFlag(KEY_INPUT_F1)==FALSE&KeyFlag(KEY_INPUT_F1)==TRUE :DebugLogScr=0
+		if bfKeyFlag(KEY_INPUT_F4)==FALSE&KeyFlag(KEY_INPUT_F4)==TRUE :DebugLogScr=0
+		if KeyFlag(KEY_INPUT_TAB)==TRUE :WaitVSync 4
+		if KeyFlag(KEY_INPUT_F1)==TRUE {
 			//デバッグメニュー
 			DrawDebugString 0,16*0,"XODA ver"+BuildVersion_Major+"."+BuildVersion_Minor
 			DrawDebugString 0,16*1,"HD "+DispWidth+"x"+DispHeight+" ["+ginfo(20)+"x"+ginfo(21)+"]"
 			DrawDebugString 0,16*3,"FPS : "+strf("%.3f",curFPSval)+" ["+strf("%.2f",1000.0/curFPSval)+"ms]"
 			DrawDebugString 0,16*4,"SCENE : ID["+curSceneID+"]"
 			DrawDebugString 0,16*5,"F:"+FrameCount+" , F(S):"+SceneCount
-			DrawDebugString 0,16*6,"USERNAME : "+authUserName+" , PASSWORD : "+RepHiddenWords(str(authPassword),"*")
 
 			//ログ
 			sdim tmpstr
@@ -222,13 +250,39 @@
 				DrawDebugString 0,16*12+(25-cnt)*16,NoteLine
 			loop
 			noteunsel
-
-			DrawDebugString 0,DispHeight-16,"F1:デバッグ情報の表示 , F2:セキュリティ情報の表示 , TAB:進行速度を1/4にする , PAGE UP:ログを上にスクロール , PAGE DOWN:ログを下にスクロール"
 		}
-		if CheckHitKey(KEY_INPUT_F2)==TRUE :SecViewFlag=TRUE:else:SecViewFlag=FALSE
+		if KeyFlag(KEY_INPUT_F2)==TRUE :SecViewFlag=TRUE:else:SecViewFlag=FALSE
+		if KeyFlag(KEY_INPUT_F4)==TRUE {
+			//API情報
+			DrawDebugString 0,16*0,"Portal Online"
+			DrawDebugString 0,16*1,"TYPE : PHP.WebAPI"
+			DrawDebugString 0,16*2,"HOST : "+SERVICE_HTTP
+			DrawDebugString 0,16*3,"SSLKEY : "+RepHiddenWords(str(SERVICE_ENCKEY),"*")
+			DrawDebugString 0,16*5,"APIkey_GetProfile = "+RepHiddenWords(str(APIkey_GetProfile),"*")
+			DrawDebugString 0,16*6,"APIKey_SendProfile = "+RepHiddenWords(str(APIKey_SendProfile),"*")
+			DrawDebugString 0,16*7,"APIkey_GetUpdate = "+RepHiddenWords(str(APIkey_GetUpdate),"*")
+			DrawDebugString 0,16*8,"APIkey_GetGlobalRanking = "+RepHiddenWords(str(APIkey_GetGlobalRanking),"*")
+			DrawDebugString 0,16*9,"APIkey_SendGlobalRanking = "+RepHiddenWords(str(APIkey_SendGlobalRanking),"*")
+			DrawDebugString 0,16*10,"APIkey_SendNewRecord = "+RepHiddenWords(str(APIkey_SendNewRecord),"*")
+			DrawDebugString 0,16*11,"APIkey_GetRecord = "+RepHiddenWords(str(APIkey_GetRecord),"*")
+
+			//ログ
+			sdim tmpstr
+			tmpstr=WebAPILogBuf
+			notesel tmpstr
+			repeat 25
+				noteget NoteLine,notemax-cnt+DebugLogScr
+				DrawDebugString 0,16*12+(25-cnt)*16,NoteLine
+			loop
+			noteunsel
+		}
+		if KeyFlag(KEY_INPUT_F1)==TRUE|KeyFlag(KEY_INPUT_F4)==TRUE {
+			DrawDebugString 0,DispHeight-16*2,"F1:デバッグ情報の表示 , F2:セキュリティ情報の表示 , F3:オートプレイを有効化 , F4:オンライン情報を表示"
+			DrawDebugString 0,DispHeight-16*1,"TAB:進行速度を1/4にする , PAGE UP:ログを上にスクロール , PAGE DOWN:ログを下にスクロール"
+		}
 		if FrameCount\2==0 {
-			if CheckHitKey(KEY_INPUT_PGUP)==TRUE : DebugLogScr--
-			if CheckHitKey(KEY_INPUT_PGDN)==TRUE : DebugLogScr++
+			if KeyFlag(KEY_INPUT_PGUP)==TRUE : DebugLogScr--
+			if KeyFlag(KEY_INPUT_PGDN)==TRUE : DebugLogScr++
 		}
 
 	ScreenFlip

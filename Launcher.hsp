@@ -32,7 +32,7 @@
 				notesave"Data/core_OnlineAuth.dat"
 				break
 			}
-			wait 100
+			wait 500
 		loop
 
 		gsel sSigninForm,-1
@@ -101,22 +101,6 @@
 	pos 952,12:button goto"",*Launcher_Close
 
 	onclick gosub*Launcher_ClickCheck
-
-	//オンラインアップデート
-	UpdateLauncherLog"オンラインアップデートの確認中"
-	dim OfflineModeFlag
-	WebAPI_Init sWebAPI
-	netinit
-	gosub*CheckOnlineUpdate
-
-	gosub*OnlineSignin
-	if onlineErrorFlag==TRUE {
-		UpdateLauncherLog"サインインに失敗しました。オフラインモード、ゲストモードで開始します。"
-		OfflineModeFlag=TRUE
-	}
-	gosub*LoadDetailRecord
-
-	UpdateLauncherLog""
 
 	objsize 256,64
 	objimage sButton_Launcher,256*0,0,256*2,0,256*1,0

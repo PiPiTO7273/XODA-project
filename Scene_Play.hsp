@@ -3,16 +3,16 @@
 
 	//キー判定
 		dim JudgeFlag,3
-		dim KeyFlag,4
-		if CheckHitKey(KEY_INPUT_D)==TRUE :KeyFlag(0)=TRUE
-		if CheckHitKey(KEY_INPUT_F)==TRUE :KeyFlag(1)=TRUE
-		if CheckHitKey(KEY_INPUT_J)==TRUE :KeyFlag(2)=TRUE
-		if CheckHitKey(KEY_INPUT_K)==TRUE :KeyFlag(3)=TRUE
+		dim JudgeKeyFlag,4
+		if KeyFlag(KEY_INPUT_D)==TRUE :JudgeKeyFlag(0)=TRUE
+		if KeyFlag(KEY_INPUT_F)==TRUE :JudgeKeyFlag(1)=TRUE
+		if KeyFlag(KEY_INPUT_J)==TRUE :JudgeKeyFlag(2)=TRUE
+		if KeyFlag(KEY_INPUT_K)==TRUE :JudgeKeyFlag(3)=TRUE
 
 	//デバッグキー判定
 		dim DebugKeyFlag,12
 		repeat 12
-			DebugKeyFlag(cnt)=CheckHitKey(KEY_INPUT_F3+cnt)
+			DebugKeyFlag(cnt)=KeyFlag(KEY_INPUT_F3+cnt)
 			if DebugbfKeyFlag(cnt)==FALSE&DebugKeyFlag(cnt)==TRUE {
 				switch cnt
 					case DEBUG_AUTOPLAY
@@ -27,20 +27,24 @@
 	//判定開始フラグ
 		repeat 4
 			//押し始め
-			if bfKeyFlag(cnt)==FALSE&KeyFlag(cnt)==TRUE :JudgeFlag(ConvKeyIDtoLaneID(cnt))=TRUE
+			if JudgebfKeyFlag(cnt)==FALSE&JudgeKeyFlag(cnt)==TRUE :JudgeFlag(ConvKeyIDtoLaneID(cnt))=TRUE
 			//離した
-			if HoldFlag(ConvKeyIDtoLaneID(cnt))==TRUE&bfKeyFlag(cnt)==TRUE&KeyFlag(cnt)==FALSE :JudgeFlag(ConvKeyIDtoLaneID(cnt))=TRUE
+			if HoldFlag(ConvKeyIDtoLaneID(cnt))==TRUE&JudgebfKeyFlag(cnt)==TRUE&JudgeKeyFlag(cnt)==FALSE :JudgeFlag(ConvKeyIDtoLaneID(cnt))=TRUE
 
-			if KeyFlag(cnt)==TRUE {
+			if JudgeKeyFlag(cnt)==TRUE {
 				LaneEffCount(ConvKeyIDtoLaneID(cnt))=0
 			}
-			bfKeyFlag(cnt)=KeyFlag(cnt)
+			JudgebfKeyFlag(cnt)=JudgeKeyFlag(cnt)
 		loop
 
 	//判定処理
 		dim ProgLaneID
 		repeat 3
 			ProgLaneID=cnt
+			if stgClearEffFlag==TRUE {
+				//ゲームオーバー処理済み
+				break
+			}
 			if JudgeFlag(cnt)==TRUE {
 				//判定処理
 				dim NearNoteDif:dim NearNoteID:dim curNoteDif
@@ -73,6 +77,10 @@
 						if abs(NearNoteDif)<JUDGE_WIDTH_EXCELLENT :JudgeRes=JUDGE_RES_EXCELLENT
 
 						UpdateJudgeValue JudgeRes
+
+						if JudgeRes!JUDGE_RES_EXCELLENT&JudgeRes!JUDGE_RES_EMPTY {
+							if NearNoteDif<0 :numEarly++:else:numLate++
+						}
 
 					//ホールド判定
 						if hitobjType(NearNoteID)==HITOBJ_HOLDSTART {
@@ -340,6 +348,11 @@
 				swend
 				DrawGraph 580+7*cnt,688,hGaugeImg,TRUE
 			loop
+
+			if (GaugeType==GAUGE_HARD|GaugeType==GAUGE_MADNESS)&curGaugeVal<=0.0 {
+				//ゲームオーバー処理
+				stgClearEffFlag=TRUE
+			}
 		}
 
 	//レーンエフェクト
@@ -357,7 +370,7 @@
 		repeat hitobjMax
 			if hitJudgeFlag(cnt)==TRUE :continue
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-			hitobjPosition(cnt)+(1000.0/60.0*curBPM/1000.0)
+			hitobjPosition(cnt)+double(1000.0/60.0*curBPM/1000.0)
 			hitobjDrawPos(cnt)=200-(hitobjPosition(cnt)*AddSpeed)
 			dim DrawobjPosX:dim DrawobjPosY:dim hitobjSize
 			hitobjSize=int(48.0*(double(aqPlayOption(ID_ObjSize)*10+10)/100.0))
@@ -366,20 +379,7 @@
 			
 			//オブジェクト画像準備
 			dim hObjImgArr
-			switch aqPlayOption(ID_ObjSkin)
-				case ID_OBJ_SIMPLE
-					hObjImgArr(HITOBJ_NORMAL)=hdxarr_Char_Simple(hitobjLaneID(cnt))
-					hObjImgArr(HITOBJ_HOLDSTART)=hdxarr_Char_Simple_Hold(3*hitobjLaneID(cnt))
-					hObjImgArr(HITOBJ_HOLDEND)=hdxarr_Char_Simple_Hold(3*hitobjLaneID(cnt)+2)
-					hObjImgArr(HITOBJ_HOLDEND+1)=hdxarr_Char_Simple_Hold(3*hitobjLaneID(cnt)+1)
-				swbreak
-				case ID_OBJ_SLIME
-					hObjImgArr(HITOBJ_NORMAL)=hdxarr_Char_Slime((SceneCount/4)\9+hitobjLaneID(cnt)*9)
-					hObjImgArr(HITOBJ_HOLDSTART)=hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3)
-					hObjImgArr(HITOBJ_HOLDEND)=hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3+2)
-					hObjImgArr(HITOBJ_HOLDEND+1)=hdxarr_Char_Slime_Hold(9*hitobjLaneID(cnt)+3*(SceneCount/4)\3+1)
-				swbreak
-			swend
+			SetObjImgArr hObjImgArr,hitobjLaneID(cnt)
 
 			//オブジェクト描画
 			switch hitobjType(cnt)
@@ -439,10 +439,12 @@
 		loop
 
 	//終了判定
-		stgClearEffFlag=TRUE
-		repeat hitobjmax
-			if hitJudgeFlag(cnt)==FALSE :stgClearEffFlag=FALSE
-		loop
+		if stgClearEffFlag==FALSE {
+			stgClearEffFlag=TRUE
+			repeat hitobjmax
+				if hitJudgeFlag(cnt)==FALSE :stgClearEffFlag=FALSE
+			loop
+		}
 
 	//自機
 		if SceneCount>25 {
@@ -450,10 +452,7 @@
 			setease -64,100,ease_cubic_out
 			EasePosX=getease(SceneCount-25,60)
 
-			dim hCursorGraph:hCursorGraph=-1
-			switch aqPlayOption(ID_CursorSkin)
-				case ID_CURSOR_SHUTTLE:hCursorGraph=hdximg(iCursor_Shuttle):swbreak
-			swend
+			dim hCursorGraph:hCursorGraph=GetCursorHandle()
 			if hCursorGraph!-1 {
 				DrawGraph EasePosX,DispHeight/2-64/2,hCursorGraph,TRUE
 			}
@@ -599,10 +598,10 @@
 							if curGaugeVal>70.0 :stgClearType=ID_Clear
 						swbreak
 						case GAUGE_HARD		//ハードクリア
-							if curGaugeVal>=0.0 :stgClearType=ID_Clear
+							if curGaugeVal>0.0 :stgClearType=ID_Clear
 						swbreak
 						case GAUGE_MADNESS		//マドネスクリア
-							if curGaugeVal>=0.0 :stgClearType=ID_Clear
+							if curGaugeVal>0.0 :stgClearType=ID_Clear
 						swbreak
 					swend
 					if hitobjMax==curCombo :stgClearType=ID_Fullcombo
@@ -717,7 +716,7 @@
 		loop
 
 	//カウンタ(ms)
-		PlayCountMS=GetNowCount()-PlayStartMS-1000*5+JudgeOffsetMS
+		PlayCountMS=GetNowCount()-PlayStartMS-1000*5
 		;PlayCountMS=int(double(SceneCount)*1000.0/60.0)-1000*5
 		JudgeResCount++
 		comboBurstCount++

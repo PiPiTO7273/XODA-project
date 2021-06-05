@@ -180,6 +180,24 @@
 		hdximg(iIcon_IR_best)=LoadGraph("Data/Image/Icon_IR_best.png")
 		hdximg(iMovie_Decide)=LoadGraph("Data/Movie/bg_Decide.ogv")
 
+		hdximg(iBadge_SSS)=LoadGraph("Data/Image/Badge_SSS.png")
+		hdximg(iBadge_SS)=LoadGraph("Data/Image/Badge_SS.png")
+		hdximg(iBadge_S)=LoadGraph("Data/Image/Badge_S.png")
+		hdximg(iBadge_AAA)=LoadGraph("Data/Image/Badge_AAA.png")
+		hdximg(iBadge_AA)=LoadGraph("Data/Image/Badge_AA.png")
+		hdximg(iBadge_A)=LoadGraph("Data/Image/Badge_A.png")
+		hdximg(iBadge_B)=LoadGraph("Data/Image/Badge_B.png")
+		hdximg(iBadge_C)=LoadGraph("Data/Image/Badge_C.png")
+		hdximg(iBadge_D)=LoadGraph("Data/Image/Badge_D.png")
+		hdximg(iBadge_AllEx)=LoadGraph("Data/Image/Badge_AllExcellent.png")
+		hdximg(iBadge_FullCombo)=LoadGraph("Data/Image/Badge_FullCombo.png")
+		hdximg(iBadge_Madness)=LoadGraph("Data/Image/Badge_Madness.png")
+		hdximg(iBadge_Hard)=LoadGraph("Data/Image/Badge_Hard.png")
+		hdximg(iBadge_Clear)=LoadGraph("Data/Image/Badge_Clear.png")
+		hdximg(iBadge_Assist)=LoadGraph("Data/Image/Badge_Assist.png")
+		hdximg(iBadge_Failed)=LoadGraph("Data/Image/Badge_Failed.png")
+		hdximg(iBadge_NoData)=LoadGraph("Data/Image/Badge_NoData.png")
+
 		hdximg(ibg_Option_Preview)=LoadGraph("Data/Image/bg_Option_Preview.png")
 		hdximg(ibg_Option_Window)=LoadGraph("Data/Image/bg_Option_Window.png")
 		hdximg(ibg_Option_SongInfo)=LoadGraph("Data/Image/bg_Option_SongInfo.png")
@@ -255,7 +273,20 @@
 		loop
 
 	//レイヤー関連
+		if hdximg(iLayer_Scene)!0 :DeleteGraph hdximg(iLayer_Scene)
 		hdximg(iLayer_Scene)=MakeScreen(DispWidth,DispHeight,TRUE)
+
+	//ビジュアライザー用スクリーン
+		if hdximg(iPlay_Visualizer)!0 :DeleteGraph hdximg(iPlay_Visualizer)
+		hdximg(iPlay_Visualizer)=MakeScreen(1024,512,TRUE)
+
+	//IRのバッファ
+		if hdximg(iLayer_Detail_IR)!0 :DeleteGraph hdximg(iLayer_Detail_IR)
+		hdximg(iLayer_Detail_IR)=MakeScreen(400,330,TRUE)
+
+	//プレイヤーデータのバッファ
+		if hdximg(iUI_tx_Profile)!0 :DeleteGraph hdximg(iUI_tx_Profile)
+		hdximg(iUI_tx_Profile)=MakeScreen(300,120,TRUE)
 
 	return
 

@@ -5,9 +5,11 @@
 #define CodeName			"MOCHI SLIME"
 #define BuildVersion_Major	0
 #define BuildVersion_Minor	2
-#define SplashTime			3
+#define SplashTime			0
 #define DebugConsoleWindow	0
 #define HTTPhostWindow		0
+#define FullScreen			0
+#define DecideWaitTime		5
 
 //フォントハンドル
 #enum fSystem		=	0
@@ -152,6 +154,24 @@
 #enum iLayer_Detail_Terminal
 #enum iMovie_Decide
 
+#enum iBadge_SSS
+#enum iBadge_SS
+#enum iBadge_S
+#enum iBadge_AAA
+#enum iBadge_AA
+#enum iBadge_A
+#enum iBadge_B
+#enum iBadge_C
+#enum iBadge_D
+#enum iBadge_AllEx
+#enum iBadge_FullCombo
+#enum iBadge_Madness
+#enum iBadge_Hard
+#enum iBadge_Clear
+#enum iBadge_Assist
+#enum iBadge_Failed
+#enum iBadge_NoData
+
 #enum ibg_Option_Preview
 #enum ibg_Option_Window
 #enum ibg_Option_SongInfo
@@ -263,7 +283,7 @@
 #define RANK_SCORE_A	8000000
 #define RANK_SCORE_B	5000000
 #define RANK_SCORE_C	2500000
-#define RANK_SCORE_D	1000000
+#define RANK_SCORE_D	0
 
 #enum RANK_ID_SSS		=	0
 #enum RANK_ID_SS

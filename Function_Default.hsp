@@ -40,6 +40,11 @@ goto*Startup
 		loop
 
 		noteunsel
+
+		repeat varsize(resValue)
+			if peek(resValue,cnt)==10 :poke resValue,cnt,0
+			if peek(resValue,cnt)==13 :poke resValue,cnt,0
+		loop
 		return resValue
 #global
 
@@ -305,9 +310,15 @@ goto*Startup
 	pos 100,0:input WebAPIControl_InputURL,480,25,0
 	pos 0,25:axobj IEobj,"Shell.Explorer.2",640,465
 	comevent IEevent,IEobj,"{34A715A0-6587-11D0-924A-0020AFC7AC4D}",*WebAPIControl_OnEvent
+	sdim WebAPILogBuf
 	AddDebugConsole STYLE_NORMAL,"WebAPIの実行環境を初期化しました。"
 	return
+#deffunc WebAPI_DrawConnecting
+	AddDebugConsole STYLE_WARNING,"Portal APIの同期処理により、アプリケーションが応答していません。"
+	return
 #defcfunc WebAPI_PostandGet str _url,int _windowid
+	if length(hdximg)!1 :WebAPI_DrawConnecting
+	WebAPILogBuf+"[POST] "+_url+"\n"
 	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを発行しました \""+_url+"\""
 	IEobj->"Navigate" _url
 	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを待機中... \""+_url+"\""
@@ -317,12 +328,16 @@ goto*Startup
 	IEmes=IEmes("body")
 	IErawdata=IEmes("innerHTML")
 	ConvBR IErawdata
+	WebAPILogBuf+"[GET] "+_url+"\n"
 	return IErawdata
 #deffunc WebAPI_Post str _url,int _windowid
+	if length(hdximg)!1 :WebAPI_DrawConnecting
+	WebAPILogBuf+"[POST] "+_url+"\n"
 	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを発行しました \""+_url+"\""
 	IEobj->"Navigate" _url
 	return
 #defcfunc WebAPI_Get
+	if length(hdximg)!1 :WebAPI_DrawConnecting
 	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを待機中... \""+_url+"\""
 	repeat:wait 10:if IEobj("Busy")=0 {break}:loop	//待機
 	IEmes=IEobj("Document")
@@ -330,12 +345,41 @@ goto*Startup
 	IErawdata=IEmes("innerHTML")
 	ConvBR IErawdata
 	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを受信しました \""+_url+"\""
+	WebAPILogBuf+"[GET]  "+_url+"\n"
 	return IErawdata
 
 #deffunc ConvBR var _raw
 	strrep _raw,"<BR>","\n"
 	strrep _raw,"<br>","\n"
 	strrep _raw,"</br>","\n"
+	return
+
+#deffunc SendProfile str _obj,str _val
+	AddDebugConsole STYLE_NORMAL,"セーブデータを更新:"+WebAPI_PostandGet(SERVICE_HTTP+"/API-SendProfile.php?key="+APIKey_SendProfile+"&id="+authUserName+"&password="+authPassword+"&decode="+SERVICE_ENCKEY+"&object="+_obj+"&value="+_val,sWebAPI)
+	return
+
+#defcfunc GetCursorHandle
+	switch aqPlayOption(ID_CursorSkin)
+		case ID_CURSOR_SHUTTLE:return hdximg(iCursor_Shuttle):swbreak
+	swend
+	return -1
+
+#deffunc SetObjImgArr array _arr,int _id
+	switch aqPlayOption(ID_ObjSkin)
+		case ID_OBJ_SIMPLE
+			_arr(HITOBJ_NORMAL)=hdxarr_Char_Simple(_id)
+			_arr(HITOBJ_HOLDSTART)=hdxarr_Char_Simple_Hold(3*_id)
+			_arr(HITOBJ_HOLDEND)=hdxarr_Char_Simple_Hold(3*_id+2)
+			_arr(HITOBJ_HOLDEND+1)=hdxarr_Char_Simple_Hold(3*_id+1)
+		swbreak
+		case ID_OBJ_SLIME
+			_arr(HITOBJ_NORMAL)=hdxarr_Char_Slime((SceneCount/4)\9+_id*9)
+			_arr(HITOBJ_HOLDSTART)=hdxarr_Char_Slime_Hold(9*_id+3*(SceneCount/4)\3)
+			_arr(HITOBJ_HOLDEND)=hdxarr_Char_Slime_Hold(9*_id+3*(SceneCount/4)\3+2)
+			_arr(HITOBJ_HOLDEND+1)=hdxarr_Char_Slime_Hold(9*_id+3*(SceneCount/4)\3+1)
+		swbreak
+	swend
+
 	return
 
 *WebAPIControl_Back
@@ -382,6 +426,8 @@ goto*Startup
 	return
 
 *OnlineSignin
+
+	gosub*LoadSkillData
 
 	//各種設定項目の初期化
 	gosub*SetItemTable
@@ -447,20 +493,25 @@ goto*Startup
 				//プレイオプション
 				dim aqPlayOption,9
 
+				UpdateLauncherLog"プレイヤーデータの読み込み中・・・"
+
 				//初回登録
-				if instr(saveInfobuf,0,"XODA.RATE")==-1 :saveInfobuf+"XODA.RATE=0.0\n"
-				if instr(saveInfobuf,0,"XODA.LEVEL")==-1 :saveInfobuf+"XODA.LEVEL=0\n"
-				if instr(saveInfobuf,0,"XODA.BADGE")==-1 :saveInfobuf+"XODA.BADGE=\n"
-				if instr(saveInfobuf,0,"XODA.LASTPLAY")==-1 :saveInfobuf+"XODA.LASTPLAY=-\n"
-				if instr(saveInfobuf,0,"XODA.NUMCLEAR")==-1 :saveInfobuf+"XODA.NUMCLEAR=\n"
-				if instr(saveInfobuf,0,"XODA.NUMFULLCOMBO")==-1 :saveInfobuf+"XODA.NUMFULLCOMBO=\n"
-				if instr(saveInfobuf,0,"XODA.NUMALLEX")==-1 :saveInfobuf+"XODA.NUMALLEX=\n"
-				if instr(saveInfobuf,0,"XODA.NUMTICKET")==-1 :saveInfobuf+"XODA.NUMTICKET=\n"
-				if instr(saveInfobuf,0,"XODA.HISTORY")==-1 :saveInfobuf+"XODA.HISTORY=++++\n"
-				if instr(saveInfobuf,0,"XODA.PARTNER.SELECT")==-1 :saveInfobuf+"XODA.PARTNER.SELECT={empty}\n"
+				if instr(saveInfobuf,0,"XODA.RATE")==-1 :saveInfobuf+"XODA.RATE=0.0\n":SendProfile"XODA.RATE","0.0"
+				if instr(saveInfobuf,0,"XODA.LEVEL")==-1 :saveInfobuf+"XODA.LEVEL=0\n":SendProfile"XODA.LEVEL","0"
+				if instr(saveInfobuf,0,"XODA.BADGE")==-1 :saveInfobuf+"XODA.BADGE=\n":SendProfile"XODA.BADGE",""
+				if instr(saveInfobuf,0,"XODA.LASTPLAY")==-1 :saveInfobuf+"XODA.LASTPLAY=-\n":SendProfile"XODA.LASTPLAY","-"
+				if instr(saveInfobuf,0,"XODA.NUMCLEAR")==-1 :saveInfobuf+"XODA.NUMCLEAR=\n":SendProfile"XODA.NUMCLEAR",""
+				if instr(saveInfobuf,0,"XODA.NUMFULLCOMBO")==-1 :saveInfobuf+"XODA.NUMFULLCOMBO=\n":SendProfile"XODA.NUMFULLCOMBO",""
+				if instr(saveInfobuf,0,"XODA.NUMALLEX")==-1 :saveInfobuf+"XODA.NUMALLEX=\n":SendProfile"XODA.NUMALLEX",""
+				if instr(saveInfobuf,0,"XODA.NUMTICKET")==-1 :saveInfobuf+"XODA.NUMTICKET=\n":SendProfile"XODA.NUMTICKET",""
+				if instr(saveInfobuf,0,"XODA.HISTORY")==-1 :saveInfobuf+"XODA.HISTORY=++++\n":SendProfile"XODA.HISTORY","++++"
+				if instr(saveInfobuf,0,"XODA.PARTNER.SELECT")==-1 :saveInfobuf+"XODA.PARTNER.SELECT={empty}\n":SendProfile"XODA.PARTNER.SELECT","{empty}"
 
 				repeat 9
-					if instr(saveInfobuf,0,"XODA.PLAYOPTION."+cnt)==-1 :saveInfobuf+"XODA.PLAYOPTION."+cnt+"="+Item_DefaultOptionValue(cnt)+"\n"
+					if instr(saveInfobuf,0,"XODA.PLAYOPTION."+cnt)==-1 {
+						saveInfobuf+"XODA.PLAYOPTION."+cnt+"="+Item_DefaultOptionValue(cnt)+"\n"
+						SendProfile"XODA.PLAYOPTION."+cnt,str(Item_DefaultOptionValue(cnt))
+					}
 				loop
 
 				aqName=GetINIvalue(saveInfobuf,"SAVEDATA","USERNAME")						//ユーザー名
@@ -579,9 +630,8 @@ goto*Startup
 	alCopyImageToDXBuf i2D_Profile,hdximg(iUI_tx_Profile)
 	*/
 
-	if hdximg(iUI_tx_Profile)!0 :DeleteGraph hdximg(iUI_tx_Profile)
-	hdximg(iUI_tx_Profile)=MakeScreen(300,120,TRUE)
-		SetDrawScreen hdximg(iUI_tx_Profile)
+	SetDrawScreen hdximg(iUI_tx_Profile)
+	ClearDrawScreen
 		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 		ChangeFontType DX_FONTTYPE_ANTIALIASING_4X4
 		ChangeFont"Pier Sans"
@@ -665,10 +715,11 @@ goto*Startup
 						Libarr_IRrank(TargetArrLevID,TargetArrSelID,TargetIRrank)=int(TargetIRrank)
 						Libarr_IRname(TargetArrLevID,TargetArrSelID,TargetIRrank)=TargetIRname
 						Libarr_IRscore(TargetArrLevID,TargetArrSelID,TargetIRrank)=int(TargetIRscore)
-						AddDebugConsole STYLE_NORMAL,"ランキングスコアを読み込みました。["+TargetArrLevID+","+TargetArrSelID+","+TargetIRrank+"]"
+						AddDebugConsole STYLE_NORMAL,"ランキングスコアを読み込みました。["+TargetArrLevID+","+TargetArrSelID+","+TargetIRrank+","+TargetIRname+","+TargetIRscore+"]"
 						if TargetIRname==aqName {
 							Libarr_MyIRrank(TargetArrLevID,TargetArrSelID)=int(TargetIRrank)
 							Libarr_MyIRscore(TargetArrLevID,TargetArrSelID)=int(TargetIRscore)
+							AddDebugConsole STYLE_NORMAL,"自己ベストスコアを読み込みました。["+TargetArrLevID+","+TargetArrSelID+","+TargetIRrank+","+TargetIRname+"]"
 						}
 					}
 				loop

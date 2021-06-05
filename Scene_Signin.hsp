@@ -2,8 +2,6 @@
 *Scene_Init_Signin
 
 	dim curButtonPos		//ボタンのカーソル位置
-	dim KeyFlag,2			//キーフラグ
-	dim bfKeyFlag,2		//前フレームのキーフラグ
 	dim decideFlag			//決定キーが押されたフラグ
 	dim decideFrameCount	//決定キーが押されてからの経過フレーム
 
@@ -12,24 +10,18 @@
 *Scene_Signin
 
 	//キー判定
-		KeyFlag(0)=CheckHitKey(KEY_INPUT_LEFT)
-		KeyFlag(1)=CheckHitKey(KEY_INPUT_RIGHT)
-
-		if bfKeyFlag(0)==0&KeyFlag(0)==1 {
+		if bfKeyFlag(KEY_INPUT_LEFT)==0&KeyFlag(KEY_INPUT_LEFT)==1 {
 			PlaySE hbasssnd(sndUI_Cursor)
 			curButtonPos--
 		}
-		if bfKeyFlag(1)==0&KeyFlag(1)==1 {
+		if bfKeyFlag(KEY_INPUT_RIGHT)==0&KeyFlag(KEY_INPUT_RIGHT)==1 {
 			PlaySE hbasssnd(sndUI_Cursor)
 			curButtonPos++
 		}
 		if curButtonPos<0 :curButtonPos=1
 		if curButtonPos>1 :curButtonPos=0
 
-		bfKeyFlag(0)=KeyFlag(0)
-		bfKeyFlag(1)=KeyFlag(1)
-
-		if CheckHitKey(KEY_INPUT_RETURN)==TRUE :decideFlag=TRUE
+		if KeyFlag(KEY_INPUT_RETURN)==TRUE :decideFlag=TRUE
 		if decideFlag==TRUE&decideFrameCount==0 {
 			if curButtonPos==1 {
 				onResetFlag=TRUE
