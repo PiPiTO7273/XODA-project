@@ -136,7 +136,12 @@
 		dim DetailWindowChangeFlag	//詳細ウィンドウのページ切り替えフラグ
 		dim bfDetailWindowChangeFlag	//前フレームのページ切り替えフラグ
 		dim JumpSceneFlag			//他シーンへのジャンプフラグ
+		dim JumpSceneID			//他シーンのID
 		dim JumpSceneCount			//他シーンへのジャンプを行うカウンタ
+
+	//セーブデータから復元
+		CursorSelID=aqMusicSelect_SelID
+		CursorLevID=aqMusicSelect_LevID
 
 	WebAPI_Post SERVICE_HTTP+"/API-GetGlobalRanking.php?key="+APIkey_GetGlobalRanking,sWebAPI
 	gosub*Create_AQProfileBuf
@@ -247,11 +252,13 @@
 			BASS_StreamFree hBGMpreview
 		}
 	loop
+	dim hBGMFX,3*Libarr_Max
 	repeat Libarr_Max
 		TargetArrSelID=cnt
 		repeat 3
 			TargetArrLevID=cnt
 			hBGMpreview(3*TargetArrSelID+TargetArrLevID)=BASS_StreamCreateFile(FALSE,"Data/Package/"+Libarr_ChartID(TargetArrLevID,TargetArrSelID)+"/preview.wav")
+			hBGMFX(3*TargetArrSelID+TargetArrLevID)=SetAudioFXtohandle(hBGMpreview(3*TargetArrSelID+TargetArrLevID),aqFxid)
 		loop
 	loop
 
@@ -309,11 +316,18 @@
 
 		//決定キー判定
 			if KeyFlag(KEY_INPUT_RETURN)==TRUE {
-				repeat 3*Libarr_Max
-					BASS_ChannelStop hBGMpreview(cnt)
-				loop
-				BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.7)
-				decideFlag=TRUE
+				exist"Data/Package/"+Libarr_ChartID(CursorLevID,CursorSelID)+"/audio.mp3"
+				if strsize==-1 {
+					dim DialogCount:dim DialogFlag
+					PlaySE hbasssnd(sndUI_Error)
+					gosub*Scene_MusicSelect_OpenError
+				} else {
+					repeat 3*Libarr_Max
+						BASS_ChannelStop hBGMpreview(cnt)
+					loop
+					BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.7)
+					decideFlag=TRUE
+				}
 			}
 
 		//ページ切り替えキー判定
@@ -326,12 +340,16 @@
 
 		//オプション
 			if KeyFlag(KEY_INPUT_D)==TRUE&JumpSceneFlag==FALSE {
-				repeat 3*Libarr_Max
-					BASS_ChannelStop hBGMpreview(cnt)
-				loop
-				BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.7)
 				JumpSceneCount=0
 				JumpSceneFlag=TRUE
+				JumpSceneID=ID_MusicSelect_Option
+				PlaySE hbasssnd(sndUI_Decide)
+			}
+		//エフェクト
+			if KeyFlag(KEY_INPUT_F)==TRUE&JumpSceneFlag==FALSE {
+				JumpSceneCount=0
+				JumpSceneFlag=TRUE
+				JumpSceneID=ID_MusicSelect_Effect
 				PlaySE hbasssnd(sndUI_Decide)
 			}
 
@@ -378,30 +396,7 @@
 		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
 		DrawGraph 0,0,hdximg(iBackground),FALSE
 
-		if JumpSceneFlag==FALSE {
-			//ナビゲーション
-				if decideFlag==FALSE {
-					setease 0,256,ease_cubic_out
-					EaseAlpha=getease(SceneCount,10)
-					setease -32,0,ease_cubic_out
-					EasePosX=getease(SceneCount,10)
-				} else {
-					setease 256,0,ease_cubic_out
-					EaseAlpha=getease(decideFrameCount-10,10)
-					setease 0,-32,ease_cubic_out
-					EasePosX=getease(decideFrameCount-10,10)
-				}
-				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
-				DrawGraph 32+EasePosX,16,hdximg(iNav_MusicSelect),TRUE
-
-			//案内文字列（背景）
-				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-				DrawGraph 32,67,hdximg(ibg_Nav),TRUE
-
-			//案内文字列
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-				DrawStringToHandle 48,72,"プレーする楽曲を選択してください。",GetColor(230,230,230),hdxfont(fNoto_b12)
-		}
+		gosub*DrawMusicSelectNav
 
 	//----- 以下、シーン別レイヤー -----
 		SetDrawScreen hdximg(iLayer_Scene)
@@ -827,21 +822,596 @@
 				SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
 				DrawBox 0,0,DispWidth,DispHeight,GetColor(0,0,0),1
 			//ゲームプレイに移行
-			BASS_ChannelStop hbasssnd(bgmMain)
-			sdim chartFileName
-			chartFileName=Libarr_ChartID(CursorLevID,CursorSelID)
-			gosub*LoadChart
-			gosub*Scene_Init_Play
-			curSceneID=ID_Play
-			gosub*InitScene
-			PlayStartMS=GetNowCount()
+				gosub*Scene_Free_MusicSelect
+				BASS_ChannelStop hbasssnd(bgmMain)
+				sdim chartFileName
+				chartFileName=Libarr_ChartID(CursorLevID,CursorSelID)
+				gosub*LoadChart
+				gosub*Scene_Init_Play
+				curSceneID=ID_Play
+				gosub*InitScene
+				PlayStartMS=GetNowCount()
 		}
 		if SceneCount==10 :PlaySE hbasssnd(vocMusicSel)
 		if JumpSceneFlag==TRUE :JumpSceneCount++
 		if JumpSceneCount>20 {
-			gosub*Scene_Init_MusicSelect_Option
-			curSceneID=ID_MusicSelect_Option
+			gosub*Scene_Free_MusicSelect
+			BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.7)
+			switch JumpSceneID
+				case ID_MusicSelect_Option:gosub*Scene_Init_MusicSelect_Option:swbreak
+				case ID_MusicSelect_Effect:gosub*Scene_Init_MusicSelect_Effect:swbreak
+			swend
+			curSceneID=JumpSceneID
 			gosub*InitScene
 		}
 
+	return
+
+*Scene_Free_MusicSelect
+	//セーブデータの同期
+		aqMusicSelect_SelID=CursorSelID
+		aqMusicSelect_LevID=CursorLevID
+		SendProfile"XODA.MUSICSELECT.ID",str(CursorSelID)
+		SendProfile"XODA.MUSICSELECT.LEVEL",str(CursorLevID)
+
+	//エフェクトの削除
+		repeat 3*Libarr_Max
+			BASS_ChannelRemoveFX hBGMpreview(cnt),hBGMFX(cnt)
+			BASS_FXReset hBGMFX(cnt)
+			BASS_ChannelStop hBGMpreview(cnt)
+		loop
+	return
+
+*Scene_Init_MusicSelect_Option
+
+	//変数初期化
+	dim ItemCursorPos		//カーソル位置
+	dim ChangeItemFlag,9	//値を変更したフラグ
+
+	return
+
+*Scene_MusicSelect_Option
+
+	//キー判定
+
+		if KeyFlag(KEY_INPUT_LEFT)==TRUE&bfKeyFlag(KEY_INPUT_LEFT)==FALSE {
+			aqPlayOption(ItemCursorPos)--
+			if aqPlayOption(ItemCursorPos)<0 :aqPlayOption(ItemCursorPos)=Item_NumOptionValue(ItemCursorPos)-1
+			ChangeItemFlag(ItemCursorPos)=TRUE
+			PlaySE hbasssnd(sndUI_Cursor)
+		}
+		if KeyFlag(KEY_INPUT_RIGHT)==TRUE&bfKeyFlag(KEY_INPUT_RIGHT)==FALSE {
+			aqPlayOption(ItemCursorPos)++
+			if aqPlayOption(ItemCursorPos)>Item_NumOptionValue(ItemCursorPos)-1 :aqPlayOption(ItemCursorPos)=0
+			ChangeItemFlag(ItemCursorPos)=TRUE
+			PlaySE hbasssnd(sndUI_Cursor)
+		}
+		if KeyFlag(KEY_INPUT_UP)==TRUE&bfKeyFlag(KEY_INPUT_UP)==FALSE {
+			ItemCursorPos--
+			if ItemCursorPos<0 :ItemCursorPos=8
+			PlaySE hbasssnd(sndUI_Cursor)
+		}
+		if KeyFlag(KEY_INPUT_DOWN)==TRUE&bfKeyFlag(KEY_INPUT_DOWN)==FALSE {
+			ItemCursorPos++
+			if ItemCursorPos>8 :ItemCursorPos=0
+			PlaySE hbasssnd(sndUI_Cursor)
+		}
+
+		if (KeyFlag(KEY_INPUT_RETURN)==TRUE|KeyFlag(KEY_INPUT_D)==TRUE)&decideFlag==FALSE {
+			decideFlag=TRUE
+			decideFrameCount=0
+			PlaySE hbasssnd(sndUI_Cancel)
+		}
+
+	//背景
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawGraph 0,0,hdximg(iBackground),FALSE
+
+	//プレビュー
+		if decideFlag==FALSE {
+			setease 100,150,ease_cubic_out
+			EaseHeight=getease(SceneCount,20)
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,20)
+		} else {
+			setease 150,100,ease_cubic_out
+			EaseHeight=getease(decideFrameCount,20)
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(decideFrameCount,20)
+		}
+		DrawExtendGraph 0,16+150/2-EaseHeight/2,DispWidth,15+150/2+EaseHeight/2,hdximg(ibg_Option_Preview),TRUE
+
+	//左ウィンドウ
+		if decideFlag==FALSE {
+			setease -640,32,ease_cubic_out
+			EasePosX=getease(SceneCount,25)
+		} else {
+			setease 32,-640,ease_cubic_out
+			EasePosX=getease(decideFrameCount,25)
+		}
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph EasePosX,176,hdximg(ibg_Option_Window),TRUE
+
+		//描画
+		if decideFlag==FALSE {
+			if SceneCount>10 {
+				setease 0,256,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-10,20)
+				setease -64,0,ease_cubic_out
+				EasePosX=getease(SceneCount-10,20)
+					repeat 9
+						DrawStringToHandle 72+EasePosX,193+38*cnt,Item_OptionName(cnt),GetColor(30,30,30),hdxfont(fNoto_m14)
+						DrawStringXCenterToHandle 332+EasePosX,193+38*cnt,Item_OptionValue(cnt,aqPlayOption(cnt)),300,GetColor(30,30,30),hdxfont(fNoto_m14)
+					loop
+					DrawStringToHandle 72+EasePosX,534,Item_OptionValue(ItemCursorPos,aqPlayOption(ItemCursorPos))+" - "+Item_OptionDescription(ItemCursorPos,aqPlayOption(ItemCursorPos)),GetColor(30,30,30),hdxfont(fNoto_m16)
+			}
+			if SceneCount>20 {
+				setease 0,256,ease_linear+ease_loop
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-20,10)
+				DrawGraph 52,182+38*ItemCursorPos,hdximg(iCursor_Option),TRUE
+			}
+		}
+
+	//右ウィンドウ
+		if decideFlag==FALSE {
+			setease DispWidth,780,ease_cubic_out
+			EasePosX=getease(SceneCount,25)
+		} else {
+			setease 780,DispWidth,ease_cubic_out
+			EasePosX=getease(decideFrameCount,25)
+		}
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph EasePosX,180,hdximg(ibg_Option_SongInfo),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		//曲名
+			DrawStringToHandle EasePosX+820-780,225,Libarr_Title(CursorLevID,CursorSelID),GetColor(40,40,40),hdxfont(fNoto_m24)
+		//アーティスト名
+			DrawStringToHandle EasePosX+820-780,269,Libarr_Artist(CursorLevID,CursorSelID),GetColor(40,40,40),hdxfont(fNoto_m16)
+
+		//BPM
+			DrawStringToHandle EasePosX+858-780,312,strf("%.1f",str(Libarr_DefBPM(CursorLevID,CursorSelID))),GetColor(40,40,40),hdxfont(fNoto_m16)
+		//SPEED値
+			DrawStringToHandle EasePosX+923-780,312,strf("%.1f",str(0.5+double(aqPlayOption(ID_ObjSpeed))*0.1)),GetColor(40,40,40),hdxfont(fNoto_m16)
+		//速度値
+			DrawStringToHandle EasePosX+990-780,312,strf("%.2f",str((0.5+double(aqPlayOption(ID_ObjSpeed))*0.1)*Libarr_DefBPM(CursorLevID,CursorSelID))),GetColor(8,181,151),hdxfont(fNoto_m16)
+
+	//プレビュー
+		if decideFlag==FALSE {
+			//カーソル
+				dim hCursorGraph:hCursorGraph=GetCursorHandle()
+				if hCursorGraph!-1 {
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+					setease -64,100,ease_cubic_out
+					DrawGraph getease(SceneCount-25,25),55,hCursorGraph,TRUE
+				}
+			//オブジェクト
+				if SceneCount>25 {
+					dim hObjImgArr
+					SetObjImgArr hObjImgArr,1
+
+					//ユーザー指定のスピード値
+					ddim AddSpeed,1
+					AddSpeed=0.5+double(aqPlayOption(ID_ObjSpeed))*0.1
+					AddSpeed=AddSpeed*2.0	//補正
+					repeat
+						setease 0,256,ease_linear
+						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-25,20)
+						hitobjPosition=-100*cnt+(1000.0/60.0*Libarr_DefBPM(CursorLevID,CursorSelID)/1000.0)*(SceneCount-25)
+						dim DrawobjPosX:dim DrawobjPosY:dim hitobjSize
+						hitobjSize=int(48.0*(double(aqPlayOption(ID_ObjSize)*10+10)/100.0))
+						DrawobjPosX=200-(double(hitobjPosition)*AddSpeed)+DispWidth
+						DrawobjPosY=91-hitobjSize/2-hitobjSize+hitobjSize*1
+
+						if DrawobjPosX<(-hitobjSize) :continue
+						if DrawobjPosX>DispWidth :break
+
+						DrawExtendGraph DrawobjPosX,DrawobjPosY,DrawobjPosX+hitobjSize,DrawobjPosY+hitobjSize,hObjImgArr(HITOBJ_NORMAL),TRUE
+					loop
+				}
+		}
+
+	//プリローダー
+		setease 100,0,ease_cubic_out
+		EaseWidth=getease(SceneCount-20,20)
+		EaseHeight=getease(SceneCount-20,20)
+		EasePosX=DispWidth/2-EaseWidth/2
+		EasePosY=DispHeight/2-EaseHeight/2
+		setease 256,0,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-20,20)
+		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdxarr_Blocks(FrameCount/2\20),TRUE
+
+		if decideFlag==TRUE {
+			setease 0,100,ease_cubic_out
+			EaseWidth=getease(decideFrameCount,20)
+			EaseHeight=getease(decideFrameCount,20)
+			EasePosX=DispWidth/2-EaseWidth/2
+			EasePosY=DispHeight/2-EaseHeight/2
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(decideFrameCount,20)
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdxarr_Blocks(FrameCount/2\20),TRUE
+		}
+
+	//ガイド
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 0,DispHeight-128,hdximg(ibg_GuidePanel),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 540,650,hdximg(iGuide_Large),TRUE
+		DrawGraph 370,660,hdximg(iGuide_Small),TRUE
+		DrawGraph 760,660,hdximg(iGuide_Small),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		sdim tmpstr:tmpstr="ENTER / D : 戻る"
+		DrawStringXCenterToHandle 540,658,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),200,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="↑↓ : カーソル移動"
+		DrawStringXCenterToHandle 370,668,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="←→ : 設定を変更"
+		DrawStringXCenterToHandle 760,668,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+
+	if decideFlag==TRUE :decideFrameCount++
+	if decideFrameCount==10 {
+		//設定を保存
+		repeat 9
+			if ChangeItemFlag(cnt)==TRUE {
+				AddDebugConsole STYLE_NORMAL,"プレイオプションを保存しました。[XODA.PLAYOPTION."+(cnt)+"]"
+				SendProfile"XODA.PLAYOPTION."+(cnt),str(aqPlayOption(cnt))
+			}
+		loop
+	}
+	if decideFrameCount>30 {
+		curSceneID=ID_MusicSelect
+		gosub*InitScene
+		//変数初期化
+		dim decideFlag
+		dim decideFrameCount
+		dim transEffFlag
+		gosub*Scene_Init_MusicSelect
+	}
+
+	return
+
+*Scene_Init_MusicSelect_Effect
+
+	dim FXitemhwnd,20
+	sdim FXitemname,32,20
+	sdim FXitemtype,16,20
+	dim FXitemflag,20
+	sdim FXitemlockmsg,32,20
+	sdim FXitemdesc,64,20
+	dim FxID,5,4
+
+	repeat 5*4
+		FxID(cnt\5,cnt/5)=cnt
+	loop
+
+	FXitemhwnd(0)=hdximg(iFX_NOFX),hdximg(iFX_BassBoost),hdximg(iFX_StrongBass),hdximg(iFX_MaximumBass),hdximg(iFX_TrebleBoost)
+	FXitemhwnd(5)=hdximg(iFX_2000HzBoost),hdximg(iFX_4000HzBoost),hdximg(iFX_Compressor),hdximg(iFX_ExtraCompressor),hdximg(iFX_Distortion)
+	FXitemhwnd(10)=hdximg(iFX_Chorus),hdximg(iFX_Flanger),hdximg(iFX_ExtraFlanger),hdximg(iFX_Echo),hdximg(iFX_ExtraEcho)
+	FXitemhwnd(15)=hdximg(iFX_Silent),hdximg(iFX_LoudnessPlus),hdximg(iFX_LoudnessHalf),hdximg(iFX_Reverb),hdximg(iFX_ExtraReverb)
+
+	FXitemname(0)="No Effect","Bass Boost","Strong Bass","Maximum Bass","Treble Boost"
+	FXitemname(5)="2000Hz Boost","4000Hz Boost","Compressor","Extra Compressor","Distortion"
+	FXitemname(10)="Chorus","Flanger","Extra Flanger","Echo","Extra Echo"
+	FXitemname(15)="Silent","Loudness Plus+","Loudness Half","Reverb","Extra Reverb"
+
+	FXitemtype(0)="なし","Equalizer","Equalizer","Equalizer","Equalizer"
+	FXitemtype(5)="Equalizer","Equalizer","Compressor","Compressor","Distortion"
+	FXitemtype(10)="Delay","Delay","Delay","Delay","Delay"
+	FXitemtype(15)="Amplifier","Amplifier","Amplifier","Room","Room"
+
+	FXitemflag=1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,0,0,0,1,0
+	if AllUnlockEffect==TRUE {
+		repeat 20
+			FXitemflag(cnt)=TRUE
+		loop
+	}
+
+	FXitemlockmsg(FxID(2,0))="Bass Boostを使用してAランク以上を達成する。"
+	FXitemlockmsg(FxID(3,0))="Strong Boostを使用してAAランク以上を達成する。"
+	FXitemlockmsg(FxID(0,1))="プレイ回数が10回以上になる。"
+	FXitemlockmsg(FxID(1,1))="プレイ回数が20回以上になる。"
+	FXitemlockmsg(FxID(3,1))="Compressorを使用してAAランク以上を達成する。"
+	FXitemlockmsg(FxID(2,2))="いずれかの楽曲でMadnessクリアを達成する。"
+	FXitemlockmsg(FxID(4,2))="いずれかの楽曲でSランク以上を達成する。"
+	FXitemlockmsg(FxID(0,3))="キーサウンドを0%にして楽曲をクリアする。"
+	FXitemlockmsg(FxID(1,3))="いずれかの楽曲でFull Comboを達成する。	"
+	FXitemlockmsg(FxID(2,3))="いずれかの楽曲でALL Excellentを達成する。"
+	FXitemlockmsg(FxID(4,3))="Reverbを使用してAAAランク以上を達成する。"
+
+	FXitemdesc(0)="エフェクターを無効化します。"
+	FXitemdesc(1)="サウンドの低音域をブーストします。	"
+	FXitemdesc(2)="サウンドの低音域を大きくブーストします。"
+	FXitemdesc(3)="サウンドの低音域を最大限にブーストします。"
+	FXitemdesc(4)="サウンドの高音域をブーストします。"
+	FXitemdesc(5)="サウンドの2000Hz帯域をブーストします。"
+	FXitemdesc(6)="サウンドの4000Hz帯域をブーストします。"
+	FXitemdesc(7)="サウンドの音量を圧縮させます。"
+	FXitemdesc(8)="サウンドの音量を大きく圧縮させます。"
+	FXitemdesc(9)="サウンドに歪みを発生させます。"
+	FXitemdesc(10)="サウンドに原音のディレイを重ねます。"
+	FXitemdesc(11)="サウンドに原音の細かいディレイを重ねます。"
+	FXitemdesc(12)="サウンドに原音の細かいディレイを大きく重ねます。"
+	FXitemdesc(13)="サウンドに残響を発生させます。"
+	FXitemdesc(14)="サウンドに残響を多く発生させます。"
+	FXitemdesc(15)="サウンドをすべて消去させます。"
+	FXitemdesc(16)="サウンドの音量を全体的に増幅させます。"
+	FXitemdesc(17)="サウンドの音量を全体的に減少させます。"
+	FXitemdesc(18)="サウンドに空間的な残響を発生させます。"
+	FXitemdesc(19)="サウンドに空間的な残響を多く発生させます。"
+
+	repeat 20
+		if FXitemflag(cnt)==FALSE {
+			FXitemname(cnt)="?????"
+			FXitemhwnd(cnt)=hdximg(iFX_locked)
+			FXitemtype(cnt)="?????"
+			FXitemdesc(cnt)="？？？？？"
+		}
+		if FXitemlockmsg(cnt)=="" :FXitemlockmsg(cnt)="なし"
+	loop
+
+	dim SelFXColumn
+	dim SelFXLine
+	dim EnableFXColumn
+	dim EnableFXLine
+	dim CursorEasePosX
+	dim CursorEasePosY
+		EnableFXColumn=aqFxid\5
+		EnableFXLine=aqFxid/5
+		SelFXColumn=EnableFXColumn
+		SelFXLine=EnableFXLine
+
+	return
+
+*Scene_MusicSelect_Effect
+
+	//キー判定
+		if KeyFlag(KEY_INPUT_LEFT)==TRUE&bfKeyFlag(KEY_INPUT_LEFT)==FALSE {
+			SelFXColumn--
+			CursorEasePosX=100
+			CursorEasePosY=0
+			if SelFXColumn<0 {
+				CursorEasePosX=-100*4
+				SelFXColumn=4
+			}
+			PlaySE hbasssnd(sndUI_Cursor)
+			CursorSelCount=0
+		}
+		if KeyFlag(KEY_INPUT_RIGHT)==TRUE&bfKeyFlag(KEY_INPUT_RIGHT)==FALSE {
+			SelFXColumn++
+			CursorEasePosX=-100
+			CursorEasePosY=0
+			if SelFXColumn>4 {
+				CursorEasePosX=100*4
+				SelFXColumn=0
+			}
+			PlaySE hbasssnd(sndUI_Cursor)
+			CursorSelCount=0
+		}
+		if KeyFlag(KEY_INPUT_UP)==TRUE&bfKeyFlag(KEY_INPUT_UP)==FALSE {
+			SelFXLine--
+			CursorEasePosX=0
+			CursorEasePosY=100
+			if SelFXLine<0 {
+				CursorEasePosY=-100*3
+				SelFXLine=3
+			}
+			PlaySE hbasssnd(sndUI_Cursor)
+			CursorSelCount=0
+		}
+		if KeyFlag(KEY_INPUT_DOWN)==TRUE&bfKeyFlag(KEY_INPUT_DOWN)==FALSE {
+			SelFXLine++
+			CursorEasePosX=0
+			CursorEasePosY=-100
+			if SelFXLine>3 {
+				CursorEasePosY=100*3
+				SelFXLine=0
+			}
+			PlaySE hbasssnd(sndUI_Cursor)
+			CursorSelCount=0
+		}
+		if KeyFlag(KEY_INPUT_RETURN)==TRUE&bfKeyFlag(KEY_INPUT_RETURN)==FALSE {
+			if FXitemflag(FxID(SelFXColumn,SelFXLine))==FALSE {
+				PlaySE hbasssnd(sndUI_Error)
+			} else {
+				EnableFXColumn=SelFXColumn
+				EnableFXLine=SelFXLine
+				SetAudioFX bgmMain,FxID(EnableFXColumn,EnableFXLine)
+				PlaySE hbasssnd(sndUI_Decide)
+			}
+		}
+		if KeyFlag(KEY_INPUT_SPACE)==TRUE&bfKeyFlag(KEY_INPUT_SPACE)==FALSE {
+			repeat
+				SelFXColumn=rnd(5)
+				SelFXLine=rnd(4)
+				if FXitemflag(FxID(SelFXColumn,SelFXLine))==FALSE :continue
+				break
+			loop
+			PlaySE hbasssnd(sndUI_Decide)
+		}
+		if KeyFlag(KEY_INPUT_F)==TRUE&bfKeyFlag(KEY_INPUT_F)==FALSE {
+			decideFlag=TRUE
+			PlaySE hbasssnd(sndUI_Cancel)
+		}
+
+	//背景
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawGraph 0,0,hdximg(iBackground),FALSE
+
+	//ナビゲーション
+		if decideFlag==FALSE {
+			setease 0,256,ease_cubic_out
+			EaseAlpha=getease(SceneCount,10)
+			setease -32,0,ease_cubic_out
+			EasePosX=getease(SceneCount,10)
+		} else {
+			setease 256,0,ease_cubic_out
+			EaseAlpha=getease(decideFrameCount-20,10)
+			setease 0,-32,ease_cubic_out
+			EasePosX=getease(decideFrameCount-20,10)
+		}
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+		DrawGraph 32+EasePosX,16,hdximg(iNav_Effect),TRUE
+
+	//案内文字列（背景）
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 32,67,hdximg(ibg_Nav),TRUE
+
+	//案内文字列
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawStringToHandle 48,72,"使用するオーディオエフェクトを選択してください。",GetColor(230,230,230),hdxfont(fNoto_b12)
+
+
+	//ウィンドウ背景
+		if decideFlag==FALSE {
+			setease 200,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,30)
+			setease -DispWidth,0,ease_cubic_out
+			DrawGraph getease(SceneCount,30),113,hdximg(ibg_Effect),TRUE
+		} else {
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(decideFrameCount-15,25)
+			setease 0,DispWidth,ease_cubic_out
+			DrawGraph getease(decideFrameCount-15,25),113,hdximg(ibg_Effect),TRUE
+		}
+
+	//エフェクトのアイコン
+		dim DrawIconColumn:dim DrawIconLine
+		repeat 5
+			DrawIconColumn=cnt
+			repeat 4
+				DrawIconLine=cnt
+				setease 0,80,ease_cubic_out
+				EaseWidth=getease(SceneCount-20-DrawIconColumn*3,20)
+				if decideFlag==TRUE {
+					EaseWidth=80-getease(decideFrameCount-DrawIconColumn*3,20)
+				}
+				EaseHeight=EaseWidth
+				EasePosX=72+100*DrawIconColumn
+				EasePosY=140+100*DrawIconLine
+
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				if FXitemFlag(FxID(DrawIconColumn,DrawIconLine))==FALSE {
+					setease 256,150,ease_linear+ease_loop
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,40)
+				}
+
+				DrawExtendGraph EasePosX+80/2-EaseWidth/2,EasePosY+80/2-EaseHeight/2,EasePosX+80/2+EaseWidth/2,EasePosY+80/2+EaseHeight/2,FXitemhwnd(FxID(DrawIconColumn,DrawIconLine)),TRUE
+			loop
+		loop
+
+	//文字列
+		if SceneCount<30|decideFlag==TRUE :CursorSelCount=0
+		setease 0,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(CursorSelCount,20)
+		setease -64,0,ease_cubic_out
+		DrawStringToHandle 700+getease(CursorSelCount,20),200,FXitemname(FxID(SelFXColumn,SelFXLine)),GetColor(240,240,240),hdxfont(fPier_r32)
+		DrawStringToHandle 700+getease(CursorSelCount,20),278,"種類",GetColor(200,200,200),hdxfont(fNoto_m16)
+		DrawStringToHandle 700+getease(CursorSelCount,20),310,"解放条件",GetColor(200,200,200),hdxfont(fNoto_m16)
+		DrawStringToHandle 700+getease(CursorSelCount,20),342,"説明",GetColor(200,200,200),hdxfont(fNoto_m16)
+		DrawStringToHandle 800+getease(CursorSelCount,20),278,FXitemtype(FxID(SelFXColumn,SelFXLine)),GetColor(200,200,200),hdxfont(fNoto_m16)
+		DrawStringToHandle 800+getease(CursorSelCount,20),310,FXitemlockmsg(FxID(SelFXColumn,SelFXLine)),GetColor(200,200,200),hdxfont(fNoto_m16)
+		DrawStringToHandle 800+getease(CursorSelCount,20),342,FXitemdesc(FxID(SelFXColumn,SelFXLine)),GetColor(200,200,200),hdxfont(fNoto_m16)
+
+	//ビジュアライザー
+		if decideFlag==FALSE {
+			dim bgmFFTbuf,4096:dim bgmFFTline
+			BASS_ChannelGetData hbasssnd(bgmMain),varptr(bgmFFTbuf),BASS_DATA_FFT8192
+
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,100
+			repeat 32
+				bgmFFTline=int(todouble(bgmFFTbuf(128/32*cnt+100))*2500)
+				if bgmFFTline>128 :bgmFFTline=128
+				DrawBox 640+cnt*(600/32),392+128-bgmFFTline,640+(cnt+1)*(600/32)-2,392+128,GetColor(255,255,255),TRUE
+			loop
+		}
+
+	//ステータス
+		if decideFlag==FALSE {
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,20)
+		} else {
+			setease 256,0,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(decideFrameCount,20)
+		}
+		DrawGraph 730,32,hdximg(iMixed_PlayerStatus),TRUE
+
+	if decideFlag==FALSE {
+		//有効
+			if SceneCount>20 {
+				setease 0,256,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-20,15)
+				DrawGraph 66+100*EnableFXColumn,134+100*EnableFXLine,hdximg(iFX_cursor),TRUE
+			}
+
+		//カーソル
+			setease 0,150,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-20,15)
+			setease 1.1,1,ease_cubic_inout+ease_loop
+				EaseWidth=int(92.0*geteasef(CursorSelCount,25)):EaseHeight=EaseWidth
+			setease CursorEasePosX,0,ease_cubic_out
+				EasePosX=66+100*SelFXColumn+92/2-EaseWidth/2+getease(CursorSelCount,8)
+			setease CursorEasePosY,0,ease_cubic_out
+				EasePosY=134+100*SelFXLine+92/2-EaseHeight/2+getease(CursorSelCount,8)
+				DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iFX_Cursor),TRUE
+	}
+
+	//ガイド
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 0,DispHeight-128,hdximg(ibg_GuidePanel),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 540,650,hdximg(iGuide_Large),TRUE
+		DrawGraph 370,640,hdximg(iGuide_Small),TRUE
+		DrawGraph 760,640,hdximg(iGuide_Small),TRUE
+		DrawGraph 370,676,hdximg(iGuide_Small),TRUE
+		DrawGraph 760,676,hdximg(iGuide_Small),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		sdim tmpstr:tmpstr="ENTER : 決定"
+		DrawStringXCenterToHandle 540,658,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),200,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="F : 戻る"
+		DrawStringXCenterToHandle 370,648,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="SPACE : ランダム"
+		DrawStringXCenterToHandle 760,648,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="↑↓ : カーソル移動"
+		DrawStringXCenterToHandle 370,684,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="←→ : カーソル移動"
+		DrawStringXCenterToHandle 760,684,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+
+	//プリローダー
+		setease 100,0,ease_cubic_out
+		EaseWidth=getease(SceneCount,20)
+		EaseHeight=getease(SceneCount,20)
+		EasePosX=DispWidth/2-EaseWidth/2
+		EasePosY=DispHeight/2-EaseHeight/2
+		setease 256,0,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,20)
+		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdxarr_Blocks(FrameCount/2\20),TRUE
+
+		if decideFlag==TRUE {
+			setease 0,100,ease_cubic_out
+			EaseWidth=getease(decideFrameCount-20,20)
+			EaseHeight=getease(decideFrameCount-20,20)
+			EasePosX=DispWidth/2-EaseWidth/2
+			EasePosY=DispHeight/2-EaseHeight/2
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(decideFrameCount-20,20)
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdxarr_Blocks(FrameCount/2\20),TRUE
+		}
+
+	//カウンター
+		CursorSelCount++
+		if decideFlag==TRUE :decideFrameCount++
+		if decideFrameCount>35 {
+			aqFxid=FxID(EnableFXColumn,EnableFXLine)
+			SendProfile"XODA.AUDIOFX",str(aqFxid)
+			curSceneID=ID_MusicSelect
+			gosub*InitScene
+			//変数初期化
+			dim decideFlag
+			dim decideFrameCount
+			dim transEffFlag
+			gosub*Scene_Init_MusicSelect
+		}
 	return

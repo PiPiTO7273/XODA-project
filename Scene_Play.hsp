@@ -682,6 +682,9 @@
 				dim decideFlag
 				dim decideFrameCount
 
+				BASS_ChannelRemoveFX hplaybgm,hplayfx
+				BASS_FXReset hplayfx
+
 				gosub*Scene_Init_Result
 			}
 			stgClearEffCount++

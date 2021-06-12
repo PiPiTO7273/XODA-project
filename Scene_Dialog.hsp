@@ -1,0 +1,47 @@
+
+*Scene_MusicSelect_OpenError
+
+	curSceneID=ID_MusicSelect_OpenError
+
+	//背景&レイヤー
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawGraph 0,0,hdximg(iBackground),FALSE
+
+		gosub*DrawMusicSelectNav
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawGraph 0,0,hdximg(iLayer_Scene),TRUE
+
+	//ウィンドウ
+		if DialogFlag==FALSE {
+			setease 0,1,ease_cubic_out
+		} else {
+			setease 1,0,ease_cubic_out
+		}
+		EaseWidth=int(640.0*geteasef(DialogCount,15))
+		EaseHeight=int(350.0*geteasef(DialogCount,15))
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,int(256.0*geteasef(DialogCount,15))
+
+		DrawExtendGraph DispWidth/2-EaseWidth/2,DispHeight/2-EaseHeight/2,DispWidth/2+EaseWidth/2,DispHeight/2+EaseHeight/2,hdximg(iDialog_OpenError),TRUE
+
+	//ガイド
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,DispHeight-128,hdximg(ibg_GuidePanel),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 540,650,hdximg(iGuide_Large),TRUE
+
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			sdim tmpstr:tmpstr="ENTER : 決定"
+			DrawStringXCenterToHandle 540,658,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),200,GetColor(230,230,230),hdxfont(fNoto_m14)
+
+	DialogCount++
+
+	if KeyFlag(KEY_INPUT_RETURN)==TRUE&DialogCount>15 {
+		PlaySE hbasssnd(sndUI_Cancel)
+		DialogFlag=TRUE:DialogCount=0
+	}
+	if DialogFlag==TRUE&DialogCount>15 :curSceneID=ID_MusicSelect
+
+	CursorSelCount++
+	return

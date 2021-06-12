@@ -1,16 +1,16 @@
 
 *DrawColumnGraph
 	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-	DrawGraph 784+EasePosX,EasePosY,hdximg(ibg_MusicSelect_Item),TRUE	//ËÉåÊôØ
+	DrawGraph 784+EasePosX,EasePosY,hdximg(ibg_MusicSelect_Item),TRUE	//îwåi
 
 	SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-	DrawStringToHandle 880+EasePosX,EasePosY+8,Libarr_Title(CursorLevID,DrawColumnID),GetColor(255,255,255),hdxfont(fNoto_m16)	//„Çø„Ç§„Éà„É´
+	DrawStringToHandle 880+EasePosX,EasePosY+8,Libarr_Title(CursorLevID,DrawColumnID),GetColor(255,255,255),hdxfont(fNoto_m16)	//É^ÉCÉgÉã
 
 	LevColorCode=GetDifficultyColor(Libarr_Difficulty(CursorLevID,DrawColumnID))
 	tmpstr=str(Libarr_Level(CursorLevID,DrawColumnID))
-	DrawStringXCenterToHandle 784+EasePosX,EasePosY+10,tmpstr,80,LevColorCode,hdxfont(fSQ_20)	//Èõ£ÊòìÂ∫¶
+	DrawStringXCenterToHandle 784+EasePosX,EasePosY+10,tmpstr,80,LevColorCode,hdxfont(fSQ_20)	//ìÔà’ìx
 
-	//„ÇØ„É™„Ç¢„ÅÆÁ®ÆÈ°û
+	//ÉNÉäÉAÇÃéÌóﬁ
 	dim hBadge_ClearType
 	switch Libarr_Rec_ClearType(CursorLevID,DrawColumnID)
 		case"ALL EXCELLENT":hBadge_ClearType=hdximg(iBadge_AllEx):swbreak
@@ -24,7 +24,7 @@
 	swend
 	DrawGraph 784+323+EasePosX,EasePosY+8,hBadge_ClearType,TRUE
 
-	//„Çπ„Ç≥„Ç¢„É©„É≥„ÇØ
+	//ÉXÉRÉAÉâÉìÉN
 	dim hBadge_Rank
 	switch Libarr_Rec_ScoreRank(CursorLevID,DrawColumnID)
 		case RANK_ID_SSS:hBadge_Rank=hdximg(iBadge_SSS):swbreak
@@ -37,7 +37,127 @@
 		case RANK_ID_C:hBadge_Rank=hdximg(iBadge_C):swbreak
 		case RANK_ID_D:hBadge_Rank=hdximg(iBadge_D):swbreak
 	swend
-	if Libarr_Rec_Score(CursorLevID,DrawColumnID)==0 :hBadge_Rank=-1	//„Çπ„Ç≥„Ç¢„Åå0„ÅÆÂ†¥Âêà„ÅØÈô§Â§ñ
+	if Libarr_Rec_Score(CursorLevID,DrawColumnID)==0 :hBadge_Rank=-1	//ÉXÉRÉAÇ™0ÇÃèÍçáÇÕèúäO
 	if hBadge_Rank!-1 :DrawGraph 784+408+EasePosX,EasePosY+10,hBadge_Rank,TRUE
 
 	return
+
+*DrawMusicSelectNav
+	if JumpSceneFlag==FALSE {
+		//ÉiÉrÉQÅ[ÉVÉáÉì
+			if decideFlag==FALSE {
+				setease 0,256,ease_cubic_out
+				EaseAlpha=getease(SceneCount,10)
+				setease -32,0,ease_cubic_out
+				EasePosX=getease(SceneCount,10)
+			} else {
+				setease 256,0,ease_cubic_out
+				EaseAlpha=getease(decideFrameCount-10,10)
+				setease 0,-32,ease_cubic_out
+				EasePosX=getease(decideFrameCount-10,10)
+			}
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+			DrawGraph 32+EasePosX,16,hdximg(iNav_MusicSelect),TRUE
+
+		//àƒì‡ï∂éöóÒÅiîwåiÅj
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 32,67,hdximg(ibg_Nav),TRUE
+
+		//àƒì‡ï∂éöóÒ
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawStringToHandle 48,72,"ÉvÉåÅ[Ç∑ÇÈäyã»ÇëIëÇµÇƒÇ≠ÇæÇ≥Ç¢ÅB",GetColor(230,230,230),hdxfont(fNoto_b12)
+	}
+
+	return
+
+#deffunc SetAudioFX int _sndid,int _id
+
+	BASS_ChannelRemoveFX hbasssnd(_sndid),hbassfx(_sndid)
+	BASS_FXReset hbassfx(_sndid)
+
+	hbassfx(_sndid)=SetAudioFXtohandle(hbasssnd(_sndid),_id)
+
+	return
+
+#defcfunc SetAudioFXtohandle int _hwnd,int _id
+	dim fxprm:dim fxhwnd
+	switch _id
+		case FX_BASSBOOST
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_PARAMEQ)
+			fxprm=tofloat(120.0),tofloat(20.0),tofloat(4.0)
+		swbreak
+		case FX_STRONGBASS
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_PARAMEQ)
+			fxprm=tofloat(120.0),tofloat(20.0),tofloat(6.0)
+		swbreak
+		case FX_MAXIMUMBASS
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_PARAMEQ)
+			fxprm=tofloat(100.0),tofloat(30.0),tofloat(8.0)
+		swbreak
+		case FX_TREBLEBOOST
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_PARAMEQ)
+			fxprm=tofloat(12000.0),tofloat(20.0),tofloat(5.0)
+		swbreak
+		case FX_2000HZBOOST
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_PARAMEQ)
+			fxprm=tofloat(2000.0),tofloat(20.0),tofloat(8.0)
+		swbreak
+		case FX_4000HZBOOST
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_PARAMEQ)
+			fxprm=tofloat(4000.0),tofloat(20.0),tofloat(8.0)
+		swbreak
+		case FX_COMPRESSOR
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_COMPRESSOR)
+			fxprm=tofloat(5.0),tofloat(10.0),tofloat(200.0),tofloat(-20.0),tofloat(3.0),tofloat(4.0)
+		swbreak
+		case FX_EXTRACOMPRESSOR
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_COMPRESSOR)
+			fxprm=tofloat(10.0),tofloat(10.0),tofloat(200.0),tofloat(-20.0),tofloat(3.0),tofloat(4.0)
+		swbreak
+		case FX_DISTORTION
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_DISTORTION)
+			fxprm=tofloat(-18.0),tofloat(10.0),tofloat(5000.0),tofloat(5000.0),tofloat(8000.0)
+		swbreak
+		case FX_CHORUS
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_CHORUS)
+			fxprm=tofloat(50.0),tofloat(10.0),tofloat(25.0),tofloat(1.1),1,tofloat(16.0),BASS_DX8_PHASE_90
+		swbreak
+		case FX_FLANGER
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_FLANGER)
+			fxprm=tofloat(50.0),tofloat(100.0),tofloat(-50.0),tofloat(0.25),1,tofloat(2.0),BASS_DX8_PHASE_ZERO
+		swbreak
+		case FX_EXTRAFLANGER
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_FLANGER)
+			fxprm=tofloat(80.0),tofloat(100.0),tofloat(-50.0),tofloat(0.25),1,tofloat(2.0),BASS_DX8_PHASE_ZERO
+		swbreak
+		case FX_ECHO
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_ECHO)
+			fxprm=tofloat(30.0),tofloat(20.0),tofloat(80.0),tofloat(90.0),0
+		swbreak
+		case FX_EXTRAECHO
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_ECHO)
+			fxprm=tofloat(40.0),tofloat(30.0),tofloat(90.0),tofloat(105.0),0
+		swbreak
+		case FX_SILENT
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_VOLUME)
+			fxprm=tofloat(0.0),tofloat(1.0),tofloat(0.0),tofloat(0.0)
+		swbreak
+		case FX_LOUDPLUS
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_VOLUME)
+			fxprm=tofloat(2.0),tofloat(1.0),tofloat(0.0),tofloat(0.0)
+		swbreak
+		case FX_LOUDHALF
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_VOLUME)
+			fxprm=tofloat(0.5),tofloat(1.0),tofloat(0.0),tofloat(0.0)
+		swbreak
+		case FX_REVERB
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_REVERB)
+			fxprm=tofloat(-2.0),tofloat(-8.0),tofloat(1000.0),tofloat(0.001)
+		swbreak
+		case FX_EXTRAREVERB
+			fxhwnd=BASS_ChannelSetFX(_hwnd,BASS_FX_DX8_REVERB)
+			fxprm=tofloat(-2.0),tofloat(-4.0),tofloat(1000.0),tofloat(0.001)
+		swbreak
+	swend
+	BASS_FXSetParameters fxhwnd,fxprm
+	return fxhwnd

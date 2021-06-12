@@ -6,10 +6,11 @@
 #define BuildVersion_Major	0
 #define BuildVersion_Minor	2
 #define SplashTime			0
-#define DebugConsoleWindow	0
+#define DebugConsoleWindow	1
 #define HTTPhostWindow		0
-#define FullScreen			0
+#define FullScreen			1
 #define DecideWaitTime		5
+#define AllUnlockEffect		1
 
 //フォントハンドル
 #enum fSystem		=	0
@@ -69,6 +70,8 @@
 #enum ID_ModeSelect
 #enum ID_MusicSelect
 #enum ID_MusicSelect_Option
+#enum ID_MusicSelect_Effect
+#enum ID_MusicSelect_OpenError
 #enum ID_Play
 #enum ID_Result
 
@@ -153,6 +156,7 @@
 #enum iLayer_Detail_Lyrics
 #enum iLayer_Detail_Terminal
 #enum iMovie_Decide
+#enum iDialog_OpenError
 
 #enum iBadge_SSS
 #enum iBadge_SS
@@ -176,6 +180,31 @@
 #enum ibg_Option_Window
 #enum ibg_Option_SongInfo
 #enum iCursor_Option
+
+#enum iNav_Effect
+#enum ibg_Effect
+#enum iFX_NOFX
+#enum iFX_BassBoost
+#enum iFX_StrongBass
+#enum iFX_MaximumBass
+#enum iFX_TrebleBoost
+#enum iFX_2000HzBoost
+#enum iFX_4000HzBoost
+#enum iFX_Compressor
+#enum iFX_ExtraCompressor
+#enum iFX_Distortion
+#enum iFX_Chorus
+#enum iFX_Flanger
+#enum iFX_ExtraFlanger
+#enum iFX_Echo
+#enum iFX_ExtraEcho
+#enum iFX_Silent
+#enum iFX_LoudnessPlus
+#enum iFX_LoudnessHalf
+#enum iFX_Reverb
+#enum iFX_ExtraReverb
+#enum iFX_locked
+#enum iFX_Cursor
 
 #enum iMovie_stg_Clear
 #enum iMovie_stg_Fullcombo
@@ -233,6 +262,8 @@
 #enum vocPartnerSel
 #enum vocReady
 #enum vocSignin
+
+#enum sndMax
 
 //オブジェクトID
 #define HITOBJ_NORMAL		0
@@ -345,3 +376,25 @@
 #enum aButton_Close
 #enum aLauncher_Log_bg
 #enum aLauncher_Log
+
+//オーディオエフェクト
+#enum FX_NOEFFECT		=	0
+#enum FX_BASSBOOST
+#enum FX_STRONGBASS
+#enum FX_MAXIMUMBASS
+#enum FX_TREBLEBOOST
+#enum FX_2000HZBOOST
+#enum FX_4000HZBOOST
+#enum FX_COMPRESSOR
+#enum FX_EXTRACOMPRESSOR
+#enum FX_DISTORTION
+#enum FX_CHORUS
+#enum FX_FLANGER
+#enum FX_EXTRAFLANGER
+#enum FX_ECHO
+#enum FX_EXTRAECHO
+#enum FX_SILENT
+#enum FX_LOUDPLUS
+#enum FX_LOUDHALF
+#enum FX_REVERB
+#enum FX_EXTRAREVERB

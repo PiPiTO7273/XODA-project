@@ -47,9 +47,9 @@
 #include"Scene_Signin.hsp"			//サインイン
 #include"Scene_ModeSelect.hsp"		//モード選択
 #include"Scene_MusicSelect.hsp"		//楽曲選択
-#include"Scene_MusicSelect_Option.hsp"	//楽曲選択のオプション
 #include"Scene_Play.hsp"				//ゲームプレイ
 #include"Scene_Result.hsp"			//リザルト
+#include"Scene_Dialog.hsp"			//ダイアログ全般
 
 //----- 起動開始 -----
 *Startup
@@ -126,6 +126,11 @@
 		goto*StopError
 	} else {
 		AddDebugConsole STYLE_NORMAL,"DXライブラリの初期化完了"
+		dim VerDXlib:dim VerDirectX:dim VerWin
+		_GetSystemInfo varptr(VerDXlib),varptr(VerDirectX),varptr(VerWin)
+		AddDebugConsole STYLE_NORMAL,"DXライブラリのバージョン : "+strf("%x",VerDXlib)
+		AddDebugConsole STYLE_NORMAL,"DirectXのバージョン : "+VerDirectX
+		AddDebugConsole STYLE_NORMAL,"実行環境のバージョン : "+VerWin
 	}
 
 	onexit*Exit
@@ -209,6 +214,12 @@
 		swbreak
 		case ID_MusicSelect_Option	//曲選択のオプション
 			gosub*Scene_MusicSelect_Option
+		swbreak
+		case ID_MusicSelect_Effect	//曲選択のエフェクト
+			gosub*Scene_MusicSelect_Effect
+		swbreak
+		case ID_MusicSelect_OpenError	//曲選択エラー
+			gosub*Scene_MusicSelect_OpenError
 		swbreak
 		case ID_Play				//プレイ
 			gosub*Scene_Play

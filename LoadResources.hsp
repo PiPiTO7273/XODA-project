@@ -33,7 +33,7 @@
 
 *LoadSoundEffects
 	//サウンドの読み込み
-		dim hbasssnd:dim hsmpsnd
+		dim hbasssnd,sndMax:dim hsmpsnd,sndMax:dim hbassfx,sndMax
 		LoadSE sndStart,"Data/Sound/Gameplay_Start.wav",1.0							//開始音
 		LoadSE sndHitobj,"Data/Sound/Gameplay_Hit.wav",1.0							//ヒット
 		LoadSE sndHitempty,"Data/Sound/Gameplay_Empty.wav",1.0							//空打ち
@@ -55,7 +55,7 @@
 		LoadSE vocReady,"Data/Sound/Voice_Ready.wav",1.0								//ボイス 開始
 		LoadSE vocSignin,"Data/Sound/Voice_Signin.wav",1.0							//ボイス サインイン
 
-		//BGM
+	//BGM
 		hbasssnd(bgmMain)=BASS_StreamCreateFile(FALSE,"Data/Sound/bgm_Main.flac",0,0,0,0,BASS_SAMPLE_LOOP)
 		BASS_ChannelSetAttribute hbasssnd(bgmMain),BASS_ATTRIB_VOL,tofloat(0.7)
 		hbasssnd(bgmResult)=BASS_StreamCreateFile(FALSE,"Data/Sound/bgm_Result.flac",0,0,0,0,BASS_SAMPLE_LOOP)
@@ -179,6 +179,7 @@
 		hdximg(iIcon_IR)=LoadGraph("Data/Image/Icon_IR.png")
 		hdximg(iIcon_IR_best)=LoadGraph("Data/Image/Icon_IR_best.png")
 		hdximg(iMovie_Decide)=LoadGraph("Data/Movie/bg_Decide.ogv")
+		hdximg(iDialog_OpenError)=LoadGraph("Data/Image/Dialog_OpenError.png")
 
 		hdximg(iBadge_SSS)=LoadGraph("Data/Image/Badge_SSS.png")
 		hdximg(iBadge_SS)=LoadGraph("Data/Image/Badge_SS.png")
@@ -202,6 +203,31 @@
 		hdximg(ibg_Option_Window)=LoadGraph("Data/Image/bg_Option_Window.png")
 		hdximg(ibg_Option_SongInfo)=LoadGraph("Data/Image/bg_Option_SongInfo.png")
 		hdximg(iCursor_Option)=LoadGraph("Data/Image/Cursor_MusicSelect_Option.png")
+
+		hdximg(iNav_Effect)=LoadGraph("Data/Image/Nav_AudioEffect.png")
+		hdximg(ibg_Effect)=LoadGraph("Data/Image/bg_AudioEffect.png")
+		hdximg(iFX_NOFX)=LoadGraph("Data/Image/FX_noeffect.png")
+		hdximg(iFX_BassBoost)=LoadGraph("Data/Image/FX_bass_boost.png")
+		hdximg(iFX_StrongBass)=LoadGraph("Data/Image/FX_bass_strong.png")
+		hdximg(iFX_MaximumBass)=LoadGraph("Data/Image/FX_bass_maximum.png")
+		hdximg(iFX_TrebleBoost)=LoadGraph("Data/Image/FX_treble.png")
+		hdximg(iFX_2000HzBoost)=LoadGraph("Data/Image/FX_2000hz.png")
+		hdximg(iFX_4000HzBoost)=LoadGraph("Data/Image/FX_4000hz.png")
+		hdximg(iFX_Compressor)=LoadGraph("Data/Image/FX_compressor.png")
+		hdximg(iFX_ExtraCompressor)=LoadGraph("Data/Image/FX_compressor_ex.png")
+		hdximg(iFX_Distortion)=LoadGraph("Data/Image/FX_distortion.png")
+		hdximg(iFX_Chorus)=LoadGraph("Data/Image/FX_chorus.png")
+		hdximg(iFX_Flanger)=LoadGraph("Data/Image/FX_flanger.png")
+		hdximg(iFX_ExtraFlanger)=LoadGraph("Data/Image/FX_flanger_ex.png")
+		hdximg(iFX_Echo)=LoadGraph("Data/Image/FX_echo.png")
+		hdximg(iFX_ExtraEcho)=LoadGraph("Data/Image/FX_echo_ex.png")
+		hdximg(iFX_Silent)=LoadGraph("Data/Image/FX_silent.png")
+		hdximg(iFX_LoudnessPlus)=LoadGraph("Data/Image/FX_loudplus.png")
+		hdximg(iFX_LoudnessHalf)=LoadGraph("Data/Image/FX_loudhalf.png")
+		hdximg(iFX_Reverb)=LoadGraph("Data/Image/FX_reverb.png")
+		hdximg(iFX_ExtraReverb)=LoadGraph("Data/Image/FX_reverb_ex.png")
+		hdximg(iFX_locked)=LoadGraph("Data/Image/FX_locked.png")
+		hdximg(iFX_cursor)=LoadGraph("Data/Image/FX_cursor.png")
 
 		hdximg(iMovie_stg_Clear)=LoadGraph("Data/Movie/stg_Clear.ogv")
 		hdximg(iMovie_stg_Fullcombo)=LoadGraph("Data/Movie/stg_Fullcombo.ogv")

@@ -489,6 +489,10 @@ goto*Startup
 				dim aqNumAllEx
 				dim aqNumTicket
 				sdim aqHistory
+				dim aqEXP
+				dim aqMusicSelect_SelID
+				dim aqMusicSelect_LevID
+				dim aqFXid
 
 				//プレイオプション
 				dim aqPlayOption,9
@@ -506,6 +510,10 @@ goto*Startup
 				if instr(saveInfobuf,0,"XODA.NUMTICKET")==-1 :saveInfobuf+"XODA.NUMTICKET=\n":SendProfile"XODA.NUMTICKET",""
 				if instr(saveInfobuf,0,"XODA.HISTORY")==-1 :saveInfobuf+"XODA.HISTORY=++++\n":SendProfile"XODA.HISTORY","++++"
 				if instr(saveInfobuf,0,"XODA.PARTNER.SELECT")==-1 :saveInfobuf+"XODA.PARTNER.SELECT={empty}\n":SendProfile"XODA.PARTNER.SELECT","{empty}"
+				if instr(saveInfobuf,0,"XODA.EXP")==-1 :saveInfobuf+"XODA.EXP=0\n":SendProfile"XODA.EXP","0"
+				if instr(saveInfobuf,0,"XODA.MUSICSELECT.ID")==-1 :saveInfobuf+"XODA.MUSICSELECT.ID=0\n":SendProfile"XODA.MUSICSELECT.ID","0"
+				if instr(saveInfobuf,0,"XODA.MUSICSELECT.LEVEL")==-1 :saveInfobuf+"XODA.MUSICSELECT.LEVEL=0\n":SendProfile"XODA.MUSICSELECT.LEVEL","0"
+				if instr(saveInfobuf,0,"XODA.AUDIOFX")==-1 :saveInfobuf+"XODA.AUDIOFX=0\n":SendProfile"XODA.AUDIOFX","0"
 
 				repeat 9
 					if instr(saveInfobuf,0,"XODA.PLAYOPTION."+cnt)==-1 {
@@ -514,19 +522,26 @@ goto*Startup
 					}
 				loop
 
-				aqName=GetINIvalue(saveInfobuf,"SAVEDATA","USERNAME")						//ユーザー名
-				aqRate=double(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.RATE"))				//レート
-				aqLevel=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.LEVEL"))				//レベル
-				aqBadge=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.BADGE")					//称号
-				aqLastplay=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.LASTPLAY")				//最後にプレイした日付
-				aqNumClear=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMCLEAR"))			//クリア数
-				aqNumFullcombo=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMFULLCOMBO"))	//フルコンボ数
-				aqNumAllEx=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMALLEX"))			//ALLEX数
-				aqNumTicket=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMTICKET"))			//チケットの数
+				aqName=GetINIvalue(saveInfobuf,"SAVEDATA","USERNAME")								//ユーザー名
+				aqRate=double(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.RATE"))						//レート
+				aqLevel=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.LEVEL"))						//レベル
+				aqBadge=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.BADGE")							//称号
+				aqLastplay=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.LASTPLAY")						//最後にプレイした日付
+				aqNumClear=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMCLEAR"))					//クリア数
+				aqNumFullcombo=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMFULLCOMBO"))			//フルコンボ数
+				aqNumAllEx=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMALLEX"))					//ALLEX数
+				aqNumTicket=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.NUMTICKET"))					//チケットの数
+				aqEXP=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.EXP"))							//経験値
+				aqMusicSelect_SelID=int(GetINIValue(saveInfobuf,"SAVEDATA","XODA.MUSICSELECT.ID"))		//カーソル位置(ID)
+				aqMusicSelect_LevID=int(GetINIValue(saveInfobuf,"SAVEDATA","XODA.MUSICSELECT.LEVEL"))	//カーソル位置(LEVEL)
+				aqFxid=int(GetINIValue(saveInfobuf,"SAVEDATA","XODA.AUDIOFX"))						//オーディオエフェクト
 
 				repeat 9
 					aqPlayOption(cnt)=int(GetINIvalue(saveInfobuf,"SAVEDATA","XODA.PLAYOPTION."+cnt))
 				loop
+
+				//エフェクト適用
+					SetAudioFX bgmMain,aqFxid
 
 				//パートナー情報
 					sdim pnCurSelect:dim pnCurID

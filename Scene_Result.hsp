@@ -3,6 +3,7 @@
 
 	//ムービーの再生開始
 	PlayMovieToGraph hdximg(ibg_Result),DX_PLAYTYPE_LOOP
+	SetAudioFX bgmResult,aqFxid
 	BASS_ChannelSetAttribute hbasssnd(bgmResult),BASS_ATTRIB_VOL,tofloat(0.4)
 	BASS_ChannelSetPosition hbasssnd(bgmResult),0,0,0
 	BASS_ChannelPlay hbasssnd(bgmResult)

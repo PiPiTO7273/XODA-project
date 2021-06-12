@@ -315,10 +315,11 @@
 	alCopyImageToDXBuf i2D_SongInfo,hdximg(iUI_tx_SongInfo)
 
 	//âπåπì«Ç›çûÇ›
-	dim hplaybgm
+	dim hplaybgm:dim hplayfx
 	hplaybgm=BASS_StreamCreateFile(FALSE,"Data/Package/"+chartResIndex+"/Audio.mp3",0,0,0,0,BASS_STREAM_AUTOFREE)
 	BASS_ChannelSetAttribute hplaybgm,BASS_ATTRIB_VOL,tofloat(0.5)
 	RegAudioLib TYPE_BGM,"Data/Package/"+chartResIndex+"/Audio.mp3"
+	hplayfx=SetAudioFXtohandle(hplaybgm,aqFxid)
 
 	//ÉÄÅ[ÉrÅ[ì«Ç›çûÇ›
 	exist"Data/Package/"+chartResIndex+"/Background.ogv"
