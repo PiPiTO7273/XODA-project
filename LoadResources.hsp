@@ -40,6 +40,7 @@
 		LoadSE sndBurst,"Data/Sound/Gameplay_Burst.wav",0.8							//バースト
 		LoadSE sndUI_Cancel,"Data/Sound/System_UI_Cancel.wav",0.7						//UI キャンセル
 		LoadSE sndUI_ChangeDifficulty,"Data/Sound/System_UI_ChangeDifficulty.wav",0.5		//UI 難易度切り替え
+		LoadSE sndUI_Notification,"Data/Sound/System_UI_Notification.wav",1.0				//UI 通知
 		LoadSE sndUI_Cursor,"Data/Sound/System_UI_Cursor.wav",0.3						//UI カーソル
 		LoadSE sndUI_Decide,"Data/Sound/System_UI_Decide.wav",0.9						//UI 決定効果音
 		LoadSE sndUI_Error,"Data/Sound/System_UI_Error.wav",0.7						//UI エラー
@@ -116,6 +117,10 @@
 		hdximg(ibg_GuidePanel)=LoadGraph("Data/Image/bg_GuidePanel.png")
 		hdximg(iGuide_Large)=LoadGraph("Data/Image/Guide_Large.png")
 		hdximg(iGuide_Small)=LoadGraph("Data/Image/Guide_Small.png")
+		hdximg(ibg_Notice_Default)=LoadGraph("Data/Image/bg_Notification_Default.png")
+		hdximg(ibg_Notice_Info)=LoadGraph("Data/Image/bg_Notification_Info.png")
+		hdximg(ibg_Notice_Activity)=LoadGraph("Data/Image/bg_Notification_Activity.png")
+		hdximg(ibg_Notice_Warning)=LoadGraph("Data/Image/bg_Notification_Warning.png")
 
 		hdximg(iUI_bg_SongInfo)=LoadGraph("Data/Image/bg_SongInfo.png")
 		hdximg(iUI_bg_Profile)=LoadGraph("Data/Image/bg_Profile.png")
@@ -229,6 +234,12 @@
 		hdximg(iFX_locked)=LoadGraph("Data/Image/FX_locked.png")
 		hdximg(iFX_cursor)=LoadGraph("Data/Image/FX_cursor.png")
 
+		hdximg(iNav_Partner)=LoadGraph("Data/Image/Nav_Partner.png")
+		hdximg(ibg_Partner)=LoadGraph("Data/Image/bg_Partner.png")
+		hdximg(iLayer_Partner_Circle)=LoadGraph("Data/Image/Layer_Partner_Circle.png")
+		hdximg(iLayer_Partner_Num)=LoadGraph("Data/Image/Layer_Partner_Num.png")
+		hdximg(iIcon_Partner_Locked)=LoadGraph("Data/Object/Skill/Card_Locked.png")
+
 		hdximg(iMovie_stg_Clear)=LoadGraph("Data/Movie/stg_Clear.ogv")
 		hdximg(iMovie_stg_Fullcombo)=LoadGraph("Data/Movie/stg_Fullcombo.ogv")
 		hdximg(iMovie_stg_ALLex)=LoadGraph("Data/Movie/stg_Allex.ogv")
@@ -313,6 +324,10 @@
 	//プレイヤーデータのバッファ
 		if hdximg(iUI_tx_Profile)!0 :DeleteGraph hdximg(iUI_tx_Profile)
 		hdximg(iUI_tx_Profile)=MakeScreen(300,120,TRUE)
+
+	//通知
+		if hdximg(iLayer_Notice)!0 :DeleteGraph hdximg(iLayer_Notice)
+		hdximg(iLayer_Notice)=MakeScreen(480,120,TRUE)
 
 	return
 
@@ -481,21 +496,27 @@
 	sdim pnID			//管理ID
 	sdim pnName		//名前
 	sdim pnIconPath	//アイコンの場所
+	sdim pnCardPath	//カード画像の場所
 	sdim pnDesc		//スキル説明
 	dim pnLevel		//レベル値
 	dim pnExp			//経験値
 	dim pnMax			//データ個数
 	dim pnhIcon		//アイコンのハンドル
+	dim pnhCard		//カード画像のハンドル
 
 	notesel pnDataBuf
 	pnMax=notemax
 	repeat pnMax
 		noteget NoteLine,cnt
-		split NoteLine,",",pnID(cnt),pnName(cnt),pnIconPath(cnt),pnDesc(cnt)
+		split NoteLine,",",pnID(cnt),pnName(cnt),pnIconPath(cnt),pnCardPath(cnt),pnDesc(cnt)
 		if pnIconPath(cnt)=="*" {
 			pnIconPath(cnt)="Icon_Empty.png"
 		}
+		if pnCardPath(cnt)=="*" {
+			pnCardPath(cnt)="Card_Empty.png"
+		}
 		pnhIcon(cnt)=LoadGraph("Data/Object/Skill/"+pnIconPath(cnt))
+		pnhCard(cnt)=LoadGraph("Data/Object/Skill/"+pnCardPath(cnt))
 	loop
 
 	return

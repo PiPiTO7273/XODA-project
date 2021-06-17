@@ -1,2 +1,13 @@
-{empty},,*,パートナースキルを使用しません。
-0000,中野二乃,icon_0000.png,このパートナーはスキルを発動しません。
+{empty},,*,card_0000.png,パートナースキルを使用しません。
+0000,テスト000,icon_0000.png,card_0000.png,this is test!!!
+0001,テスト001,icon_0000.png,card_0000.png,テストだよ（１）
+0002,テスト002,icon_0000.png,card_0000.png,テストだよ（２）
+0003,テスト003,icon_0000.png,card_0000.png,テストだよ（三）
+0004,テスト004,icon_0000.png,card_0000.png,テストだよ（IV）
+0005,テスト005,icon_0000.png,card_0000.png,テストだよVVVVV
+0006,テスト006,icon_0000.png,card_0000.png,テストだよろく
+0007,テスト007,icon_0000.png,card_0000.png,テストだよナナ
+0008,中野二乃,icon_0000.png,card_0000.png,二乃～～～www
+0009,テスト009,icon_0000.png,card_0000.png,テストだよkyu
+0010,テスト010,icon_0000.png,card_0000.png,テストだよJUJUJU
+0011,テスト011,icon_0000.png,card_0000.png,テストだよイレブン

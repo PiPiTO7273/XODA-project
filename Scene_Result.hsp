@@ -85,6 +85,62 @@
 					swbreak
 				swend
 		}
+	//履歴追加
+		dim tmparr,5
+		repeat 5
+			tmparr(cnt)=aqHistory(cnt)
+		loop
+		repeat 4
+			aqHistory(cnt+1)=tmparr(cnt)
+		loop
+		sdim tmpstr:tmpstr="???"
+		switch CursorLevID
+			case 0:tmpstr="NORMAL":swbreak
+			case 1:tmpstr="HARD":swbreak
+			case 2:tmpstr="CHAOS":swbreak
+		swend
+		aqHistory(0)=Libarr_Artist(CursorLevID,CursorSelID)+" - "+Libarr_Title(CursorLevID,CursorSelID)+" ["+tmpstr+"]"
+		sdim tmpstr
+		repeat 5
+			tmpstr+aqHistory(cnt)
+			if cnt<4 :tmpstr+"%2B"
+		loop
+		SendProfile"XODA.HISTORY",tmpstr
+	//レーティング計算&クリア数計算
+		ddim Libarr_Rate,3,Libarr_Max
+		ddim tmp_sort,10
+		dim aqNumAllEx
+		dim aqNumFullcombo
+		dim aqNumClear
+		repeat 3
+			TargetArrLevID=cnt
+			repeat Libarr_Max
+				TargetArrSelID=cnt
+
+				Libarr_Rate(TargetArrLevID,TargetArrSelID)=double(Libarr_Level(TargetArrLevID,TargetArrSelID))*(double(Libarr_MyIRscore(TargetArrLevID,TargetArrSelID))/10000000.0)
+				tmp_sort(Libarr_Max*TargetArrLevID+TargetArrSelID)=Libarr_Rate(TargetArrLevID,TargetArrSelID)
+
+				if Libarr_Rec_ClearType(TargetArrLevID,TargetArrSelID)=="CLEAR" :aqNumClear++
+				if Libarr_Rec_ClearType(TargetArrLevID,TargetArrSelID)=="HARD" :aqNumClear++
+				if Libarr_Rec_ClearType(TargetArrLevID,TargetArrSelID)=="MADNESS" :aqNumClear++
+				if Libarr_Rec_ClearType(TargetArrLevID,TargetArrSelID)=="FULL COMBO" :aqNumClear++:aqNumFullcombo++
+				if Libarr_Rec_ClearType(TargetArrLevID,TargetArrSelID)=="ALL EXCELLENT" :aqNumClear++:aqNumFullcombo++:aqNumAllEx++
+			loop
+		loop
+		ddim aqRate,1
+		sortval tmp_sort,1
+		//平均値
+			repeat 10
+				aqRate+tmp_sort(cnt)
+			loop
+			aqRate=aqRate/10.0
+			SendProfile"XODA.RATE",str(aqRate)
+		//クリア数送信
+			SendProfile"XODA.NUMCLEAR",str(aqNumClear)
+			SendProfile"XODA.NUMFULLCOMBO",str(aqNumFullcombo)
+			SendProfile"XODA.NUMALLEX",str(aqNumAllEx)
+		//最後にプレイした日
+			SendProfile"XODA.LASTPLAY",strf("%d/%d/%d",gettime(0),gettime(1),gettime(3))
 
 	//BGM停止
 	BASS_ChannelStop hplaybgm

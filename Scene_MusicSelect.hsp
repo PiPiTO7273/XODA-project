@@ -331,25 +331,38 @@
 			}
 
 		//ページ切り替えキー判定
-			DetailWindowChangeFlag=KeyFlag(KEY_INPUT_J)
+			DetailWindowChangeFlag=KeyFlag(KEY_INPUT_4)
 			if bfDetailWindowChangeFlag==0&DetailWindowChangeFlag==1 {
 				DetailWindowPageID++
 				if DetailWindowPageID>3 :DetailWindowPageID=0
+				if DetailWindowPageID==3 {
+					//未実装アイテム
+					CreateNotificationBuf hdximg(iLayer_Notice),ID_WARNING,"現在、未実装の機能です。",""
+					SendNotification hdximg(iLayer_Notice)
+					SetDrawScreen DX_SCREEN_BACK
+				}
 			}
 			bfDetailWindowChangeFlag=DetailWindowChangeFlag
 
 		//オプション
-			if KeyFlag(KEY_INPUT_D)==TRUE&JumpSceneFlag==FALSE {
+			if KeyFlag(KEY_INPUT_1)==TRUE&JumpSceneFlag==FALSE {
 				JumpSceneCount=0
 				JumpSceneFlag=TRUE
 				JumpSceneID=ID_MusicSelect_Option
 				PlaySE hbasssnd(sndUI_Decide)
 			}
 		//エフェクト
-			if KeyFlag(KEY_INPUT_F)==TRUE&JumpSceneFlag==FALSE {
+			if KeyFlag(KEY_INPUT_2)==TRUE&JumpSceneFlag==FALSE {
 				JumpSceneCount=0
 				JumpSceneFlag=TRUE
 				JumpSceneID=ID_MusicSelect_Effect
+				PlaySE hbasssnd(sndUI_Decide)
+			}
+		//パートナー
+			if KeyFlag(KEY_INPUT_3)==TRUE&JumpSceneFlag==FALSE {
+				JumpSceneCount=0
+				JumpSceneFlag=TRUE
+				JumpSceneID=ID_MusicSelect_Partner
 				PlaySE hbasssnd(sndUI_Decide)
 			}
 
@@ -715,9 +728,9 @@
 		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 		sdim tmpstr:tmpstr="ENTER : 決定"
 		DrawStringXCenterToHandle 540,658,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),200,GetColor(230,230,230),hdxfont(fNoto_m14)
-		sdim tmpstr:tmpstr="D : オプション"
+		sdim tmpstr:tmpstr="1 : オプション"
 		DrawStringXCenterToHandle 370,648,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
-		sdim tmpstr:tmpstr="F : エフェクト設定"
+		sdim tmpstr:tmpstr="2 : エフェクト設定"
 		DrawStringXCenterToHandle 760,648,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
 		sdim tmpstr:tmpstr="↑↓ : カーソル移動"
 		DrawStringXCenterToHandle 370,684,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
@@ -840,6 +853,7 @@
 			switch JumpSceneID
 				case ID_MusicSelect_Option:gosub*Scene_Init_MusicSelect_Option:swbreak
 				case ID_MusicSelect_Effect:gosub*Scene_Init_MusicSelect_Effect:swbreak
+				case ID_MusicSelect_Partner:gosub*Scene_Init_MusicSelect_Partner:swbreak
 			swend
 			curSceneID=JumpSceneID
 			gosub*InitScene
@@ -897,7 +911,7 @@
 			PlaySE hbasssnd(sndUI_Cursor)
 		}
 
-		if (KeyFlag(KEY_INPUT_RETURN)==TRUE|KeyFlag(KEY_INPUT_D)==TRUE)&decideFlag==FALSE {
+		if (KeyFlag(KEY_INPUT_RETURN)==TRUE|KeyFlag(KEY_INPUT_1)==TRUE)&decideFlag==FALSE {
 			decideFlag=TRUE
 			decideFrameCount=0
 			PlaySE hbasssnd(sndUI_Cancel)
@@ -1042,7 +1056,7 @@
 		DrawGraph 760,660,hdximg(iGuide_Small),TRUE
 
 		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-		sdim tmpstr:tmpstr="ENTER / D : 戻る"
+		sdim tmpstr:tmpstr="ENTER / 1 : 戻る"
 		DrawStringXCenterToHandle 540,658,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),200,GetColor(230,230,230),hdxfont(fNoto_m14)
 		sdim tmpstr:tmpstr="↑↓ : カーソル移動"
 		DrawStringXCenterToHandle 370,668,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
@@ -1213,11 +1227,21 @@
 		if KeyFlag(KEY_INPUT_RETURN)==TRUE&bfKeyFlag(KEY_INPUT_RETURN)==FALSE {
 			if FXitemflag(FxID(SelFXColumn,SelFXLine))==FALSE {
 				PlaySE hbasssnd(sndUI_Error)
+
+				//通知
+				CreateNotificationBuf hdximg(iLayer_Notice),ID_INFORMATION,"このエフェクトは解放されていません。","解放条件:"+FXitemlockmsg(FxID(SelFXColumn,SelFXLine))
+				SendNotification hdximg(iLayer_Notice)
+				SetDrawScreen DX_SCREEN_BACK
 			} else {
 				EnableFXColumn=SelFXColumn
 				EnableFXLine=SelFXLine
 				SetAudioFX bgmMain,FxID(EnableFXColumn,EnableFXLine)
 				PlaySE hbasssnd(sndUI_Decide)
+
+				//通知
+				CreateNotificationBuf hdximg(iLayer_Notice),ID_INFORMATION,FXitemname(FxID(EnableFXColumn,EnableFXLine))+"を有効にしました。","オーディオエフェクトを変更しました。"
+				SendNotification hdximg(iLayer_Notice)
+				SetDrawScreen DX_SCREEN_BACK
 			}
 		}
 		if KeyFlag(KEY_INPUT_SPACE)==TRUE&bfKeyFlag(KEY_INPUT_SPACE)==FALSE {
@@ -1229,7 +1253,7 @@
 			loop
 			PlaySE hbasssnd(sndUI_Decide)
 		}
-		if KeyFlag(KEY_INPUT_F)==TRUE&bfKeyFlag(KEY_INPUT_F)==FALSE {
+		if KeyFlag(KEY_INPUT_2)==TRUE&bfKeyFlag(KEY_INPUT_2)==FALSE {
 			decideFlag=TRUE
 			PlaySE hbasssnd(sndUI_Cancel)
 		}
@@ -1329,10 +1353,10 @@
 	//ステータス
 		if decideFlag==FALSE {
 			setease 0,256,ease_linear
-			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,20)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,10)
 		} else {
 			setease 256,0,ease_linear
-			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(decideFrameCount,20)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(decideFrameCount-10,10)
 		}
 		DrawGraph 730,32,hdximg(iMixed_PlayerStatus),TRUE
 
@@ -1370,7 +1394,7 @@
 		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 		sdim tmpstr:tmpstr="ENTER : 決定"
 		DrawStringXCenterToHandle 540,658,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),200,GetColor(230,230,230),hdxfont(fNoto_m14)
-		sdim tmpstr:tmpstr="F : 戻る"
+		sdim tmpstr:tmpstr="2 : 戻る"
 		DrawStringXCenterToHandle 370,648,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
 		sdim tmpstr:tmpstr="SPACE : ランダム"
 		DrawStringXCenterToHandle 760,648,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
@@ -1406,6 +1430,202 @@
 		if decideFrameCount>35 {
 			aqFxid=FxID(EnableFXColumn,EnableFXLine)
 			SendProfile"XODA.AUDIOFX",str(aqFxid)
+			curSceneID=ID_MusicSelect
+			gosub*InitScene
+			//変数初期化
+			dim decideFlag
+			dim decideFrameCount
+			dim transEffFlag
+			gosub*Scene_Init_MusicSelect
+		}
+	return
+
+*Scene_Init_MusicSelect_Partner
+
+	//変数初期化
+		dim decideFlag
+		dim decideFrameCount
+		dim transEffFlag
+
+	//カーソル位置
+		dim CardCursorID
+		dim CardCursorCount
+		dim CardCursorEase
+		CardCursorID=pnCurID
+
+	return
+
+*Scene_MusicSelect_Partner
+
+	//キー判定
+		if KeyFlag(KEY_INPUT_LEFT)==TRUE&bfKeyFlag(KEY_INPUT_LEFT)==FALSE {
+			CardCursorID--
+			CardCursorEase=-(220+32)
+			if CardCursorID<0 :CardCursorID=0:CardCursorEase=0
+			CardCursorCount=0
+			PlaySE hbasssnd(sndUI_Cursor)
+		}
+		if KeyFlag(KEY_INPUT_RIGHT)==TRUE&bfKeyFlag(KEY_INPUT_RIGHT)==FALSE {
+			CardCursorID++
+			CardCursorEase=(220+32)
+			if CardCursorID>=pnMax :CardCursorID=0:CardCursorEase=0
+			CardCursorCount=0
+			PlaySE hbasssnd(sndUI_Cursor)
+		}
+		if ((KeyFlag(KEY_INPUT_RETURN)==TRUE&bfKeyFlag(KEY_INPUT_RETURN)==FALSE)|(KeyFlag(KEY_INPUT_3)==TRUE&bfKeyFlag(KEY_INPUT_3)==FALSE))&decideFlag==FALSE {
+			if pnUnlockFlag(CardCursorID)==FALSE {
+				//未解放
+				PlaySE hbasssnd(sndUI_Error)
+				//通知
+				CreateNotificationBuf hdximg(iLayer_Notice),ID_INFORMATION,"このパートナーは解放されていません。",pnName(CardCursorID)+"は使用できません。"
+				SendNotification hdximg(iLayer_Notice)
+				SetDrawScreen DX_SCREEN_BACK
+			} else {
+				decideFlag=TRUE
+				decideFrameCount=0
+				PlaySE hbasssnd(sndUI_Decide)
+			}
+		}
+
+	//背景&レイヤー
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawGraph 0,0,hdximg(iBackground),FALSE
+
+	//ナビゲーション
+		if decideFlag==FALSE {
+			setease 0,256,ease_cubic_out
+			EaseAlpha=getease(SceneCount,10)
+			setease -32,0,ease_cubic_out
+			EasePosX=getease(SceneCount,10)
+		} else {
+			setease 256,0,ease_cubic_out
+			EaseAlpha=getease(decideFrameCount-20,10)
+			setease 0,-32,ease_cubic_out
+			EasePosX=getease(decideFrameCount-20,10)
+		}
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+		DrawGraph 32+EasePosX,16,hdximg(iNav_Partner),TRUE
+
+	//案内文字列（背景）
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 32,67,hdximg(ibg_Nav),TRUE
+
+	//案内文字列
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawStringToHandle 48,72,"使用するパートナーを選択してください。",GetColor(230,230,230),hdxfont(fNoto_b12)
+
+	//----以下、シーン別レイヤー---
+		SetDrawScreen hdximg(iLayer_Scene)
+		ClearDrawScreen
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 0,132,hdximg(ibg_Partner),TRUE
+		DrawRotaGraph 640,332,1.0,deg2rad(double(SceneCount)*2.0\360.0),hdximg(iLayer_Partner_Circle),TRUE,FALSE
+
+		//ステータス
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 730,32,hdximg(iMixed_PlayerStatus),TRUE
+
+		//カード一覧
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			repeat pnMax
+				setease CardCursorEase,0,ease_cubic_out
+				EasePosX=getease(CardCursorCount,14)
+				if cnt==CardCursorID {
+					setease 0,16,ease_cubic_out
+					EasePosY=getease(CardCursorCount,14)
+				} else :EasePosY=0
+
+				//描画
+				if pnUnlockFlag(cnt)==TRUE {
+					DrawGraph 530+(cnt-CardCursorID)*(220+32)+EasePosX,216-EasePosY,pnhCard(cnt),TRUE
+				} else {
+					DrawGraph 530+(cnt-CardCursorID)*(220+32)+EasePosX,216-EasePosY,hdximg(iIcon_Partner_Locked),TRUE
+				}
+			loop
+
+		//数
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 590,514,hdximg(iLayer_Partner_Num),TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawStringXCenterToHandle 590,518,str(CardCursorID+1)+"/"+pnMax,100,GetColor(30,30,30),hdxfont(fPier_m16)
+
+	//シーン別レイヤー
+		SetDrawScreen DX_SCREEN_BACK
+			if decideFlag==FALSE {
+				setease 1.2,1,ease_cubic_out
+				EaseWidth=int(double(DispWidth)*geteasef(SceneCount,20))
+				EaseHeight=int(double(DispHeight)*geteasef(SceneCount,20))
+				EasePosX=DispWidth/2-EaseWidth/2
+				EasePosY=DispHeight/2-EaseHeight/2
+				setease 0,256,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,20)
+				DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iLayer_Scene),TRUE
+			} else {
+				setease 1,1.2,ease_cubic_out
+				EaseWidth=int(double(DispWidth)*geteasef(decideFrameCount,20))
+				EaseHeight=int(double(DispHeight)*geteasef(decideFrameCount,20))
+				EasePosX=DispWidth/2-EaseWidth/2
+				EasePosY=DispHeight/2-EaseHeight/2
+				setease 256,0,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(decideFrameCount,20)
+				DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iLayer_Scene),TRUE
+
+				//プリローダー
+				setease 0,100,ease_cubic_out
+				EaseWidth=getease(decideFrameCount,20)
+				EaseHeight=getease(decideFrameCount,20)
+				EasePosX=DispWidth/2-EaseWidth/2
+				EasePosY=DispHeight/2-EaseHeight/2
+				setease 0,256,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(decideFrameCount,20)
+				DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdxarr_Blocks(FrameCount/2\20),TRUE
+			}
+
+	//プリローダー
+		setease 100,0,ease_cubic_out
+		EaseWidth=getease(SceneCount-20,20)
+		EaseHeight=getease(SceneCount-20,20)
+		EasePosX=DispWidth/2-EaseWidth/2
+		EasePosY=DispHeight/2-EaseHeight/2
+		setease 256,0,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-20,20)
+		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdxarr_Blocks(FrameCount/2\20),TRUE
+
+		if decideFlag==TRUE {
+			setease 0,100,ease_cubic_out
+			EaseWidth=getease(decideFrameCount,20)
+			EaseHeight=getease(decideFrameCount,20)
+			EasePosX=DispWidth/2-EaseWidth/2
+			EasePosY=DispHeight/2-EaseHeight/2
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(decideFrameCount,20)
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdxarr_Blocks(FrameCount/2\20),TRUE
+		}
+
+	//ガイド
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 0,DispHeight-128,hdximg(ibg_GuidePanel),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 540,650,hdximg(iGuide_Large),TRUE
+		DrawGraph 370,660,hdximg(iGuide_Small),TRUE
+		DrawGraph 760,660,hdximg(iGuide_Small),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		sdim tmpstr:tmpstr="3 / Enter : 戻る"
+		DrawStringXCenterToHandle 540,658,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),200,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="← : カーソル移動"
+		DrawStringXCenterToHandle 370,668,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+		sdim tmpstr:tmpstr="→ : カーソル移動"
+		DrawStringXCenterToHandle 760,668,strmid(tmpstr,0,limit(SceneCount,0,strlen(tmpstr))),150,GetColor(230,230,230),hdxfont(fNoto_m14)
+
+	//カウンター
+		CardCursorCount++
+		if decideFlag==TRUE :decideFrameCount++
+		if decideFrameCount>25 {
+			SendProfile"XODA.PARTNER.SELECT",str(pnID(CardCursorID))
+			pnCurID=CardCursorID
 			curSceneID=ID_MusicSelect
 			gosub*InitScene
 			//変数初期化

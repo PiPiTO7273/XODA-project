@@ -339,7 +339,7 @@ goto*Startup
 #defcfunc WebAPI_Get
 	if length(hdximg)!1 :WebAPI_DrawConnecting
 	AddDebugConsole STYLE_NORMAL,"HTTPリクエストを待機中... \""+_url+"\""
-	repeat:wait 10:if IEobj("Busy")=0 {break}:loop	//待機
+	repeat:wait:if IEobj("Busy")=0 {break}:loop	//待機
 	IEmes=IEobj("Document")
 	IEmes=IEmes("body")
 	IErawdata=IEmes("innerHTML")
@@ -380,6 +380,53 @@ goto*Startup
 		swbreak
 	swend
 
+	return
+
+#deffunc CreateNotificationBuf int _handle,int _type,str _body,str _sub
+
+	SetDrawScreen _handle
+	ClearDrawScreen
+
+	//配置
+		switch _type
+			//通常
+			case ID_DEFAULT
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 0,0,hdximg(ibg_Notice_Default),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringToHandle 50,32,_body,GetColor(30,30,30),hdxfont(fNoto_b20)
+			swbreak
+			//情報
+			case ID_INFORMATION
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 0,0,hdximg(ibg_Notice_Info),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringToHandle 100,38,_body,GetColor(30,30,30),hdxfont(fNoto_b20)
+				DrawStringToHandle 100,71,_sub,GetColor(30,30,30),hdxfont(fNoto_m14)
+			swbreak
+			//ユーザーアクティビティ
+			case ID_ACTIVITY
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 0,0,hdximg(ibg_Notice_Activity),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringToHandle 100,38,_body,GetColor(30,30,30),hdxfont(fNoto_b20)
+				DrawStringToHandle 100,71,_sub,GetColor(30,30,30),hdxfont(fNoto_m14)
+			swbreak
+			//警告,エラー
+			case ID_WARNING
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 0,0,hdximg(ibg_Notice_Warning),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringToHandle 100,40,_body,GetColor(30,30,30),hdxfont(fNoto_b20)
+			swbreak
+		swend
+
+	return
+
+#deffunc SendNotification int _handle
+	PlaySE hbasssnd(sndUI_Notification)
+	NotificationCount=0
+	hNotification=_handle
 	return
 
 *WebAPIControl_Back
@@ -481,14 +528,14 @@ goto*Startup
 				sdim aqName
 				sdim aqPassword
 				sdim aqBadge
-				sdim aqRate
+				ddim aqRate,1
 				dim aqLevel
 				sdim aqLastplay
 				dim aqNumClear
 				dim aqNumFullcombo
 				dim aqNumAllEx
 				dim aqNumTicket
-				sdim aqHistory
+				sdim aqHistory,5
 				dim aqEXP
 				dim aqMusicSelect_SelID
 				dim aqMusicSelect_LevID
@@ -544,7 +591,7 @@ goto*Startup
 					SetAudioFX bgmMain,aqFxid
 
 				//パートナー情報
-					sdim pnCurSelect:dim pnCurID
+					sdim pnCurSelect:dim pnCurID:dim pnUnlockFlag
 					pnCurSelect="{empty}"
 					pnCurSelect=GetINIvalue(saveInfobuf,"SAVEDATA","XODA.PARTNER.SELECT")
 					repeat pnMax
@@ -554,6 +601,9 @@ goto*Startup
 						split tmpstr,",",tmp_pnlev,tmp_pnexp
 						pnLevel(cnt)=int(tmp_pnlev)
 						pnExp(cnt)=int(tmp_pnexp)
+
+						//解放されているか
+						if GetINIvalue(saveInfobuf,"SAVEDATA","XODA.PARTNER."+pnID(cnt)+".UNLOCK")=="TRUE" :pnUnlockFlag(cnt)=TRUE:else:pnUnlockFlag(cnt)=FALSE
 
 						if pnCurSelect==pnID(cnt) :pnCurID=cnt
 					loop

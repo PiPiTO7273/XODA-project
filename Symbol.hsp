@@ -8,9 +8,9 @@
 #define SplashTime			0
 #define DebugConsoleWindow	1
 #define HTTPhostWindow		0
-#define FullScreen			1
+#define FullScreen			0
 #define DecideWaitTime		5
-#define AllUnlockEffect		1
+#define AllUnlockEffect		0
 
 //フォントハンドル
 #enum fSystem		=	0
@@ -72,6 +72,7 @@
 #enum ID_MusicSelect_Option
 #enum ID_MusicSelect_Effect
 #enum ID_MusicSelect_OpenError
+#enum ID_MusicSelect_Partner
 #enum ID_Play
 #enum ID_Result
 
@@ -84,6 +85,12 @@
 #enum ibg_GuidePanel
 #enum iGuide_Large
 #enum iGuide_Small
+#enum ibg_Notice_Default
+#enum ibg_Notice_Info
+#enum ibg_Notice_Activity
+#enum ibg_Notice_Warning
+#enum iLayer_Notice
+
 #enum iUI_bg_SongInfo
 #enum iUI_bg_Profile
 #enum iUI_bg_Score
@@ -206,6 +213,12 @@
 #enum iFX_locked
 #enum iFX_Cursor
 
+#enum iNav_Partner
+#enum ibg_Partner
+#enum iLayer_Partner_Circle
+#enum iLayer_Partner_Num
+#enum iIcon_Partner_Locked
+
 #enum iMovie_stg_Clear
 #enum iMovie_stg_Fullcombo
 #enum iMovie_stg_ALLex
@@ -247,6 +260,7 @@
 #enum sndBurst
 #enum sndUI_Cancel
 #enum sndUI_ChangeDifficulty
+#enum sndUI_Notification
 #enum sndUI_Cursor
 #enum sndUI_Decide
 #enum sndUI_Error
@@ -398,3 +412,9 @@
 #enum FX_LOUDHALF
 #enum FX_REVERB
 #enum FX_EXTRAREVERB
+
+//通知の種類
+#enum ID_DEFAULT		=	0
+#enum ID_INFORMATION
+#enum ID_ACTIVITY
+#enum ID_WARNING

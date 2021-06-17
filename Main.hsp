@@ -169,7 +169,7 @@
 	//シーンID
 	dim curSceneID
 	curSceneID=ID_Splash
-	//現在のFPS値5
+	//現在のFPS値
 	ddim curFPSval,1
 	//フレームカウンタ
 	dim FrameCount
@@ -182,6 +182,9 @@
 	//キーフラグ
 	dim KeyFlag,256
 	dim bfKeyFlag,256
+	//通知ハンドル
+	dim hNotification:dim NotificationCount
+	hNotification=-1
 
 	//////debug
 	//読み込む譜面ファイル名
@@ -221,6 +224,9 @@
 		case ID_MusicSelect_OpenError	//曲選択エラー
 			gosub*Scene_MusicSelect_OpenError
 		swbreak
+		case ID_MusicSelect_Partner	//パートナー選択
+			gosub*Scene_MusicSelect_Partner
+		swbreak
 		case ID_Play				//プレイ
 			gosub*Scene_Play
 		swbreak
@@ -229,16 +235,33 @@
 		swbreak
 	swend
 
-	repeat 256:bfKeyFlag(cnt)=KeyFlag(cnt):loop
-
-	//FPS表示
+	//FPS計算
 	if FrameCount\4==0 {
-		GetFPS:getdouble:curFPSval=refdval 
+		GetFPS:getdouble:curFPSval=refdval
 	}
 
-	//カウンタ処理
-	SceneCount++
-	FrameCount++
+	//通知
+	if hNotification!-1 {
+		SetDrawScreen DX_SCREEN_BACK
+		if NotificationCount<15+60*4 {
+			setease 0.0,1.0,ease_cubic_out
+			EaseWidth=int(480.0*geteasef(NotificationCount,15))
+			EaseHeight=int(120.0*geteasef(NotificationCount,15))
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(NotificationCount,15)
+		} else {
+			setease 1.0,0,ease_cubic_out
+			EaseWidth=int(480.0*geteasef(NotificationCount-15-60*4,15))
+			EaseHeight=int(120.0*geteasef(NotificationCount-15-60*4,15))
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(NotificationCount-15-60*4,15)
+		}
+		EasePosX=DispWidth-10-EaseWidth
+		EasePosY=70
+		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hNotification,TRUE
+		NotificationCount++
+		if NotificationCount>30+60*4 :hNotification=-1
+	}
 
 	//デバッグ用遅延処理
 		if bfKeyFlag(KEY_INPUT_F1)==FALSE&KeyFlag(KEY_INPUT_F1)==TRUE :DebugLogScr=0
@@ -287,8 +310,13 @@
 			loop
 			noteunsel
 		}
+		if KeyFlag(KEY_INPUT_F5)==TRUE&bfKeyFlag(KEY_INPUT_F5)==FALSE {
+			CreateNotificationBuf hdximg(iLayer_Notice),ID_INFORMATION,"通知のテストです。","This is Notification Test."
+			SendNotification hdximg(iLayer_Notice)
+			SetDrawScreen DX_SCREEN_BACK
+		}
 		if KeyFlag(KEY_INPUT_F1)==TRUE|KeyFlag(KEY_INPUT_F4)==TRUE {
-			DrawDebugString 0,DispHeight-16*2,"F1:デバッグ情報の表示 , F2:セキュリティ情報の表示 , F3:オートプレイを有効化 , F4:オンライン情報を表示"
+			DrawDebugString 0,DispHeight-16*2,"F1:デバッグ情報の表示 , F2:セキュリティ情報の表示 , F3:オートプレイを有効化 , F4:オンライン情報を表示 , F5:通知表示のテスト"
 			DrawDebugString 0,DispHeight-16*1,"TAB:進行速度を1/4にする , PAGE UP:ログを上にスクロール , PAGE DOWN:ログを下にスクロール"
 		}
 		if FrameCount\2==0 {
@@ -296,9 +324,15 @@
 			if KeyFlag(KEY_INPUT_PGDN)==TRUE : DebugLogScr++
 		}
 
+		//カウンタ処理
+			SceneCount++
+			FrameCount++
+
 	ScreenFlip
 
 	await
+
+	repeat 256:bfKeyFlag(cnt)=KeyFlag(cnt):loop
 
 	if onResetFlag==TRUE {
 		gosub*ExitProg
