@@ -680,8 +680,10 @@
 
 			//パートナー情報
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-				DrawStringToHandle 970,32,pnName(pnCurID),GetColor(240,240,240),hdxfont(fNoto_m16)
-				DrawStringToHandle 970,64,"Lv. "+pnLevel(pnCurID),GetColor(220,220,220),hdxfont(fPier_m12)
+				if pnCurID!0 {
+					DrawStringToHandle 970,32,pnName(pnCurID),GetColor(240,240,240),hdxfont(fNoto_m16)
+					DrawStringToHandle 970,64,"Lv. "+pnLevel(pnCurID),GetColor(220,220,220),hdxfont(fPier_m12)
+				}
 				DrawStringToHandle 1020,58,pnDesc(pnCurID),GetColor(201,253,255),hdxfont(fNoto_m12)
 
 		//シーン別レイヤー
@@ -834,10 +836,10 @@
 						}
 
 						//ステージ名
-							sdim tmpstr:tmpstr="NORMAL MODE"
+							sdim tmpstr:tmpstr="NORMAL MODE "
 							switch Libarr_Style(CursorLevID,CursorSelID)
-								case 0:tmpstr="- Shuttle Style -":swbreak
-								case 1:tmpstr="- Classic Style -":swbreak
+								case 0:tmpstr+"- Shuttle Style -":swbreak
+								case 1:tmpstr+"- Classic Style -":swbreak
 							swend
 							DrawStringXCenterToHandle -128+tmpease,280,tmpstr,DispWidth,GetColor(50,50,50),hdxfont(fPier_m16)
 						//曲名
