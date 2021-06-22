@@ -601,9 +601,16 @@ goto*Startup
 						split tmpstr,",",tmp_pnlev,tmp_pnexp
 						pnLevel(cnt)=int(tmp_pnlev)
 						pnExp(cnt)=int(tmp_pnexp)
+						if tmpstr=="" {
+							SendProfile"XODA.PARTNER."+pnID(cnt),"1,0"
+							pnLevel(cnt)=1
+							pnExp(cnt)=0
+						}
 
 						//‰ð•ú‚³‚ê‚Ä‚¢‚é‚©
-						if GetINIvalue(saveInfobuf,"SAVEDATA","XODA.PARTNER."+pnID(cnt)+".UNLOCK")=="TRUE" :pnUnlockFlag(cnt)=TRUE:else:pnUnlockFlag(cnt)=FALSE
+						pnUnlockFlag(cnt)=pnDef(cnt)
+						if GetINIvalue(saveInfobuf,"SAVEDATA","XODA.PARTNER."+pnID(cnt)+".UNLOCK")=="TRUE" :pnUnlockFlag(cnt)=TRUE
+						if AllUnlockPartner==TRUE :pnUnlockFlag(cnt)=TRUE
 
 						if pnCurSelect==pnID(cnt) :pnCurID=cnt
 					loop

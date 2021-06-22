@@ -111,202 +111,211 @@
 	//画像読み込み
 		dim hdximg,iMax
 		SetUsePremulAlphaConvertLoad TRUE
-		hdximg(iBackground)=LoadGraph("Data/Movie/bg_Main.ogv")
-		hdximg(ibg_Result)=LoadGraph("Data/Movie/bg_Result.ogv")
-		hdximg(ibg_Nav)=LoadGraph("Data/Image/bg_Navigation.png")
-		hdximg(ibg_GuidePanel)=LoadGraph("Data/Image/bg_GuidePanel.png")
-		hdximg(iGuide_Large)=LoadGraph("Data/Image/Guide_Large.png")
-		hdximg(iGuide_Small)=LoadGraph("Data/Image/Guide_Small.png")
-		hdximg(ibg_Notice_Default)=LoadGraph("Data/Image/bg_Notification_Default.png")
-		hdximg(ibg_Notice_Info)=LoadGraph("Data/Image/bg_Notification_Info.png")
-		hdximg(ibg_Notice_Activity)=LoadGraph("Data/Image/bg_Notification_Activity.png")
-		hdximg(ibg_Notice_Warning)=LoadGraph("Data/Image/bg_Notification_Warning.png")
+		hdximg(iBackground)=LoadGraph("Data/movie/bg_Main.ogv")
+		hdximg(ibg_Result)=LoadGraph("Data/movie/bg_Result.ogv")
+		hdximg(ibg_Nav)=LoadGraph("Data/bg/bg_Navigation.png")
+		hdximg(ibg_GuidePanel)=LoadGraph("Data/bg/bg_GuidePanel.png")
+		hdximg(iGuide_Large)=LoadGraph("Data/ex/Guide_Large.png")
+		hdximg(iGuide_Small)=LoadGraph("Data/ex/Guide_Small.png")
+		hdximg(ibg_Notice_Default)=LoadGraph("Data/bg/bg_Notification_Default.png")
+		hdximg(ibg_Notice_Info)=LoadGraph("Data/bg/bg_Notification_Info.png")
+		hdximg(ibg_Notice_Activity)=LoadGraph("Data/bg/bg_Notification_Activity.png")
+		hdximg(ibg_Notice_Warning)=LoadGraph("Data/bg/bg_Notification_Warning.png")
 
-		hdximg(iUI_bg_SongInfo)=LoadGraph("Data/Image/bg_SongInfo.png")
-		hdximg(iUI_bg_Profile)=LoadGraph("Data/Image/bg_Profile.png")
-		hdximg(iUI_bg_Score)=LoadGraph("Data/Image/bg_Score.png")
-		hdximg(iUI_bg_Gauge)=LoadGraph("Data/Image/bg_Gauge.png")
-		hdximg(iUI_tx_Combo)=LoadGraph("Data/Image/tx_Combo.png")
-		hdximg(iMovie_Start)=LoadGraph("Data/Movie/Start.ogv")
-		hdximg(iHitCircle)=LoadGraph("Data/Object/Hit/Circle.png")
-		hdximg(iParticle_Line_256_White)=LoadGraph("Data/Object/Particle/White_256.png")
-		hdximg(iParticle_Fade_White)=LoadGraph("Data/Object/Particle/White_Fade.png")
-		hdximg(iPlay_bg_Grid)=LoadGraph("Data/Object/Background/Grid.png")
-		hdximg(iLaneEffect)=LoadGraph("Data/Image/LaneEffect.png")
-		hdximg(iBurst_Combo_x50)=LoadGraph("Data/Object/Burst/Combo_50.png")
-		hdximg(iBurst_Combo_x100)=LoadGraph("Data/Object/Burst/Combo_100.png")
-		hdximg(iBurst_Combo_x200)=LoadGraph("Data/Object/Burst/Combo_200.png")
-		hdximg(iBurst_Combo_x300)=LoadGraph("Data/Object/Burst/Combo_300.png")
-		hdximg(iBurst_Combo_x400)=LoadGraph("Data/Object/Burst/Combo_400.png")
-		hdximg(iBurst_Combo_x500)=LoadGraph("Data/Object/Burst/Combo_500.png")
-		hdximg(iBurst_Combo_x600)=LoadGraph("Data/Object/Burst/Combo_600.png")
-		hdximg(iBurst_Combo_x700)=LoadGraph("Data/Object/Burst/Combo_700.png")
-		hdximg(iBurst_Combo_x800)=LoadGraph("Data/Object/Burst/Combo_800.png")
-		hdximg(iBurst_Combo_x900)=LoadGraph("Data/Object/Burst/Combo_900.png")
-		hdximg(iBurst_Combo_x1000)=LoadGraph("Data/Object/Burst/Combo_1000.png")
+		hdximg(iUI_bg_SongInfo)=LoadGraph("Data/shuttle/bg_SongInfo.png")
+		hdximg(iUI_bg_Profile)=LoadGraph("Data/shuttle/bg_Profile.png")
+		hdximg(iUI_bg_Score)=LoadGraph("Data/shuttle/bg_Score.png")
+		hdximg(iUI_bg_Gauge)=LoadGraph("Data/shuttle/bg_Gauge.png")
+		hdximg(iUI_tx_Combo)=LoadGraph("Data/shuttle/tx_Combo.png")
+		hdximg(iMovie_Start)=LoadGraph("Data/movie/Start.ogv")
+		hdximg(iHitCircle)=LoadGraph("Data/hit/Circle.png")
+		hdximg(iParticle_Line_256_White)=LoadGraph("Data/particle/White_256.png")
+		hdximg(iParticle_Fade_White)=LoadGraph("Data/particle/White_Fade.png")
+		hdximg(iPlay_bg_Grid)=LoadGraph("Data/bg/Grid.png")
+		hdximg(iLaneEffect)=LoadGraph("Data/ex/LaneEffect.png")
+		hdximg(iBurst_Combo_x50)=LoadGraph("Data/burst/Combo_50.png")
+		hdximg(iBurst_Combo_x100)=LoadGraph("Data/burst/Combo_100.png")
+		hdximg(iBurst_Combo_x200)=LoadGraph("Data/burst/Combo_200.png")
+		hdximg(iBurst_Combo_x300)=LoadGraph("Data/burst/Combo_300.png")
+		hdximg(iBurst_Combo_x400)=LoadGraph("Data/burst/Combo_400.png")
+		hdximg(iBurst_Combo_x500)=LoadGraph("Data/burst/Combo_500.png")
+		hdximg(iBurst_Combo_x600)=LoadGraph("Data/burst/Combo_600.png")
+		hdximg(iBurst_Combo_x700)=LoadGraph("Data/burst/Combo_700.png")
+		hdximg(iBurst_Combo_x800)=LoadGraph("Data/burst/Combo_800.png")
+		hdximg(iBurst_Combo_x900)=LoadGraph("Data/burst/Combo_900.png")
+		hdximg(iBurst_Combo_x1000)=LoadGraph("Data/burst/Combo_1000.png")
 
-		hdximg(iSplash)=LoadGraph("Data/Image/bg_Splash.png")
-		hdximg(iSplash_Phones)=LoadGraph("Data/Image/Splash_Phones.png")
-		hdximg(iSplash_Title)=LoadGraph("Data/Image/Splash_Title.png")
-		hdximg(iDialog_OfflineMode)=LoadGraph("Data/Image/Dialog_Offline.png")
+		hdximg(iSplash)=LoadGraph("Data/bg/bg_Splash.png")
+		hdximg(iSplash_Phones)=LoadGraph("Data/ex/Splash_Phones.png")
+		hdximg(iSplash_Title)=LoadGraph("Data/ex/Splash_Title.png")
+		hdximg(iDialog_OfflineMode)=LoadGraph("Data/ex/Dialog_Offline.png")
 
-		hdximg(ibg_Signin)=LoadGraph("Data/Image/bg_Signin.png")
-		hdximg(iNav_Signin)=LoadGraph("Data/Image/Nav_Signin.png")
-		hdximg(ibg_PlayerData)=LoadGraph("Data/Image/bg_PlayerData.png")
-		hdximg(iLayer_PlayerData)=LoadGraph("Data/Image/Layer_PlayerData.png")
+		hdximg(ibg_Signin)=LoadGraph("Data/bg/bg_Signin.png")
+		hdximg(iNav_Signin)=LoadGraph("Data/nav/nav_Signin.png")
+		hdximg(ibg_PlayerData)=LoadGraph("Data/bg/bg_PlayerData.png")
+		hdximg(iLayer_PlayerData)=LoadGraph("Data/layer/Layer_PlayerData.png")
 
-		hdximg(iNav_ModeSelect)=LoadGraph("Data/Image/Nav_ModeSelect.png")
-		hdximg(iMode_Item_Normal)=LoadGraph("Data/Image/Item_Mode_Normal.png")
-		hdximg(iMode_Item_Challenge)=LoadGraph("Data/Image/Item_Mode_Challenge.png")
-		hdximg(iMode_Item_Practice)=LoadGraph("Data/Image/Item_Mode_Practice.png")
-		hdximg(iMode_Item_Config)=LoadGraph("Data/Image/Item_Mode_Config.png")
-		hdximg(iMode_Item_Cursor)=LoadGraph("Data/Image/Cursor_ModeSelect.png")
-		hdximg(ibg_PlayerStatus)=LoadGraph("Data/Image/bg_ModeSelect_Status.png")
-		hdximg(iLayer_PlayerStatus)=LoadGraph("Data/Image/Layer_ModeSelect_Status.png")
+		hdximg(iNav_ModeSelect)=LoadGraph("Data/nav/nav_ModeSelect.png")
+		hdximg(iMode_Item_Normal)=LoadGraph("Data/ex/Item_Mode_Normal.png")
+		hdximg(iMode_Item_Challenge)=LoadGraph("Data/ex/Item_Mode_Challenge.png")
+		hdximg(iMode_Item_Practice)=LoadGraph("Data/ex/Item_Mode_Practice.png")
+		hdximg(iMode_Item_Config)=LoadGraph("Data/ex/Item_Mode_Config.png")
+		hdximg(iMode_Item_Cursor)=LoadGraph("Data/ex/Cursor_ModeSelect.png")
+		hdximg(ibg_PlayerStatus)=LoadGraph("Data/bg/bg_ModeSelect_Status.png")
+		hdximg(iLayer_PlayerStatus)=LoadGraph("Data/layer/Layer_ModeSelect_Status.png")
 
-		hdximg(iNav_MusicSelect)=LoadGraph("Data/Image/Nav_MusicSelect.png")
-		hdximg(ibg_MusicSelect_ItemInfo)=LoadGraph("Data/Image/bg_MusicSelect_ItemInfo.png")
-		hdximg(ibg_MusicSelect_Detail)=LoadGraph("Data/Image/bg_MusicSelect_Detail.png")
-		hdximg(ibg_MusicSelect_Level)=LoadGraph("Data/Image/bg_MusicSelect_Level.png")
-		hdximg(ibg_MusicSelect_Item)=LoadGraph("Data/Image/bg_MusicSelect_Item.png")
-		hdximg(ibg_MusicSelect_Partner)=LoadGraph("Data/Image/bg_MusicSelect_Partner.png")
-		hdximg(ibg_Disc)=LoadGraph("Data/Image/bg_LevelSelect.png")
-		hdximg(ibg_Disc_Normal)=LoadGraph("Data/Image/bg_LevelSelect_Normal.png")
-		hdximg(ibg_Disc_Hard)=LoadGraph("Data/Image/bg_LevelSelect_Hard.png")
-		hdximg(ibg_Disc_Chaos)=LoadGraph("Data/Image/bg_LevelSelect_Chaos.png")
-		hdximg(iLayer_LevelSelect)=LoadGraph("Data/Image/Layer_LevelSelect.png")
-		hdximg(iLayer_LevelSelect_Normal)=LoadGraph("Data/Image/Layer_LevelSelect_Normal.png")
-		hdximg(iLayer_LevelSelect_Hard)=LoadGraph("Data/Image/Layer_LevelSelect_Hard.png")
-		hdximg(iLayer_LevelSelect_Chaos)=LoadGraph("Data/Image/Layer_LevelSelect_Chaos.png")
-		hdximg(iIcon_IR_1st)=LoadGraph("Data/Image/Icon_IR_1st.png")
-		hdximg(iIcon_IR_2nd)=LoadGraph("Data/Image/Icon_IR_2nd.png")
-		hdximg(iIcon_IR_3rd)=LoadGraph("Data/Image/Icon_IR_3rd.png")
-		hdximg(iIcon_IR)=LoadGraph("Data/Image/Icon_IR.png")
-		hdximg(iIcon_IR_best)=LoadGraph("Data/Image/Icon_IR_best.png")
-		hdximg(iMovie_Decide)=LoadGraph("Data/Movie/bg_Decide.ogv")
-		hdximg(iDialog_OpenError)=LoadGraph("Data/Image/Dialog_OpenError.png")
+		hdximg(iNav_MusicSelect)=LoadGraph("Data/nav/nav_MusicSelect.png")
+		hdximg(ibg_MusicSelect_ItemInfo)=LoadGraph("Data/bg/bg_MusicSelect_ItemInfo.png")
+		hdximg(ibg_MusicSelect_Detail)=LoadGraph("Data/bg/bg_MusicSelect_Detail.png")
+		hdximg(ibg_MusicSelect_Level)=LoadGraph("Data/bg/bg_MusicSelect_Level.png")
+		hdximg(ibg_MusicSelect_Item)=LoadGraph("Data/bg/bg_MusicSelect_Item.png")
+		hdximg(ibg_MusicSelect_Partner)=LoadGraph("Data/bg/bg_MusicSelect_Partner.png")
+		hdximg(ibg_Disc)=LoadGraph("Data/bg/bg_LevelSelect.png")
+		hdximg(ibg_Disc_Normal)=LoadGraph("Data/bg/bg_LevelSelect_Normal.png")
+		hdximg(ibg_Disc_Hard)=LoadGraph("Data/bg/bg_LevelSelect_Hard.png")
+		hdximg(ibg_Disc_Chaos)=LoadGraph("Data/bg/bg_LevelSelect_Chaos.png")
+		hdximg(iLayer_LevelSelect)=LoadGraph("Data/layer/Layer_LevelSelect.png")
+		hdximg(iLayer_LevelSelect_Normal)=LoadGraph("Data/layer/Layer_LevelSelect_Normal.png")
+		hdximg(iLayer_LevelSelect_Hard)=LoadGraph("Data/layer/Layer_LevelSelect_Hard.png")
+		hdximg(iLayer_LevelSelect_Chaos)=LoadGraph("Data/layer/Layer_LevelSelect_Chaos.png")
+		hdximg(iIcon_IR_1st)=LoadGraph("Data/icon/Icon_IR_1st.png")
+		hdximg(iIcon_IR_2nd)=LoadGraph("Data/icon/Icon_IR_2nd.png")
+		hdximg(iIcon_IR_3rd)=LoadGraph("Data/icon/Icon_IR_3rd.png")
+		hdximg(iIcon_IR)=LoadGraph("Data/icon/Icon_IR.png")
+		hdximg(iIcon_IR_best)=LoadGraph("Data/icon/Icon_IR_best.png")
+		hdximg(iMovie_Decide)=LoadGraph("Data/movie/bg_Decide.ogv")
+		hdximg(iDialog_OpenError)=LoadGraph("Data/ex/Dialog_OpenError.png")
+		hdximg(iLayer_ShuttleStyle)=LoadGraph("Data/layer/Layer_MusicSelect_ShuttleStyle.png")
+		hdximg(iLayer_ClassicStyle)=LoadGraph("Data/layer/Layer_MusicSelect_ClassicStyle.png")
+		hdximg(iIcon_ShuttleStyle)=LoadGraph("Data/icon/Icon_ShuttleStyle.png")
+		hdximg(iIcon_ClassicStyle)=LoadGraph("Data/icon/Icon_ClassicStyle.png")
 
-		hdximg(iBadge_SSS)=LoadGraph("Data/Image/Badge_SSS.png")
-		hdximg(iBadge_SS)=LoadGraph("Data/Image/Badge_SS.png")
-		hdximg(iBadge_S)=LoadGraph("Data/Image/Badge_S.png")
-		hdximg(iBadge_AAA)=LoadGraph("Data/Image/Badge_AAA.png")
-		hdximg(iBadge_AA)=LoadGraph("Data/Image/Badge_AA.png")
-		hdximg(iBadge_A)=LoadGraph("Data/Image/Badge_A.png")
-		hdximg(iBadge_B)=LoadGraph("Data/Image/Badge_B.png")
-		hdximg(iBadge_C)=LoadGraph("Data/Image/Badge_C.png")
-		hdximg(iBadge_D)=LoadGraph("Data/Image/Badge_D.png")
-		hdximg(iBadge_AllEx)=LoadGraph("Data/Image/Badge_AllExcellent.png")
-		hdximg(iBadge_FullCombo)=LoadGraph("Data/Image/Badge_FullCombo.png")
-		hdximg(iBadge_Madness)=LoadGraph("Data/Image/Badge_Madness.png")
-		hdximg(iBadge_Hard)=LoadGraph("Data/Image/Badge_Hard.png")
-		hdximg(iBadge_Clear)=LoadGraph("Data/Image/Badge_Clear.png")
-		hdximg(iBadge_Assist)=LoadGraph("Data/Image/Badge_Assist.png")
-		hdximg(iBadge_Failed)=LoadGraph("Data/Image/Badge_Failed.png")
-		hdximg(iBadge_NoData)=LoadGraph("Data/Image/Badge_NoData.png")
+		hdximg(iBadge_SSS)=LoadGraph("Data/badge/Badge_SSS.png")
+		hdximg(iBadge_SS)=LoadGraph("Data/badge/Badge_SS.png")
+		hdximg(iBadge_S)=LoadGraph("Data/badge/Badge_S.png")
+		hdximg(iBadge_AAA)=LoadGraph("Data/badge/Badge_AAA.png")
+		hdximg(iBadge_AA)=LoadGraph("Data/badge/Badge_AA.png")
+		hdximg(iBadge_A)=LoadGraph("Data/badge/Badge_A.png")
+		hdximg(iBadge_B)=LoadGraph("Data/badge/Badge_B.png")
+		hdximg(iBadge_C)=LoadGraph("Data/badge/Badge_C.png")
+		hdximg(iBadge_D)=LoadGraph("Data/badge/Badge_D.png")
+		hdximg(iBadge_AllEx)=LoadGraph("Data/badge/Badge_AllExcellent.png")
+		hdximg(iBadge_FullCombo)=LoadGraph("Data/badge/Badge_FullCombo.png")
+		hdximg(iBadge_Madness)=LoadGraph("Data/badge/Badge_Madness.png")
+		hdximg(iBadge_Hard)=LoadGraph("Data/badge/Badge_Hard.png")
+		hdximg(iBadge_Clear)=LoadGraph("Data/badge/Badge_Clear.png")
+		hdximg(iBadge_Assist)=LoadGraph("Data/badge/Badge_Assist.png")
+		hdximg(iBadge_Failed)=LoadGraph("Data/badge/Badge_Failed.png")
+		hdximg(iBadge_NoData)=LoadGraph("Data/badge/Badge_NoData.png")
 
-		hdximg(ibg_Option_Preview)=LoadGraph("Data/Image/bg_Option_Preview.png")
-		hdximg(ibg_Option_Window)=LoadGraph("Data/Image/bg_Option_Window.png")
-		hdximg(ibg_Option_SongInfo)=LoadGraph("Data/Image/bg_Option_SongInfo.png")
-		hdximg(iCursor_Option)=LoadGraph("Data/Image/Cursor_MusicSelect_Option.png")
+		hdximg(ibg_Option_Preview)=LoadGraph("Data/bg/bg_Option_Preview.png")
+		hdximg(ibg_Option_Window)=LoadGraph("Data/bg/bg_Option_Window.png")
+		hdximg(ibg_Option_SongInfo)=LoadGraph("Data/bg/bg_Option_SongInfo.png")
+		hdximg(iCursor_Option)=LoadGraph("Data/ex/Cursor_MusicSelect_Option.png")
 
-		hdximg(iNav_Effect)=LoadGraph("Data/Image/Nav_AudioEffect.png")
-		hdximg(ibg_Effect)=LoadGraph("Data/Image/bg_AudioEffect.png")
-		hdximg(iFX_NOFX)=LoadGraph("Data/Image/FX_noeffect.png")
-		hdximg(iFX_BassBoost)=LoadGraph("Data/Image/FX_bass_boost.png")
-		hdximg(iFX_StrongBass)=LoadGraph("Data/Image/FX_bass_strong.png")
-		hdximg(iFX_MaximumBass)=LoadGraph("Data/Image/FX_bass_maximum.png")
-		hdximg(iFX_TrebleBoost)=LoadGraph("Data/Image/FX_treble.png")
-		hdximg(iFX_2000HzBoost)=LoadGraph("Data/Image/FX_2000hz.png")
-		hdximg(iFX_4000HzBoost)=LoadGraph("Data/Image/FX_4000hz.png")
-		hdximg(iFX_Compressor)=LoadGraph("Data/Image/FX_compressor.png")
-		hdximg(iFX_ExtraCompressor)=LoadGraph("Data/Image/FX_compressor_ex.png")
-		hdximg(iFX_Distortion)=LoadGraph("Data/Image/FX_distortion.png")
-		hdximg(iFX_Chorus)=LoadGraph("Data/Image/FX_chorus.png")
-		hdximg(iFX_Flanger)=LoadGraph("Data/Image/FX_flanger.png")
-		hdximg(iFX_ExtraFlanger)=LoadGraph("Data/Image/FX_flanger_ex.png")
-		hdximg(iFX_Echo)=LoadGraph("Data/Image/FX_echo.png")
-		hdximg(iFX_ExtraEcho)=LoadGraph("Data/Image/FX_echo_ex.png")
-		hdximg(iFX_Silent)=LoadGraph("Data/Image/FX_silent.png")
-		hdximg(iFX_LoudnessPlus)=LoadGraph("Data/Image/FX_loudplus.png")
-		hdximg(iFX_LoudnessHalf)=LoadGraph("Data/Image/FX_loudhalf.png")
-		hdximg(iFX_Reverb)=LoadGraph("Data/Image/FX_reverb.png")
-		hdximg(iFX_ExtraReverb)=LoadGraph("Data/Image/FX_reverb_ex.png")
-		hdximg(iFX_locked)=LoadGraph("Data/Image/FX_locked.png")
-		hdximg(iFX_cursor)=LoadGraph("Data/Image/FX_cursor.png")
+		hdximg(iNav_Effect)=LoadGraph("Data/nav/nav_AudioEffect.png")
+		hdximg(ibg_Effect)=LoadGraph("Data/bg/bg_AudioEffect.png")
+		hdximg(iFX_NOFX)=LoadGraph("Data/fx/fx_noeffect.png")
+		hdximg(iFX_BassBoost)=LoadGraph("Data/fx/fx_bass_boost.png")
+		hdximg(iFX_StrongBass)=LoadGraph("Data/fx/fx_bass_strong.png")
+		hdximg(iFX_MaximumBass)=LoadGraph("Data/fx/fx_bass_maximum.png")
+		hdximg(iFX_TrebleBoost)=LoadGraph("Data/fx/fx_treble.png")
+		hdximg(iFX_2000HzBoost)=LoadGraph("Data/fx/fx_2000hz.png")
+		hdximg(iFX_4000HzBoost)=LoadGraph("Data/fx/fx_4000hz.png")
+		hdximg(iFX_Compressor)=LoadGraph("Data/fx/fx_compressor.png")
+		hdximg(iFX_ExtraCompressor)=LoadGraph("Data/fx/fx_compressor_ex.png")
+		hdximg(iFX_Distortion)=LoadGraph("Data/fx/fx_distortion.png")
+		hdximg(iFX_Chorus)=LoadGraph("Data/fx/fx_chorus.png")
+		hdximg(iFX_Flanger)=LoadGraph("Data/fx/fx_flanger.png")
+		hdximg(iFX_ExtraFlanger)=LoadGraph("Data/fx/fx_flanger_ex.png")
+		hdximg(iFX_Echo)=LoadGraph("Data/fx/fx_echo.png")
+		hdximg(iFX_ExtraEcho)=LoadGraph("Data/fx/fx_echo_ex.png")
+		hdximg(iFX_Silent)=LoadGraph("Data/fx/fx_silent.png")
+		hdximg(iFX_LoudnessPlus)=LoadGraph("Data/fx/fx_loudplus.png")
+		hdximg(iFX_LoudnessHalf)=LoadGraph("Data/fx/fx_loudhalf.png")
+		hdximg(iFX_Reverb)=LoadGraph("Data/fx/fx_reverb.png")
+		hdximg(iFX_ExtraReverb)=LoadGraph("Data/fx/fx_reverb_ex.png")
+		hdximg(iFX_locked)=LoadGraph("Data/fx/fx_locked.png")
+		hdximg(iFX_cursor)=LoadGraph("Data/fx/fx_cursor.png")
 
-		hdximg(iNav_Partner)=LoadGraph("Data/Image/Nav_Partner.png")
-		hdximg(ibg_Partner)=LoadGraph("Data/Image/bg_Partner.png")
-		hdximg(iLayer_Partner_Circle)=LoadGraph("Data/Image/Layer_Partner_Circle.png")
-		hdximg(iLayer_Partner_Num)=LoadGraph("Data/Image/Layer_Partner_Num.png")
-		hdximg(iIcon_Partner_Locked)=LoadGraph("Data/Object/Skill/Card_Locked.png")
+		hdximg(iNav_Partner)=LoadGraph("Data/nav/nav_Partner.png")
+		hdximg(ibg_Partner)=LoadGraph("Data/bg/bg_Partner.png")
+		hdximg(iLayer_Partner_Circle)=LoadGraph("Data/layer/Layer_Partner_Circle.png")
+		hdximg(iLayer_Partner_Num)=LoadGraph("Data/layer/Layer_Partner_Num.png")
+		hdximg(iIcon_Partner_Locked)=LoadGraph("Data/skill/Card_Locked.png")
 
-		hdximg(iMovie_stg_Clear)=LoadGraph("Data/Movie/stg_Clear.ogv")
-		hdximg(iMovie_stg_Fullcombo)=LoadGraph("Data/Movie/stg_Fullcombo.ogv")
-		hdximg(iMovie_stg_ALLex)=LoadGraph("Data/Movie/stg_Allex.ogv")
-		hdximg(iMovie_stg_Failed)=LoadGraph("Data/Movie/stg_Failed.ogv")
+		hdximg(iMovie_stg_Clear)=LoadGraph("Data/movie/stg_Clear.ogv")
+		hdximg(iMovie_stg_Fullcombo)=LoadGraph("Data/movie/stg_Fullcombo.ogv")
+		hdximg(iMovie_stg_ALLex)=LoadGraph("Data/movie/stg_Allex.ogv")
+		hdximg(iMovie_stg_Failed)=LoadGraph("Data/movie/stg_Failed.ogv")
 
-		hdximg(iTrans_Out_L)=LoadGraph("Data/Image/Transition_Out_L.png")
-		hdximg(iTrans_Out_R)=LoadGraph("Data/Image/Transition_Out_R.png")
-		hdximg(iTrans_In_L)=LoadGraph("Data/Image/Transition_In_L.png")
-		hdximg(iTrans_In_R)=LoadGraph("Data/Image/Transition_In_R.png")
+		hdximg(iTrans_Out_L)=LoadGraph("Data/transition/Transition_Out_L.png")
+		hdximg(iTrans_Out_R)=LoadGraph("Data/transition/Transition_Out_R.png")
+		hdximg(iTrans_In_L)=LoadGraph("Data/transition/Transition_In_L.png")
+		hdximg(iTrans_In_R)=LoadGraph("Data/transition/Transition_In_R.png")
 
-		hdximg(iNav_Result)=LoadGraph("Data/Image/Nav_Result.png")
-		hdximg(ibg_Result_Info)=LoadGraph("Data/Image/bg_Result_Info.png")
-		hdximg(ibg_Result_Score)=LoadGraph("Data/Image/bg_Result_Score.png")
-		hdximg(iLayer_Result_Info)=LoadGraph("Data/Image/Layer_Result_Info.png")
-		hdximg(iLayer_Result_Score)=LoadGraph("Data/Image/Layer_Result_Score.png")
+		hdximg(iNav_Result)=LoadGraph("Data/nav/nav_Result.png")
+		hdximg(ibg_Result_Info)=LoadGraph("Data/bg/bg_Result_Info.png")
+		hdximg(ibg_Result_Score)=LoadGraph("Data/bg/bg_Result_Score.png")
+		hdximg(iLayer_Result_Info)=LoadGraph("Data/layer/Layer_Result_Info.png")
+		hdximg(iLayer_Result_Score)=LoadGraph("Data/layer/Layer_Result_Score.png")
 
-		hdximg(iIcon_Rank_SSS)=LoadGraph("Data/Image/Result_rank_SSS.png")
-		hdximg(iIcon_Rank_SS)=LoadGraph("Data/Image/Result_rank_SS.png")
-		hdximg(iIcon_Rank_S)=LoadGraph("Data/Image/Result_rank_S.png")
-		hdximg(iIcon_Rank_AAA)=LoadGraph("Data/Image/Result_rank_AAA.png")
-		hdximg(iIcon_Rank_AA)=LoadGraph("Data/Image/Result_rank_AA.png")
-		hdximg(iIcon_Rank_A)=LoadGraph("Data/Image/Result_rank_A.png")
-		hdximg(iIcon_Rank_B)=LoadGraph("Data/Image/Result_rank_B.png")
-		hdximg(iIcon_Rank_C)=LoadGraph("Data/Image/Result_rank_C.png")
-		hdximg(iIcon_Rank_D)=LoadGraph("Data/Image/Result_rank_D.png")
+		hdximg(iIcon_Rank_SSS)=LoadGraph("Data/rank/Result_rank_SSS.png")
+		hdximg(iIcon_Rank_SS)=LoadGraph("Data/rank/Result_rank_SS.png")
+		hdximg(iIcon_Rank_S)=LoadGraph("Data/rank/Result_rank_S.png")
+		hdximg(iIcon_Rank_AAA)=LoadGraph("Data/rank/Result_rank_AAA.png")
+		hdximg(iIcon_Rank_AA)=LoadGraph("Data/rank/Result_rank_AA.png")
+		hdximg(iIcon_Rank_A)=LoadGraph("Data/rank/Result_rank_A.png")
+		hdximg(iIcon_Rank_B)=LoadGraph("Data/rank/Result_rank_B.png")
+		hdximg(iIcon_Rank_C)=LoadGraph("Data/rank/Result_rank_C.png")
+		hdximg(iIcon_Rank_D)=LoadGraph("Data/rank/Result_rank_D.png")
 
-		hdximg(iCursor_Shuttle)=LoadGraph("Data/Object/Cursor/Char_Shuttle.png")
+		hdximg(iCursor_Shuttle)=LoadGraph("Data/cursor/Char_Shuttle.png")
 
 	//配列画像素材の読み込み
 		dim hdxarr_Button_Yes,2
-		LoadDivGraph"Data/Image/Button_Yes.png",2,1,2,128,40,varptr(hdxarr_Button_Yes)
+		LoadDivGraph"Data/button/Button_Yes.png",2,1,2,128,40,varptr(hdxarr_Button_Yes)
 		dim hdxarr_Button_No,2
-		LoadDivGraph"Data/Image/Button_No.png",2,1,2,128,40,varptr(hdxarr_Button_No)
+		LoadDivGraph"Data/button/Button_No.png",2,1,2,128,40,varptr(hdxarr_Button_No)
 
 		dim hdxarr_Char_Simple,1*3	//1 frame * 3 char
 		dim hdxarr_Char_Simple_Hold,1*3*3	//1 frame * 3 chip * 3 char
-		LoadDivGraph"Data/Object/Hit/Char_Simple.png",1*3,1,3,48,48,varptr(hdxarr_Char_Simple)
-		LoadDivGraph"Data/Object/Hit/Char_Simple_Hold.png",1*3*3,3,3,48,48,varptr(hdxarr_Char_Simple_Hold)
+		LoadDivGraph"Data/hit/Char_Simple.png",1*3,1,3,48,48,varptr(hdxarr_Char_Simple)
+		LoadDivGraph"Data/hit/Char_Simple_Hold.png",1*3*3,3,3,48,48,varptr(hdxarr_Char_Simple_Hold)
 
 		dim hdxarr_Char_Slime,9*3	//9 frame * 3 char
 		dim hdxarr_Char_Slime_Hold,3*3*3	//3 frame * 3 chip * 3 char
-		LoadDivGraph"Data/Object/Hit/Char_Slime.png",9*3,9,3,48,48,varptr(hdxarr_Char_Slime)
-		LoadDivGraph"Data/Object/Hit/Char_Slime_Hold.png",3*3*3,3,3*3,48,48,varptr(hdxarr_Char_Slime_Hold)
+		LoadDivGraph"Data/hit/Char_Slime.png",9*3,9,3,48,48,varptr(hdxarr_Char_Slime)
+		LoadDivGraph"Data/hit/Char_Slime_Hold.png",3*3*3,3,3*3,48,48,varptr(hdxarr_Char_Slime_Hold)
 
 		dim hdxarr_Judge,10
-		LoadDivGraph"Data/Image/Judge.png",10,1,10,150,32,varptr(hdxarr_Judge)
+		LoadDivGraph"Data/shuttle/Judge.png",10,1,10,150,32,varptr(hdxarr_Judge)
 		dim hdxarr_HitBomb,10
-		LoadDivGraph"Data/Object/Hit/Bomb.png",10,5,2,192,192,varptr(hdxarr_HitBomb)
+		LoadDivGraph"Data/hit/Bomb.png",10,5,2,192,192,varptr(hdxarr_HitBomb)
 		dim hdxarr_HoldCharge,80
-		LoadDivGraph"Data/Object/Hit/Charge.png",80,9,9,128,128,varptr(hdxarr_HoldCharge)
+		LoadDivGraph"Data/hit/Charge.png",80,9,9,128,128,varptr(hdxarr_HoldCharge)
 
 		dim hdxarr_Gauge_Assist,100
 		dim hdxarr_Gauge_Normal,100
 		dim hdxarr_Gauge_Hard,100
 		dim hdxarr_Gauge_Madness,100
-		LoadDivGraph"Data/Image/Gauge_Assist.png",100,100,1,7,32,varptr(hdxarr_Gauge_Assist)
-		LoadDivGraph"Data/Image/Gauge_Normal.png",100,100,1,7,32,varptr(hdxarr_Gauge_Normal)
-		LoadDivGraph"Data/Image/Gauge_Hard.png",100,100,1,7,32,varptr(hdxarr_Gauge_Hard)
-		LoadDivGraph"Data/Image/Gauge_Madness.png",100,100,1,7,32,varptr(hdxarr_Gauge_Madness)
+		LoadDivGraph"Data/shuttle/Gauge_Assist.png",100,100,1,7,32,varptr(hdxarr_Gauge_Assist)
+		LoadDivGraph"Data/shuttle/Gauge_Normal.png",100,100,1,7,32,varptr(hdxarr_Gauge_Normal)
+		LoadDivGraph"Data/shuttle/Gauge_Hard.png",100,100,1,7,32,varptr(hdxarr_Gauge_Hard)
+		LoadDivGraph"Data/shuttle/Gauge_Madness.png",100,100,1,7,32,varptr(hdxarr_Gauge_Madness)
 
 		dim hdxarr_MusicSelect_Action,35
-		LoadDivGraph"Data/Image/Layer_MusicSelect_Action.png",35,1,35,1080,180,varptr(hdxarr_MusicSelect_Action)
+		LoadDivGraph"Data/layer/Layer_MusicSelect_Action.png",35,1,35,1080,180,varptr(hdxarr_MusicSelect_Action)
 
 		SetDXArchiveExtension"dat"
 		dim hdxarr_Blocks,24
 		repeat 24
 			hdxarr_Blocks(cnt)=LoadGraph("Data/Blocks/img"+(cnt+1)+".png")
+		loop
+
+		dim hdxarr_CardAdvsign,4
+		repeat 4
+			hdxarr_CardAdvsign(cnt)=LoadGraph("Data/skill/card_adv_"+cnt+".png")
 		loop
 
 	//レイヤー関連
@@ -498,25 +507,33 @@
 	sdim pnIconPath	//アイコンの場所
 	sdim pnCardPath	//カード画像の場所
 	sdim pnDesc		//スキル説明
+	dim pnDef			//デフォルトでアンロックされているか
+	dim pnAdv			//進化キャラか
 	dim pnLevel		//レベル値
 	dim pnExp			//経験値
 	dim pnMax			//データ個数
 	dim pnhIcon		//アイコンのハンドル
 	dim pnhCard		//カード画像のハンドル
+	sdim pnDef_str
+	sdim pnAdv_str
 
 	notesel pnDataBuf
 	pnMax=notemax
 	repeat pnMax
 		noteget NoteLine,cnt
-		split NoteLine,",",pnID(cnt),pnName(cnt),pnIconPath(cnt),pnCardPath(cnt),pnDesc(cnt)
+		split NoteLine,",",pnID(cnt),pnName(cnt),pnIconPath(cnt),pnCardPath(cnt),pnDesc(cnt),pnDef_str,pnAdv_str
+		strrep pnDesc(cnt),"<br>","\n"
 		if pnIconPath(cnt)=="*" {
 			pnIconPath(cnt)="Icon_Empty.png"
 		}
 		if pnCardPath(cnt)=="*" {
 			pnCardPath(cnt)="Card_Empty.png"
 		}
-		pnhIcon(cnt)=LoadGraph("Data/Object/Skill/"+pnIconPath(cnt))
-		pnhCard(cnt)=LoadGraph("Data/Object/Skill/"+pnCardPath(cnt))
+		pnhIcon(cnt)=LoadGraph("Data/skill/"+pnIconPath(cnt))
+		pnhCard(cnt)=LoadGraph("Data/skill/"+pnCardPath(cnt))
+
+		if pnDef_str=="u" :pnDef(cnt)=TRUE:else:pnDef(cnt)=FALSE
+		if pnAdv_str=="a" :pnAdv(cnt)=TRUE:else:pnAdv(cnt)=FALSE
 	loop
 
 	return

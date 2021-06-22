@@ -1,13 +1,27 @@
-{empty},,*,card_0000.png,パートナースキルを使用しません。
-0000,テスト000,icon_0000.png,card_0000.png,this is test!!!
-0001,テスト001,icon_0000.png,card_0000.png,テストだよ（１）
-0002,テスト002,icon_0000.png,card_0000.png,テストだよ（２）
-0003,テスト003,icon_0000.png,card_0000.png,テストだよ（三）
-0004,テスト004,icon_0000.png,card_0000.png,テストだよ（IV）
-0005,テスト005,icon_0000.png,card_0000.png,テストだよVVVVV
-0006,テスト006,icon_0000.png,card_0000.png,テストだよろく
-0007,テスト007,icon_0000.png,card_0000.png,テストだよナナ
-0008,中野二乃,icon_0000.png,card_0000.png,二乃～～～www
-0009,テスト009,icon_0000.png,card_0000.png,テストだよkyu
-0010,テスト010,icon_0000.png,card_0000.png,テストだよJUJUJU
-0011,テスト011,icon_0000.png,card_0000.png,テストだよイレブン
+{empty},,*,*,パートナースキルを使用しません。,u,n
+0012,たかし,icon_0012.png,card_0012.png,スキルなし,u,n
+0012a,たかし 極,icon_0012a.png,card_0012a.png,スキルなし,u,a
+0000,モモカ,icon_0000.png,card_0000.png,スキルなし,u,n
+0000a,モモカ極,icon_0000a.png,card_0000a.png,スキルなし,u,a
+0006,マナミ,icon_0006.png,card_0006.png,スキルなし,u,n
+0006a,マナミ極,icon_0006a.png,card_0006a.png,スキルなし,u,a
+0002,シーナ,icon_0002.png,card_0002.png,経験値を1.25倍獲得する,l,n
+0002a,シーナ極,icon_0002a.png,card_0002a.png,経験値を1.5倍獲得する,l,a
+0003,アメリア,icon_0003.png,card_0003.png,MADNESSクリア以上で<br>経験値を1.75倍獲得,l,n
+0003a,アメリア極,icon_0003a.png,card_0003a.png,HARDクリア以上で<br>経験値を1.75倍獲得,l,a
+0010,亜沙美,icon_0010.png,card_0010.png,10回MISSをすると強制終了,l,n
+0010a,亜沙美 極,icon_0010a.png,card_0010a.png,10回MISSをすると強制終了,l,a
+0011,悠斗,icon_0011.png,card_0011.png,判定が厳しくなる。<br>経験値を1.25倍獲得,l,n
+0011a,悠斗 極,icon_0011a.png,card_0011a.png,判定が厳しくなる。<br>経験値を1.5倍獲得,l,a
+0001,マサト,icon_0001.png,card_0001.png,チケットを必ず一枚獲得する,l,n
+0001a,マサト極,icon_0001a.png,card_0001a.png,チケットを必ず二枚獲得する,l,a
+0004,ヒロキ,icon_0004.png,card_0004.png,スキルなし,l,n
+0004a,ヒロキ極,icon_0004a.png,card_0004a.png,ASSISTゲージのとき<br>ゲージが減りにくくなる。,l,a
+0005,キョウヘイ,icon_0005.png,card_0005.png,1/5の確率で経験値を2倍獲得,l,n
+0005a,キョウヘイ極,icon_0005a.png,card_0005a.png,1/4の確率で経験値を2倍獲得,l,a
+0007,アスハ,icon_0007.png,card_0007.png,スキルなし,l,n
+0007a,アスハ極,icon_0007a.png,card_0007a.png,EXCELLENT以外がMISSになる。<br>経験値を3倍獲得する。,l,a
+0008,マオ,icon_0008.png,card_0008.png,スキルなし,l,n
+0008a,マオ極,icon_0008a.png,card_0008a.png,一度MISS判定を出すとゲージが0%になる。,l,a
+0009,シオリ,icon_0009.png,card_0009.png,スキルなし,l,n
+0009a,シオリ極,icon_0009a.png,card_0009a.png,オブジェクトが全てスイーツになる。,l,a

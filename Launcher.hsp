@@ -39,16 +39,16 @@
 	}
 	gsel sLauncher,1
 
-	alCreateImageByFile aButton_Boot,"Data/Image/Button_Boot.png"
-	alCreateImageByFile aButton_OpenConfig,"Data/Image/Button_OpenConfig.png"
-	alCreateImageByFile aButton_Signout,"Data/Image/Button_Signout.png"
-	alCreateImageByFile aButton_Close,"Data/Image/Button_Close.png"
-	alCreateImageByFile aLauncher_Log_bg,"Data/Image/bg_Launcher_Log.png"
+	alCreateImageByFile aButton_Boot,"Data/button/Button_Boot.png"
+	alCreateImageByFile aButton_OpenConfig,"Data/button/Button_OpenConfig.png"
+	alCreateImageByFile aButton_Signout,"Data/button/Button_Signout.png"
+	alCreateImageByFile aButton_Close,"Data/button/Button_Close.png"
+	alCreateImageByFile aLauncher_Log_bg,"Data/bg/bg_Launcher_Log.png"
 
 	alCreateImage aLauncher,1000,600
 		alCopyModeAlpha 1.0
 		//背景
-		alLoadFile"Data/Image/bg_Launcher.png",0,0
+		alLoadFile"Data/bg/bg_Launcher.png",0,0
 
 		//著作権表示・ビルド表示
 		alFont"Pier Sans",16:alColor 230,230,230

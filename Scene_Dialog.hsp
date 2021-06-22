@@ -9,7 +9,7 @@
 
 		gosub*DrawMusicSelectNav
 
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 		DrawGraph 0,0,hdximg(iLayer_Scene),TRUE
 
 	//ウィンドウ

@@ -18,6 +18,7 @@
 		sdim Libarr_ChartID,32,3,notemax		//譜面ファイルのパス
 		sdim Libarr_Title,64,3,notemax		//タイトル
 		sdim Libarr_Artist,64,3,notemax		//アーティスト
+		dim Libarr_Style,3,notemax			//プレイスタイル
 		sdim Libarr_Difficulty,8,3,notemax		//難易度区分
 		sdim Libarr_Lyrics,512,3,notemax		//歌詞データ
 		dim Libarr_Level,3,notemax			//難易度数値
@@ -48,6 +49,7 @@
 					}
 					Libarr_Title(cnt,SongLibSelID)=""
 					Libarr_Artist(cnt,SongLibSelID)=""
+					Libarr_Style(cnt,SongLibSelID)=0
 					Libarr_Difficulty(cnt,SongLibSelID)=""
 					Libarr_Lyrics(cnt,SongLibSelID)=""
 					Libarr_Level(cnt,SongLibSelID)=0
@@ -73,6 +75,10 @@
 							swbreak
 							case"#ARTIST"
 								Libarr_Artist(SongLibLevID,SongLibSelID)=ChartPrm
+							swbreak
+							case"#STYLE"
+								if ChartPrm=="SHUTTLE" :Libarr_Style(SongLibLevID,SongLibSelID)=0
+								if ChartPrm=="CLASSIC" :Libarr_Style(SongLibLevID,SongLibSelID)=1
 							swbreak
 							case"#DIFFICULTY"
 								Libarr_Difficulty(SongLibLevID,SongLibSelID)=ChartPrm
@@ -464,6 +470,25 @@
 			sdim tmpstr:tmpstr=Libarr_Difficulty(CursorLevID,CursorSelID)+" Lv."+Libarr_Level(CursorLevID,CursorSelID)
 			DrawStringToHandle 50+EasePosX,227,tmpstr,GetDifficultyColor(Libarr_Difficulty(CursorLevID,CursorSelID)),hdxfont(fGood_14)	//難易度
 
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,int(double(EaseAlpha)*0.2)
+			switch Libarr_Style(CursorLevID,CursorSelID)
+				case 0:DrawGraph 360+EasePosX,137,hdximg(iIcon_ShuttleStyle),TRUE:swbreak
+				case 1:DrawGraph 360+EasePosX,137,hdximg(iIcon_ClassicStyle),TRUE:swbreak
+			swend
+
+		//プレイスタイル
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(CursorSelCount,20)
+			setease 1.5,1.0,ease_cubic_out
+			EaseWidth=int(237.0*geteasef(CursorSelCount,20))
+			EaseHeight=int(300.0*geteasef(CursorSelCount,20))
+			EasePosX=521+237/2-EaseWidth/2
+			EasePosY=-50+300/2-EaseHeight/2
+			switch Libarr_Style(CursorLevID,CursorSelID)
+				case 0:DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iLayer_ShuttleStyle),TRUE:swbreak
+				case 1:DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iLayer_ClassicStyle),TRUE:swbreak
+			swend
+
 		//詳細
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 0,278,hdximg(ibg_MusicSelect_Detail),TRUE
@@ -483,7 +508,7 @@
 								DrawGraph 24,46+28*1,hdximg(iIcon_IR_2nd),TRUE		//2nd アイコン
 								DrawGraph 24,46+28*2,hdximg(iIcon_IR_3rd),TRUE		//3rd アイコン
 								//1-3
-								SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+								SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 								repeat 3
 									if Libarr_IRscore(CursorLevID,CursorSelID,cnt)!0 {
 										//値あり
@@ -518,7 +543,7 @@
 									SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 									DrawGraph 24,46+28*(3+cnt),hdximg(iIcon_IR),TRUE
 
-									SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+									SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 									if Libarr_IRscore(CursorLevID,CursorSelID,3+cnt)!0 {
 										//値あり
 										DrawStringToHandle 84,47+28*(3+cnt),Libarr_IRname(CursorLevID,CursorSelID,3+cnt),GetColor(240,240,240),hdxfont(fPier_m12)
@@ -629,7 +654,7 @@
 				loop
 
 			//プレイヤーデータ,譜面情報
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 				DrawStringToHandle 470,449,aqName,GetColor(20,20,20),hdxfont(fPier_m12)
 				DrawStringToHandle 470,467,strf("%.2f",str(aqRate)),GetColor(20,20,20),hdxfont(fPier_m12)
 				setease 0,Libarr_TotalNotes(CursorLevID,CursorSelID),ease_cubic_out
@@ -657,7 +682,7 @@
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 				DrawStringToHandle 970,32,pnName(pnCurID),GetColor(240,240,240),hdxfont(fNoto_m16)
 				DrawStringToHandle 970,64,"Lv. "+pnLevel(pnCurID),GetColor(220,220,220),hdxfont(fPier_m12)
-				DrawStringToHandle 1020,64,pnDesc(pnCurID),GetColor(201,253,255),hdxfont(fNoto_m12)
+				DrawStringToHandle 1020,58,pnDesc(pnCurID),GetColor(201,253,255),hdxfont(fNoto_m12)
 
 		//シーン別レイヤー
 			SetDrawScreen DX_SCREEN_BACK
@@ -668,7 +693,7 @@
 				EasePosX=DispWidth/2-EaseWidth/2
 				EasePosY=DispHeight/2-EaseHeight/2
 				setease 0,256,ease_cubic_out
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,20)
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,20)
 				DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iLayer_Scene),TRUE
 			} else {
 				setease 1,1.2,ease_cubic_out
@@ -677,7 +702,7 @@
 				EasePosX=DispWidth/2-EaseWidth/2
 				EasePosY=DispHeight/2-EaseHeight/2
 				setease 256,0,ease_cubic_out
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(JumpSceneCount,20)
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(JumpSceneCount,20)
 				DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iLayer_Scene),TRUE
 
 				//プリローダー
@@ -809,7 +834,12 @@
 						}
 
 						//ステージ名
-							DrawStringXCenterToHandle -128+tmpease,280,"NORMAL MODE 1st Stage",DispWidth,GetColor(50,50,50),hdxfont(fPier_m16)
+							sdim tmpstr:tmpstr="NORMAL MODE"
+							switch Libarr_Style(CursorLevID,CursorSelID)
+								case 0:tmpstr="- Shuttle Style -":swbreak
+								case 1:tmpstr="- Classic Style -":swbreak
+							swend
+							DrawStringXCenterToHandle -128+tmpease,280,tmpstr,DispWidth,GetColor(50,50,50),hdxfont(fPier_m16)
 						//曲名
 							DrawStringXCenterToHandle 128-tmpease,315,Libarr_Title(CursorLevID,CursorSelID),DispWidth,GetColor(15,15,15),hdxfont(fNoto_m30)
 						//アーティスト名
@@ -1239,7 +1269,11 @@
 				PlaySE hbasssnd(sndUI_Decide)
 
 				//通知
-				CreateNotificationBuf hdximg(iLayer_Notice),ID_INFORMATION,FXitemname(FxID(EnableFXColumn,EnableFXLine))+"を有効にしました。","オーディオエフェクトを変更しました。"
+				if EnableFXColumn==0&EnableFXLine==0 {
+					CreateNotificationBuf hdximg(iLayer_Notice),ID_INFORMATION,"エフェクトをOFFにしました。","オーディオエフェクトを変更しました。"
+				} else {
+					CreateNotificationBuf hdximg(iLayer_Notice),ID_INFORMATION,FXitemname(FxID(EnableFXColumn,EnableFXLine))+"を有効にしました。","オーディオエフェクトを変更しました。"
+				}
 				SendNotification hdximg(iLayer_Notice)
 				SetDrawScreen DX_SCREEN_BACK
 			}
@@ -1468,7 +1502,7 @@
 		if KeyFlag(KEY_INPUT_RIGHT)==TRUE&bfKeyFlag(KEY_INPUT_RIGHT)==FALSE {
 			CardCursorID++
 			CardCursorEase=(220+32)
-			if CardCursorID>=pnMax :CardCursorID=0:CardCursorEase=0
+			if CardCursorID>=pnMax :CardCursorID=pnMax:CardCursorEase=0
 			CardCursorCount=0
 			PlaySE hbasssnd(sndUI_Cursor)
 		}
@@ -1527,7 +1561,6 @@
 			DrawGraph 730,32,hdximg(iMixed_PlayerStatus),TRUE
 
 		//カード一覧
-			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			repeat pnMax
 				setease CardCursorEase,0,ease_cubic_out
 				EasePosX=getease(CardCursorCount,14)
@@ -1537,10 +1570,17 @@
 				} else :EasePosY=0
 
 				//描画
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 				if pnUnlockFlag(cnt)==TRUE {
 					DrawGraph 530+(cnt-CardCursorID)*(220+32)+EasePosX,216-EasePosY,pnhCard(cnt),TRUE
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+					DrawStringToHandle 530+(cnt-CardCursorID)*(220+32)+EasePosX+156,216-EasePosY+207,"Lv. "+pnLevel(cnt),GetColor(10,10,10),hdxfont(fPier_r14)
 				} else {
 					DrawGraph 530+(cnt-CardCursorID)*(220+32)+EasePosX,216-EasePosY,hdximg(iIcon_Partner_Locked),TRUE
+				}
+				if pnAdv(cnt)==TRUE {
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,200
+					DrawGraph 530+(cnt-CardCursorID)*(220+32)+EasePosX,216-EasePosY,hdxarr_CardAdvsign(SceneCount\4),TRUE
 				}
 			loop
 

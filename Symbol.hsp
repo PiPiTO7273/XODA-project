@@ -5,12 +5,13 @@
 #define CodeName			"MOCHI SLIME"
 #define BuildVersion_Major	0
 #define BuildVersion_Minor	2
-#define SplashTime			0
+#define SplashTime			3
 #define DebugConsoleWindow	1
 #define HTTPhostWindow		0
 #define FullScreen			0
 #define DecideWaitTime		5
-#define AllUnlockEffect		0
+#define AllUnlockEffect		1
+#define AllUnlockPartner		0
 
 //フォントハンドル
 #enum fSystem		=	0
@@ -164,6 +165,10 @@
 #enum iLayer_Detail_Terminal
 #enum iMovie_Decide
 #enum iDialog_OpenError
+#enum iLayer_ShuttleStyle
+#enum iLayer_ClassicStyle
+#enum iIcon_ShuttleStyle
+#enum iIcon_ClassicStyle
 
 #enum iBadge_SSS
 #enum iBadge_SS
