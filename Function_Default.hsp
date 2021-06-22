@@ -169,7 +169,7 @@ goto*Startup
 			switch FuncName
 				//îwåiÇìoò^
 				case"RegBackground"
-					exdBGhwnd=LoadGraph("Data/Object/Background/"+FuncPrm)
+					exdBGhwnd=LoadGraph("Data/bg/"+FuncPrm)
 				swbreak
 				//âÊëúÉtÉ@ÉCÉãÇêVãKìoò^
 				case"RegImage"
@@ -177,9 +177,9 @@ goto*Startup
 						AddDebugConsole STYLE_WARNING,"[EXD] âÊëúÉtÉ@ÉCÉãÇÃìoò^èáÇ™ïœçXÇ≥ÇÍÇ‹ÇµÇΩÅB"
 						AddDebugConsole STYLE_STATUS,"ID["+int(FuncDivPrm(0))+"] > ID["+exdImgMax+"]"
 					}
-					exdImgHwnd(exdImgMax)=LoadGraph("Data/Object/Background/"+FuncDivPrm(1))
+					exdImgHwnd(exdImgMax)=LoadGraph("Data/bg/"+FuncDivPrm(1))
 					if exdImgHwnd(exdImgMax)==0 {
-						AddDebugConsole STYLE_WARNING,"[EXD] ì«Ç›çûÇ›ÉGÉâÅ[ \"Data/Object/Background/"+FuncDivPrm(1)+"\""
+						AddDebugConsole STYLE_WARNING,"[EXD] ì«Ç›çûÇ›ÉGÉâÅ[ \"Data/bg/"+FuncDivPrm(1)+"\""
 					}
 					exdImgMax++
 				swbreak
