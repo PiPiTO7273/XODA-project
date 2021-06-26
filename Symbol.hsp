@@ -6,12 +6,12 @@
 #define BuildVersion_Major	0
 #define BuildVersion_Minor	2
 #define SplashTime			3
-#define DebugConsoleWindow	1
+#define DebugConsoleWindow	0
 #define HTTPhostWindow		0
 #define FullScreen			0
 #define DecideWaitTime		5
 #define AllUnlockEffect		1
-#define AllUnlockPartner		0
+#define AllUnlockPartner		1
 
 //フォントハンドル
 #enum fSystem		=	0

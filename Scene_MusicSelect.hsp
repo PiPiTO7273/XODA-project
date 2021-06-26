@@ -1571,6 +1571,9 @@
 					EasePosY=getease(CardCursorCount,14)
 				} else :EasePosY=0
 
+				if (530+(cnt-CardCursorID)*(220+32)+EasePosX)>DispWidth :continue
+				if (530+(cnt-CardCursorID)*(220+32)+EasePosX)<-220-32 :continue
+
 				//•`‰æ
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 				if pnUnlockFlag(cnt)==TRUE {
